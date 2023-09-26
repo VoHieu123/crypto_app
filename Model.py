@@ -1,4 +1,4 @@
-BIN_DEFAULT_ALARM = 0.5
+BIN_DEFAULT_ALARM = 0.7
 OKX_DEFAULT_ALARM = 9
 
 class Model(object):
