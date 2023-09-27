@@ -1,8 +1,14 @@
 from okx import SubAccount, Account
-import const
 
-okx_subaccount_api = SubAccount.SubAccountAPI(const.OKX_API_KEY, const.OKX_SECRET_KEY, const.OKX_PASSPHRASE, flag="0", debug=False)
-okx_account_api = Account.AccountAPI(const.OKX_API_KEY, const.OKX_SECRET_KEY, const.OKX_PASSPHRASE, flag="0", debug=False)
+okx_subaccount_api = 0
+okx_account_api = 0
+
+def init(apiKey, secretKey, password):
+    global okx_subaccount_api
+    global okx_account_api
+    okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
+    okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
+
 
 def get_risk_percentage():
     risk_list = {}
