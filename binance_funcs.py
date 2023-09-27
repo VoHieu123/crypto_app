@@ -1,13 +1,22 @@
 from binance import Client
-import pandas as pd
-from datetime import datetime
-import numpy as np
 import const
 
 binance_client = Client(const.BIN_API_KEY, const.BIN_SECRET_KEY)
 
 def get_risk_percentage():
     risk_list = {}
+    mainAccountData = binance_client.futures_account()
+    for asset in mainAccountData["assets"]:
+        if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
+            continue
+        risk_list[f"BiMU_{asset['asset']}"] = float(asset["maintMargin"])/float(asset["marginBalance"])
+
+    mainAccountData = binance_client.futures_coin_account()
+    for asset in mainAccountData["assets"]:
+        if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
+            continue
+        risk_list[f"BiMC_{asset['asset']}"] = float(asset["maintMargin"])/float(asset["marginBalance"])
+
     sub_accounts = ["evan1965.11@proton.me", "evan1965.12@proton.me", "evan1965.13@proton.me"]
     for i, sub_account in enumerate(sub_accounts):
         usdm = binance_client.get_subaccount_futures_details(email=sub_account, futuresType = 1)

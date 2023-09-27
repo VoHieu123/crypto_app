@@ -3,9 +3,9 @@ OKX_DEFAULT_ALARM = 9
 
 class Model(object):
     # Todo: Persistent storage
-    data = {"Bi1U": [], "Bi2U": [], "Bi3U": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
-            "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "Ok2C": [], "Ok3C": [],
-            "By1U": [], "By2U": [], "By3U": [], "By1C": [], "By2C": [], "By3C": []}
+    data = {"BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
+            "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
+            "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []}
 
     def __init__(self):
         pass

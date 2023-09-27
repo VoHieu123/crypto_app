@@ -22,7 +22,7 @@ class Controller(object):
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.changeThresholdButtonClicked)
 
         markets = ["Bi", "Ok", "By"]
-        subaccounts = ["1", "2", "3"]
+        subaccounts = ["M", "1", "2", "3"]
         coinTypes = ["U", "C"]
 
         self.labelDict = {}
@@ -49,6 +49,7 @@ class Controller(object):
             "Binance": "Bi",
             "OKX": "Ok",
             "Bybit": "By",
+            "Main": "M",
             "Sub1": "1",
             "Sub2": "2",
             "Sub3": "3",
