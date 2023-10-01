@@ -30,22 +30,16 @@ def backgroundTask():
         controller.loop()
 
 def main():
-    if len(sys.argv) != 2:
-        print("python main.py [x]")
-        print("x = 0 => Tuan Anh")
-        print("x = 1 => Steve")
-        exit()
-    if sys.argv[1] == 0:
-        binance_funcs.init(apiKey=const.TA_BIN_API_KEY, secretKey=const.TA_BIN_SECRET_KEY)
-        okx_funcs.init(apiKey=const.TA_OKX_API_KEY, secretKey=const.TA_OKX_SECRET_KEY, password=const.TA_OKX_PASSPHRASE)
-    elif sys.argv[1] == 1:
-        binance_funcs.init(apiKey=const.ST_BIN_API_KEY, secretKey=const.ST_BIN_SECRET_KEY)
-        okx_funcs.init(apiKey=const.ST_OKX_API_KEY, secretKey=const.ST_OKX_SECRET_KEY, password=const.ST_OKX_PASSPHRASE)
-    else:
-        print("python main.py [x]")
-        print("x = 0 => Tuan Anh")
-        print("x = 1 => Steve")
-        exit()
+    choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
+    while(choice != 1 and choice != 2):
+        if choice == 1:
+            binance_funcs.init(apiKey=const.TA_BIN_API_KEY, secretKey=const.TA_BIN_SECRET_KEY)
+            okx_funcs.init(apiKey=const.TA_OKX_API_KEY, secretKey=const.TA_OKX_SECRET_KEY, password=const.TA_OKX_PASSPHRASE)
+        elif choice == 2:
+            binance_funcs.init(apiKey=const.ST_BIN_API_KEY, secretKey=const.ST_BIN_SECRET_KEY)
+            okx_funcs.init(apiKey=const.ST_OKX_API_KEY, secretKey=const.ST_OKX_SECRET_KEY, password=const.ST_OKX_PASSPHRASE)
+        else:
+            choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
     backgroudThread = threading.Thread(target=backgroundTask)
     backgroudThread.start()
