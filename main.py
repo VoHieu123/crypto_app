@@ -18,30 +18,41 @@ class MyWindow(QMainWindow):
         global exitFlag
         exitFlag = True
 
-app = QApplication(sys.argv)
-MainWindow = MyWindow()
-ui = Ui_MainWindow.Ui_MainWindow()
-ui.setupUi(MainWindow)
-model = Model.Model()
-controller = Controller.Controller(ui, model)
 
-def backgroundTask():
+def backgroundTask(controller):
     while not exitFlag:
         controller.loop()
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
-    while(choice != 1 and choice != 2):
+
+    while True:
         if choice == 1:
-            binance_funcs.init(apiKey=const.TA_BIN_API_KEY, secretKey=const.TA_BIN_SECRET_KEY)
-            okx_funcs.init(apiKey=const.TA_OKX_API_KEY, secretKey=const.TA_OKX_SECRET_KEY, password=const.TA_OKX_PASSPHRASE)
+            chosenBinAPIKey = const.TA_BIN_API_KEY
+            chosenBinSecretKey = const.TA_BIN_SECRET_KEY
+            chosenOKXAPIKey = const.TA_OKX_API_KEY
+            chosenOKXSecretKey = const.TA_OKX_SECRET_KEY
+            chosenPassword = const.TA_OKX_PASSPHRASE
+            break
         elif choice == 2:
-            binance_funcs.init(apiKey=const.ST_BIN_API_KEY, secretKey=const.ST_BIN_SECRET_KEY)
-            okx_funcs.init(apiKey=const.ST_OKX_API_KEY, secretKey=const.ST_OKX_SECRET_KEY, password=const.ST_OKX_PASSPHRASE)
+            chosenBinAPIKey = const.ST_BIN_API_KEY
+            chosenBinSecretKey = const.ST_BIN_SECRET_KEY
+            chosenOKXAPIKey = const.ST_OKX_API_KEY
+            chosenOKXSecretKey = const.ST_OKX_SECRET_KEY
+            chosenPassword = const.ST_OKX_PASSPHRASE
+            break
         else:
             choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
-    backgroudThread = threading.Thread(target=backgroundTask)
+    BinanceHandler = binance_funcs.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
+    OKXHandler = okx_funcs.OKXHandler(chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
+    app = QApplication(sys.argv)
+    MainWindow = MyWindow()
+    ui = Ui_MainWindow.Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    model = Model.Model()
+    controller = Controller.Controller(ui, model, BinanceHandler=BinanceHandler, OKXHandler=OKXHandler)
+    backgroudThread = threading.Thread(target=backgroundTask, args=(controller, ))
     backgroudThread.start()
     MainWindow.show()
     sys.exit(app.exec())

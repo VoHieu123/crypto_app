@@ -16,7 +16,9 @@ class Controller(object):
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, Ui_MainWindow, Model):
+    def __init__ (self, Ui_MainWindow, Model, BinanceHandler, OKXHandler):
+        self.BinanceHandler_ = BinanceHandler
+        self.OKXHandler_ = OKXHandler
         self.uiMainWindow_ = Ui_MainWindow
         self.model_ = Model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.changeThresholdButtonClicked)
@@ -70,20 +72,20 @@ class Controller(object):
         return returnStr[:-1]
 
     def updateData(self):
-            bin_risk = binance_funcs.get_risk_percentage()
-            okx_risk = okx_funcs.get_risk_percentage()
+            bin_risk = self.BinanceHandler_.get_risk_percentage()
+            okx_risk = self.OKXHandler_.get_risk_percentage()
             risk_dict = ChainMap(bin_risk, okx_risk)
             for key, value in risk_dict.items():
-                self.model_.setData(symbol=substringBefore(key, "_"), asset=substringAfter(key, "_"), risk=value)
+                self.model_.set_data(symbol=substringBefore(key, "_"), asset=substringAfter(key, "_"), risk=value)
 
     def uploadData(self):
         for symbol, qtLabel in self.labelDict.items():
-            currentListOfDict = self.model_.getData(symbol=symbol)
+            currentListOfDict = self.model_.get_data(symbol=symbol)
             qtLabel.setText(self.listToLabel(currentListOfDict))
 
     def alarmIf(self):
         for symbol in self.labelDict.keys():
-            currentListOfDict = self.model_.getData(symbol=symbol)
+            currentListOfDict = self.model_.get_data(symbol=symbol)
             for dict in currentListOfDict:
                 if dict["risk"] == -1 or dict["alarm"] == -1:
                     continue
