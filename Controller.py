@@ -1,6 +1,6 @@
 import telegram_send
-import binance_funcs
-import okx_funcs
+import binance_handler
+import okx_handler
 from collections import ChainMap
 import time
 
@@ -16,8 +16,9 @@ class Controller(object):
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, Ui_MainWindow, Model, BinanceHandler, OKXHandler):
+    def __init__ (self, Ui_MainWindow, Model, BinanceHandler, OKXHandler, BybitHandler):
         self.BinanceHandler_ = BinanceHandler
+        self.BybitHandler_ = BybitHandler
         self.OKXHandler_ = OKXHandler
         self.uiMainWindow_ = Ui_MainWindow
         self.model_ = Model
@@ -74,7 +75,8 @@ class Controller(object):
     def updateData(self):
             bin_risk = self.BinanceHandler_.get_risk_percentage()
             okx_risk = self.OKXHandler_.get_risk_percentage()
-            risk_dict = ChainMap(bin_risk, okx_risk)
+            bybit_risk = self.BybitHandler_.get_risk_percentage()
+            risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
             for key, value in risk_dict.items():
                 self.model_.set_data(symbol=substringBefore(key, "_"), asset=substringAfter(key, "_"), risk=value)
 
@@ -93,6 +95,8 @@ class Controller(object):
                     telegram_send.send(messages=[f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
                 elif dict["risk"] < dict["alarm"] and "Ok" in symbol:
                     telegram_send.send(messages=[f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
+                elif dict["risk"] > dict["alarm"] and "By" in symbol:
+                    telegram_send.send(messages=[f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
 
     def loop(self):
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):

@@ -5,8 +5,7 @@ import Controller
 import threading
 import Model
 import const
-import binance_funcs
-import okx_funcs
+import binance_handler,bybit_handler, okx_handler
 
 exitFlag = False
 
@@ -33,6 +32,8 @@ def main():
             chosenOKXAPIKey = const.TA_OKX_API_KEY
             chosenOKXSecretKey = const.TA_OKX_SECRET_KEY
             chosenPassword = const.TA_OKX_PASSPHRASE
+            chosenBybAPIKey = const.TA_BYB_API_KEY
+            chosenBybSecretKey = const.TA_BYB_SECRET_KEY
             break
         elif choice == 2:
             chosenBinAPIKey = const.ST_BIN_API_KEY
@@ -40,18 +41,21 @@ def main():
             chosenOKXAPIKey = const.ST_OKX_API_KEY
             chosenOKXSecretKey = const.ST_OKX_SECRET_KEY
             chosenPassword = const.ST_OKX_PASSPHRASE
+            chosenBybAPIKey = const.ST_BYB_API_KEY
+            chosenBybSecretKey = const.ST_BYB_SECRET_KEY
             break
         else:
             choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
-    BinanceHandler = binance_funcs.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
-    OKXHandler = okx_funcs.OKXHandler(chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
+    BybitHandler = bybit_handler.BybitHandler(apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
+    BinanceHandler = binance_handler.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
+    OKXHandler = okx_handler.OKXHandler(chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
     app = QApplication(sys.argv)
     MainWindow = MyWindow()
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
     model = Model.Model()
-    controller = Controller.Controller(ui, model, BinanceHandler=BinanceHandler, OKXHandler=OKXHandler)
+    controller = Controller.Controller(ui, model, BinanceHandler=BinanceHandler, OKXHandler=OKXHandler, BybitHandler=BybitHandler)
     backgroudThread = threading.Thread(target=backgroundTask, args=(controller, ))
     backgroudThread.start()
     MainWindow.show()

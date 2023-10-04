@@ -1,8 +1,9 @@
 BIN_DEFAULT_ALARM = 0.7
 OKX_DEFAULT_ALARM = 9
+BYBIT_DEFAULT_ALARM = 0.7
 
 class Model(object):
-    DEFAULT_ALARM = {"Bi": BIN_DEFAULT_ALARM, "Ok": OKX_DEFAULT_ALARM}
+    DEFAULT_ALARM = {"Bi": BIN_DEFAULT_ALARM, "Ok": OKX_DEFAULT_ALARM, "Byb": BYBIT_DEFAULT_ALARM}
 
     def __init__(self):
         # Todo: Persistent storage
@@ -25,6 +26,8 @@ class Model(object):
                     alarm = BIN_DEFAULT_ALARM
                 elif "Ok" in symbol:
                     alarm = OKX_DEFAULT_ALARM
+                elif "By" in symbol:
+                    alarm = BYBIT_DEFAULT_ALARM
 
                 # if alarm == -1:
                 #     exchange_prefix = next((prefix for prefix in ["Bi", "Ok", "By"] if prefix in symbol), "")

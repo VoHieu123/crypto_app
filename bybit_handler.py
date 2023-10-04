@@ -5,19 +5,17 @@ import time
 
 class BybitHandler:
 
-    def __init__(self, sleepTime):
+    def __init__(self, apiKey, secretKey, sleepTime=3):
         self.session = HTTP(
             testnet=False,
-            api_key=const.BYBIT_API_KEY,
-            api_secret=const.BYBIT_SECRET_KEY,
+            api_key=apiKey,
+            api_secret=secretKey,
         )
 
         self.sleep_time = sleepTime
-        self.risk = 0
-        self.marginBalance = 0
-        self.availableAmount = 0
 
-    def update_account_balance(self) -> bool:
+    def get_risk_percentage(self) -> {}:
+        risk_list = {}
         retriesCount = 0
         while True:
             retriesCount += 1
@@ -26,19 +24,15 @@ class BybitHandler:
                 if data.get("retCode") == 0 and len(data["result"]["list"]) > 0:
                     for item in data["result"]["list"]:
                         if item["accountType"] == "UNIFIED":
-                            self.risk = float(item["accountMMRate"])
-                            self.smarginBalance = float(item["totalMarginBalance"])
-                            for coin in item["coin"]:
-                                if coin["coin"] == "USDT":
-                                    self.availableAmount = float(coin["availableToWithdraw"])
-                                    return True
+                            risk_list[f"ByMU_ALL"] = float(item["accountMMRate"])
+                            return risk_list
                 else:
                     raise Exception(message=f"Corrupted received data: {data['msg']}. Length: {len(data['data'])}.")
             except Exception as error:
                 if retriesCount <= const.MAX_RETRIES:
                     message = [f"Bybit Error: {error}. Retries number: {retriesCount}"]
                     print(message[0])
-                    time.sleep(self.sleepTime)
+                    time.sleep(self.sleep_time)
                     try:
                         telegram_send.send(messages=message)
                     except:
@@ -47,7 +41,7 @@ class BybitHandler:
                     print(error)
                     break
 
-        return False
+        return {}
 
     def transfer_money(amt) -> bool:
         # data = session.get_coin_info(coin="USDT")
@@ -59,3 +53,6 @@ class BybitHandler:
         #             break
         #     res = session.withdraw(feeType=1, amount=amt, coin="USDT", chain="ARBI", address=const.OKX_ADDRESS)
         return True
+
+# byb = BybitHandler(apiKey=const.TA_BYB_API_KEY, secretKey=const.TA_BYB_SECRET_KEY)
+# byb.get_risk_percentage()
