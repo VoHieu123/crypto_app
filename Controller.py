@@ -62,7 +62,7 @@ class Controller(object):
 
         symbol = "".join(symbol_mappings.get(item, "") for item in [market, subAcc, coinType])
 
-        self.model_.setData(symbol=symbol, asset=asset, alarm=alarm)
+        self.model_.set_data(symbol=symbol, asset=asset, alarm=alarm)
         self.uploadData()
 
     def listToLabel(self, list):
