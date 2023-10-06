@@ -32,10 +32,16 @@ class Controller(object):
 
         for market in markets:
             for subaccount in subaccounts:
-                for coinType in coinTypes:
-                    label_key = f"{market}{subaccount}{coinType}"
-                    label_name = f"label_{market}{subaccount}{coinType}"
+                if market == "Bi" or market == "Ok":
+                    for coinType in coinTypes:
+                        label_key = f"{market}{subaccount}{coinType}"
+                        label_name = f"label_{market}{subaccount}{coinType}"
+                        self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
+                else:
+                    label_key = f"{market}{subaccount}U"
+                    label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
+
 
     def changeThresholdButtonClicked(self):
         # Todo: Check if user type correctly
@@ -48,7 +54,7 @@ class Controller(object):
         self.uiMainWindow_.lineEdit_threshold.setText("")
         self.uiMainWindow_.lineEdit_assetName.setText("")
 
-        symbol_mappings = {
+        symbol_mappings_1 = {
             "Binance": "Bi",
             "OKX": "Ok",
             "Bybit": "By",
@@ -60,7 +66,17 @@ class Controller(object):
             "COINM": "C"
         }
 
-        symbol = "".join(symbol_mappings.get(item, "") for item in [market, subAcc, coinType])
+        symbol_mappings_2 = {
+            "Bybit": "By",
+            "Main": "M",
+            "Sub1": "1",
+            "Sub2": "2",
+            "Sub3": "3",
+            "USDM": "U",
+        }
+
+        symbol = "".join(symbol_mappings_1.get(item, "") for item in [market, subAcc, coinType])
+        symbol += "".join(symbol_mappings_2.get(item, "") for item in [market, subAcc, coinType])
 
         self.model_.set_data(symbol=symbol, asset=asset, alarm=alarm)
         self.uploadData()
