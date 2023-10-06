@@ -7,10 +7,16 @@ class OKXHandler:
 
     def get_risk_percentage(self) -> bool:
         risk_list = {}
-        subaccounts = ["evan196511", "evan196512", "evan196513"]
+        # Todo: Query subaccount list when initialized
+        # Todo: Unified https functions error handler
+        subaccounts = []
+        sub_account_raw = self.okx_subaccount_api.get_subaccount_list()
+        if sub_account_raw.get("code") == "0":
+            for subaccount_data in sub_account_raw["data"]:
+                subaccounts.append(subaccount_data["subAcct"])
+
         usdMarginList = ["USDT", "USDC"]
 
-        # Todo: Check
         try:
             accountData = self.okx_account_api.get_account_balance()
             if accountData.get("code") == "0":
@@ -36,7 +42,7 @@ class OKXHandler:
             else:
                 raise Exception("?")
         except Exception as error:
-            # Todo
+            print(error)
             pass
 
         return risk_list
