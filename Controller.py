@@ -39,6 +39,21 @@ class Controller(object):
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
 
+    @staticmethod
+    def change_last_letter(word, new_letter):
+        if len(word) < 1:
+            return word  # Return the original word if it's empty
+
+        # Convert the word to a list of charactsers
+        word_list = list(word)
+
+        # Change the last character to the new letter
+        word_list[-1] = new_letter
+
+        # Join the characters back into a string
+        modified_word = ''.join(word_list)
+
+        return modified_word
 
     def changeThresholdButtonClicked(self):
         # Todo: Check if user type correctly
@@ -66,7 +81,7 @@ class Controller(object):
         symbol = "".join(symbol_mappings.get(item, "") for item in [market, subAcc, coinType])
 
         if "By" in symbol:
-            symbol[-1] = "U"
+            symbol = self.change_last_letter(symbol, "U")
 
         self.model_.set_data(symbol=symbol, asset=asset, alarm=alarm)
         self.uploadData()

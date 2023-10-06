@@ -7,8 +7,6 @@ import Model
 import const
 import binance_handler,bybit_handler, okx_handler
 
-sys.path.append('../../')
-
 exitFlag = False
 
 class MyWindow(QMainWindow):
