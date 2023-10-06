@@ -1,8 +1,5 @@
-import telegram_send
-import binance_handler
-import okx_handler
 from collections import ChainMap
-import time
+import time, alarm
 
 def substringAfter(s, delim):
     return s.partition(delim)[2]
@@ -54,7 +51,7 @@ class Controller(object):
         self.uiMainWindow_.lineEdit_threshold.setText("")
         self.uiMainWindow_.lineEdit_assetName.setText("")
 
-        symbol_mappings_1 = {
+        symbol_mappings = {
             "Binance": "Bi",
             "OKX": "Ok",
             "Bybit": "By",
@@ -66,17 +63,10 @@ class Controller(object):
             "COINM": "C"
         }
 
-        symbol_mappings_2 = {
-            "Bybit": "By",
-            "Main": "M",
-            "Sub1": "1",
-            "Sub2": "2",
-            "Sub3": "3",
-            "USDM": "U",
-        }
+        symbol = "".join(symbol_mappings.get(item, "") for item in [market, subAcc, coinType])
 
-        symbol = "".join(symbol_mappings_1.get(item, "") for item in [market, subAcc, coinType])
-        symbol += "".join(symbol_mappings_2.get(item, "") for item in [market, subAcc, coinType])
+        if "By" in symbol:
+            symbol[-1] = "U"
 
         self.model_.set_data(symbol=symbol, asset=asset, alarm=alarm)
         self.uploadData()
@@ -105,14 +95,12 @@ class Controller(object):
         for symbol in self.labelDict.keys():
             currentListOfDict = self.model_.get_data(symbol=symbol)
             for dict in currentListOfDict:
-                if dict["risk"] == -1 or dict["alarm"] == -1:
-                    continue
                 if dict["risk"] > dict["alarm"] and "Bi" in symbol:
-                    telegram_send.send(messages=[f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
+                    alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
                 elif dict["risk"] < dict["alarm"] and "Ok" in symbol:
-                    telegram_send.send(messages=[f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
+                    alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
                 elif dict["risk"] > dict["alarm"] and "By" in symbol:
-                    telegram_send.send(messages=[f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}"])
+                    alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
 
     def loop(self):
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):

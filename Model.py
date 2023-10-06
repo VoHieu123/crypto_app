@@ -3,10 +3,8 @@ OKX_DEFAULT_ALARM = [3, 3]
 BYBIT_DEFAULT_ALARM = 0.5
 
 class Model(object):
-    # DEFAULT_ALARM = {"Bi": BIN_DEFAULT_ALARM, "Ok": OKX_DEFAULT_ALARM, "Byb": BYBIT_DEFAULT_ALARM}
 
     def __init__(self):
-        # Todo: Persistent storage
         self.data = {
             "BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
             "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
@@ -16,12 +14,12 @@ class Model(object):
     def set_data(self, symbol, asset, risk=-1, alarm=-1) -> bool:
         if symbol in self.data:
             for sub_dict in self.data[symbol]:
-                if isinstance(sub_dict, dict) and sub_dict.get("asset") == asset:
+                if sub_dict.get("asset") == asset:
                     sub_dict["risk"] = risk if risk != -1 else sub_dict["risk"]
                     sub_dict["alarm"] = alarm if alarm != -1 else sub_dict["alarm"]
                     return True
 
-            if alarm == -1:
+            if alarm == -1 and risk != -1:
                 if "Bi" in symbol:
                     alarm = BIN_DEFAULT_ALARM[0] if "U" in symbol else BIN_DEFAULT_ALARM[1]
                 elif "Ok" in symbol:
@@ -29,11 +27,8 @@ class Model(object):
                 elif "By" in symbol:
                     alarm = BYBIT_DEFAULT_ALARM
 
-                # if alarm == -1:
-                #     exchange_prefix = next((prefix for prefix in ["Bi", "Ok", "By"] if prefix in symbol), "")
-                #     alarm = self.DEFAULT_ALARM.get(exchange_prefix, 0)
-            self.data[symbol].append({"asset": asset, "risk": risk, "alarm": alarm})
-            return True
+                self.data[symbol].append({"asset": asset, "risk": risk, "alarm": alarm})
+                return True
 
         return False
 
