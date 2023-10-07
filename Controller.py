@@ -53,8 +53,10 @@ class Controller(object):
         return s.partition(delim)[0]
 
     def change_threshold_button_clicked(self):
-        # Todo: Check if user type correctly
-        alarm = float(self.uiMainWindow_.lineEdit_threshold.text())
+        try:
+            alarm = float(self.uiMainWindow_.lineEdit_threshold.text())
+        except:
+            return
         asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
         market = self.uiMainWindow_.comboBox_market.currentText()
         coinType = self.uiMainWindow_.comboBox_coinType.currentText()
@@ -124,4 +126,3 @@ class Controller(object):
             self.upload_data()
             self.alarmIf()
             self.currentTime = time.time()
-
