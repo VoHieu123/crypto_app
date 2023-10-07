@@ -1,25 +1,19 @@
 from collections import ChainMap
 import time, alarm
 
-def substringAfter(s, delim):
-    return s.partition(delim)[2]
-
-def substringBefore(s, delim):
-    return s.partition(delim)[0]
-
 class Controller(object):
     labelDict = {}
     save_frequency_m = 10
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, Ui_MainWindow, Model, BinanceHandler, OKXHandler, BybitHandler):
-        self.BinanceHandler_ = BinanceHandler
-        self.BybitHandler_ = BybitHandler
-        self.OKXHandler_ = OKXHandler
-        self.uiMainWindow_ = Ui_MainWindow
+    def __init__ (self, uiMainWindow, Model, binanceHandler, okxHandler, bybitHandler):
+        self.BinanceHandler_ = binanceHandler
+        self.BybitHandler_ = bybitHandler
+        self.OKXHandler_ = okxHandler
+        self.uiMainWindow_ = uiMainWindow
         self.model_ = Model
-        self.uiMainWindow_.button_changeThreshold.clicked.connect(self.changeThresholdButtonClicked)
+        self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1", "2", "3"]
@@ -42,20 +36,23 @@ class Controller(object):
     @staticmethod
     def change_last_letter(word, new_letter):
         if len(word) < 1:
-            return word  # Return the original word if it's empty
+            return word
 
-        # Convert the word to a list of charactsers
         word_list = list(word)
-
-        # Change the last character to the new letter
         word_list[-1] = new_letter
-
-        # Join the characters back into a string
         modified_word = ''.join(word_list)
 
         return modified_word
 
-    def changeThresholdButtonClicked(self):
+    @staticmethod
+    def substring_after(s, delim):
+        return s.partition(delim)[2]
+
+    @staticmethod
+    def substring_before(s, delim):
+        return s.partition(delim)[0]
+
+    def change_threshold_button_clicked(self):
         # Todo: Check if user type correctly
         alarm = float(self.uiMainWindow_.lineEdit_threshold.text())
         asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
@@ -99,7 +96,7 @@ class Controller(object):
             bybit_risk = self.BybitHandler_.get_risk()
             risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
             for key, value in risk_dict.items():
-                self.model_.set_data(symbol=substringBefore(key, "_"), asset=substringAfter(key, "_"), risk=value)
+                self.model_.set_data(symbol=self.substring_before(key, "_"), asset=self.substring_after(key, "_"), risk=value)
 
     def uploadData(self):
         for symbol, qtLabel in self.labelDict.items():
