@@ -55,7 +55,7 @@ def main():
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
     model = Model.Model()
-    controller = Controller.Controller(ui, model, BinanceHandler=BinanceHandler, OKXHandler=OKXHandler, BybitHandler=BybitHandler)
+    controller = Controller.Controller(ui, model, binanceHandler=BinanceHandler, okxHandler=OKXHandler, bybitHandler=BybitHandler)
     backgroudThread = threading.Thread(target=backgroundTask, args=(controller, ))
     backgroudThread.start()
     MainWindow.show()

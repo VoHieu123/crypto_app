@@ -11,7 +11,7 @@ class Model(object):
             "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
         }
 
-    def set_data(self, symbol, asset, risk=-1, alarm=-1) -> bool:
+    def set_risk_data(self, symbol, asset, risk=-1, alarm=-1) -> bool:
         if symbol in self.risk_data:
             for sub_dict in self.risk_data[symbol]:
                 if sub_dict.get("asset") == asset:
@@ -32,7 +32,7 @@ class Model(object):
 
         return False
 
-    def get_data(self, symbol):
+    def get_risk_data(self, symbol):
         if symbol in self.risk_data:
             return [sub_dict for sub_dict in self.risk_data[symbol] if isinstance(sub_dict, dict) and all(key in sub_dict for key in ("asset", "risk", "alarm"))]
 

@@ -7,12 +7,12 @@ class Controller(object):
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, uiMainWindow, Model, binanceHandler, okxHandler, bybitHandler):
+    def __init__ (self, uiMainWindow, model, binanceHandler, okxHandler, bybitHandler):
         self.BinanceHandler_ = binanceHandler
         self.BybitHandler_ = bybitHandler
         self.OKXHandler_ = okxHandler
         self.uiMainWindow_ = uiMainWindow
-        self.model_ = Model
+        self.model_ = model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
@@ -80,10 +80,11 @@ class Controller(object):
         if "By" in symbol:
             symbol = self.change_last_letter(symbol, "U")
 
-        self.model_.set_data(symbol=symbol, asset=asset, alarm=alarm)
-        self.uploadData()
+        self.model_.set_risk_data(symbol=symbol, asset=asset, alarm=alarm)
+        self.upload_data()
 
-    def listToLabel(self, list):
+    @staticmethod
+    def list_to_label(list):
         returnStr = ""
         for dict in list:
             returnStr += dict["asset"] + ": " + str(round(dict["risk"], 4)) + "/" + str(round(dict["alarm"], 4)) + "\n"
@@ -96,16 +97,16 @@ class Controller(object):
             bybit_risk = self.BybitHandler_.get_risk()
             risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
             for key, value in risk_dict.items():
-                self.model_.set_data(symbol=self.substring_before(key, "_"), asset=self.substring_after(key, "_"), risk=value)
+                self.model_.set_risk_data(symbol=self.substring_before(key, "_"), asset=self.substring_after(key, "_"), risk=value)
 
-    def uploadData(self):
+    def upload_data(self):
         for symbol, qtLabel in self.labelDict.items():
-            currentListOfDict = self.model_.get_data(symbol=symbol)
-            qtLabel.setText(self.listToLabel(currentListOfDict))
+            currentListOfDict = self.model_.get_risk_data(symbol=symbol)
+            qtLabel.setText(self.list_to_label(currentListOfDict))
 
     def alarmIf(self):
         for symbol in self.labelDict.keys():
-            currentListOfDict = self.model_.get_data(symbol=symbol)
+            currentListOfDict = self.model_.get_risk_data(symbol=symbol)
             for dict in currentListOfDict:
                 if dict["risk"] > dict["alarm"] and "Bi" in symbol:
                     alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
@@ -120,7 +121,7 @@ class Controller(object):
 
         if int(self.currentTime/self.retrieveFrequencyS) < int(time.time()/self.retrieveFrequencyS):
             self.updateData()
-            self.uploadData()
+            self.upload_data()
             self.alarmIf()
             self.currentTime = time.time()
 
