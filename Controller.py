@@ -94,9 +94,9 @@ class Controller(object):
         return returnStr[:-1]
 
     def updateData(self):
-            bin_risk = self.BinanceHandler_.get_risk_percentage()
-            okx_risk = self.OKXHandler_.get_risk_percentage()
-            bybit_risk = self.BybitHandler_.get_risk_percentage()
+            bin_risk = self.BinanceHandler_.get_risk()
+            okx_risk = self.OKXHandler_.get_risk()
+            bybit_risk = self.BybitHandler_.get_risk()
             risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
             for key, value in risk_dict.items():
                 self.model_.set_data(symbol=substringBefore(key, "_"), asset=substringAfter(key, "_"), risk=value)

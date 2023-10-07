@@ -4,7 +4,7 @@ class BinanceHandler:
     def __init__(self, apiKey, secretKey):
         self.binanceClient = Client(api_key=apiKey, api_secret=secretKey)
 
-    def get_risk_percentage(self) -> {}:
+    def get_risk(self) -> {}:
         risk_list = {}
         mainAccountData = self.binanceClient.futures_account()
         for asset in mainAccountData["assets"]:

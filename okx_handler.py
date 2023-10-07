@@ -5,7 +5,7 @@ class OKXHandler:
         self.okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
 
-    def get_risk_percentage(self) -> bool:
+    def get_risk(self) -> bool:
         risk_list = {}
         # Todo: Query subaccount list when initialized
         # Todo: Unified https functions error handler
