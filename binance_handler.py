@@ -51,3 +51,23 @@ class BinanceHandler:
                 risk_list[f"Bi{i + 1}C_{coin['asset']}"] = float(coin["maintenanceMargin"])/float(coin["marginBalance"])
 
         return risk_list
+
+    def transfer_money(self, to, amount, subAccount=None):
+        # coins_data = self.binance_client.get_all_coins_info()
+        # for coin_data in coins_data:
+        #     if coin_data["coin"] == "USDT":
+        #         available = coin_data["free"]
+        #         for network in coin_data["networkList"]:
+        #             if network['network'] == "BSC":
+        #                 pass
+        # # self.binance_client.withdraw(coin="USDT", network="BSC", amount=amount, walletType=0,
+        # #                              address="0xba1e35b0f3392af3b423409876d0773c9fc3ed36")
+        # if to == "Bybit":
+        #     pass
+        # elif to == "OKX":
+        #     pass
+        pass
+
+
+# handler = BinanceHandler(apiKey="P9Z0jtiqSvr9cKMnsgHmjpBNpOZAaoAs7O5uVu0ScscQHReq9fMxsb1gTxtm2AsY", secretKey="bOVuS18DGDXlHpw94EwqnV2cH6EDC8v3v96LykSFLzUpsLRXHpWmhgrEQvBWFGzy")
+# handler.transfer_money(to="Bybit", amount=4488.71)
