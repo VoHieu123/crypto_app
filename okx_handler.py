@@ -28,23 +28,25 @@ class OKXHandler:
                     break
                 time.sleep(self.sleep_time)
 
-    def get_risk(self) -> bool:
+    def get_account_status(self) -> bool:
         risk_list = {}
         usd_margin_list = ["USDT", "USDC"]
 
         account_data = self.send_http_request(self=self, func=self.okx_account_api.get_account_balance)
         for asset in account_data[0]["details"]:
-            if asset['ccy'] in usd_margin_list:
-                risk_list[f"OkMU_{asset['ccy']}"] = float(asset["mgnRatio"])
-            else:
-                risk_list[f"OkMC_{asset['ccy']}"] = float(asset["mgnRatio"])
+            if asset["mgnRatio"] != '':
+                if asset['ccy'] in usd_margin_list:
+                    risk_list[f"OkMU_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"])]
+                else:
+                    risk_list[f"OkMC_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"])]
 
         for i, sub_acct in enumerate(self.subaccount_list):
             sub_data = self.send_http_request(self=self, func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
             for asset in sub_data[0]["details"]:
-                if asset['ccy'] in usd_margin_list:
-                    risk_list[f"Ok{i + 1}U_{asset['ccy']}"] = float(asset["mgnRatio"])
-                else:
-                    risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = float(asset["mgnRatio"])
+                if asset["mgnRatio"] != '':
+                    if asset['ccy'] in usd_margin_list:
+                        risk_list[f"Ok{i + 1}U_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"])]
+                    else:
+                        risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"])]
 
         return risk_list

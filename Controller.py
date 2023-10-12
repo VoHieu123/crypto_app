@@ -60,6 +60,7 @@ class Controller(object):
         asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
         market = self.uiMainWindow_.comboBox_market.currentText()
         coinType = self.uiMainWindow_.comboBox_coinType.currentText()
+        alarmType = self.uiMainWindow_.comboBox_alarmType.currentText()
         subAcc = self.uiMainWindow_.comboBox_subAcc.currentText()
 
         self.uiMainWindow_.lineEdit_threshold.setText("")
@@ -82,7 +83,10 @@ class Controller(object):
         if "By" in symbol:
             symbol = self.change_last_letter(symbol, "U")
 
-        self.model_.set_risk_data(symbol=symbol, asset=asset, alarm=alarm)
+        if alarmType == "Risk":
+            self.model_.set_data(symbol=symbol, asset_name=asset, alarm=alarm)
+        elif alarmType == "Equity":
+            self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
         self.upload_data()
 
     @staticmethod
@@ -90,39 +94,49 @@ class Controller(object):
         returnStr = ""
         for dict in list:
             returnStr += dict["asset"] + ": " + str(round(dict["risk"], 4)) + "/" + str(round(dict["alarm"], 4)) + "\n"
+            returnStr += "EQUITY: " + str(round(dict["equity"], 4)) + "/" + str(round(dict["equity_alarm"], 4)) + "\n"
 
         return returnStr[:-1]
 
-    def updateData(self):
-            bin_risk = self.BinanceHandler_.get_risk()
-            okx_risk = self.OKXHandler_.get_risk()
-            bybit_risk = self.BybitHandler_.get_risk()
+    def update_data(self):
+            bin_risk = self.BinanceHandler_.get_account_status()
+            okx_risk = self.OKXHandler_.get_account_status()
+            bybit_risk = self.BybitHandler_.get_account_status()
             risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
             for key, value in risk_dict.items():
-                self.model_.set_risk_data(symbol=self.substring_before(key, "_"), asset=self.substring_after(key, "_"), risk=value)
+                self.model_.set_data(symbol=self.substring_before(key, "_"),
+                                     asset_name=self.substring_after(key, "_"),
+                                     risk=value[0], equity=value[1])
 
     def upload_data(self):
         for symbol, qtLabel in self.labelDict.items():
-            currentListOfDict = self.model_.get_risk_data(symbol=symbol)
+            currentListOfDict = self.model_.get_data(symbol=symbol)
             qtLabel.setText(self.list_to_label(currentListOfDict))
 
-    def alarmIf(self):
+    def alarm_if(self):
         for symbol in self.labelDict.keys():
-            currentListOfDict = self.model_.get_risk_data(symbol=symbol)
+            currentListOfDict = self.model_.get_data(symbol=symbol)
             for dict in currentListOfDict:
                 if dict["risk"] > dict["alarm"] and "Bi" in symbol:
                     alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
-                elif dict["risk"] < dict["alarm"] and "Ok" in symbol:
+                if dict["risk"] < dict["alarm"] and "Ok" in symbol:
                     alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
-                elif dict["risk"] > dict["alarm"] and "By" in symbol:
+                if dict["risk"] > dict["alarm"] and "By" in symbol:
                     alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+
+                if dict["equity"] < dict["equity_alarm"] and "Bi" in symbol:
+                    alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                if dict["equity"] < dict["equity_alarm"] and "Ok" in symbol:
+                    alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                if dict["equity"] < dict["equity_alarm"] and "By" in symbol:
+                    alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
 
     def loop(self):
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):
             pass
 
         if int(self.currentTime/self.retrieveFrequencyS) < int(time.time()/self.retrieveFrequencyS):
-            self.updateData()
+            self.update_data()
             self.upload_data()
-            self.alarmIf()
+            self.alarm_if()
             self.currentTime = time.time()

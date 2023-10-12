@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
-    <height>674</height>
+    <width>937</width>
+    <height>684</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -267,6 +267,20 @@
          </widget>
         </item>
         <item>
+         <widget class="QComboBox" name="comboBox_alarmType">
+          <item>
+           <property name="text">
+            <string>Risk</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Equity</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
          <widget class="QLineEdit" name="lineEdit_assetName">
           <property name="placeholderText">
            <string>Enter asset name</string>
@@ -276,7 +290,7 @@
         <item>
          <widget class="QLineEdit" name="lineEdit_threshold">
           <property name="placeholderText">
-           <string>Enter risk alarm threshold</string>
+           <string>Enter alarm threshold</string>
           </property>
          </widget>
         </item>
@@ -305,8 +319,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>678</width>
-           <height>181</height>
+           <width>917</width>
+           <height>184</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -682,8 +696,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>678</width>
-           <height>181</height>
+           <width>917</width>
+           <height>185</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_40">
@@ -952,8 +966,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>678</width>
-           <height>181</height>
+           <width>917</width>
+           <height>184</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_27">

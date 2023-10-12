@@ -31,12 +31,12 @@ class BybitHandler:
                     break
                 time.sleep(self.sleep_time)
 
-    def get_risk(self) -> {}:
+    def get_account_status(self) -> {}:
         risk_list = {}
         data = self.send_http_request(self=self, func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
             if item["accountType"] == "UNIFIED":
-                risk_list[f"ByMU_ALL"] = float(item["accountMMRate"])
+                risk_list[f"ByMU_ALL"] = [float(item["accountMMRate"]), float(item["totalEquity"])]
                 return risk_list
 
         return {}
