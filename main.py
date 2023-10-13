@@ -23,7 +23,8 @@ def backgroundTask(controller):
         controller.loop()
 
 def main():
-    choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
+    # choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
+    choice = 1
 
     while True:
         if choice == 1:

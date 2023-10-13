@@ -1,5 +1,6 @@
 from pybit.unified_trading import HTTP
 import const, time, alarm
+import uuid
 
 class BybitHandler:
     def __init__(self, apiKey, secretKey, sleepTime=3):
@@ -10,9 +11,18 @@ class BybitHandler:
         )
 
         self.sleep_time = sleepTime
-        self.subaccount_list = []
-        # Todo: Test connection?
-        # Todo: Get subaccount list
+        self.account_uid_dict = {}
+        subaccount_data = self.send_http_request(self=self, func=self.session.get_sub_uid)
+        main_uid = self.send_http_request(self=self, func=self.session.get_uid_wallet_type)
+        self.account_uid_dict["Main"] = int(main_uid["accounts"][0]["uid"])
+        if subaccount_data['subMemberIds'] != subaccount_data['transferableSubMemberIds']:
+            exit("Bybit error: subMemberIds and transferableSubMemberIds are different.")
+        for i, uid in enumerate(subaccount_data['transferableSubMemberIds']):
+            self.account_uid_dict[f"Sub{i + 1}"] = int(uid)
+
+    @staticmethod
+    def generate_uuid():
+        return str(uuid.uuid4())
 
     @staticmethod
     def convert_to_float(self, data):
@@ -42,8 +52,10 @@ class BybitHandler:
             except Exception as error:
                 alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
+                    time.sleep(self.sleep_time)
                     break
-                time.sleep(self.sleep_time)
+                else:
+                    exit()
 
     def get_account_status(self) -> {}:
         # Format: {"symbol": [risk, equity, withdrawable]}
@@ -51,9 +63,8 @@ class BybitHandler:
         mmr, equity, withdrawable = None, None, None
         data = self.send_http_request(self=self, func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
-            if item["accountType"] == "UNIFIED":
-                mmr = item["accountMMRate"]
-                equity = item["totalEquity"]
+            mmr = item["accountMMRate"]
+            equity = item["totalEquity"]
 
         # Account asset should always be moved to Unified Trading Account before hand
         data = self.send_http_request(self=self, func=self.session.get_coin_balance,
@@ -77,3 +88,22 @@ class BybitHandler:
         #             break
         #     res = session.withdraw(feeType=1, amount=amt, coin="USDT", chain="ARBI", address=const.OKX_ADDRESS)
         return True
+
+## Transfer between different account types under the same uid
+# self.session.create_internal_transfer(
+#         transferId=self.generate_uuid(),
+#         coin="USDT",
+#         amount="5",
+#         fromAccountType="UNIFIED",
+#         toAccountType="FUND",
+#     )
+## Transfer between differnt accounts types under different uids
+# self.session.create_universal_transfer(
+#         transferId=self.generate_uuid(),
+#         coin="USDT",
+#         amount="5",
+#         fromMemberId=106785119,
+#         toMemberId=109067714,
+#         fromAccountType="FUND",
+#         toAccountType="FUND",
+#     )

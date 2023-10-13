@@ -34,38 +34,38 @@ class BinanceHandler:
             except Exception as error:
                 alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
+                    time.sleep(self.sleep_time)
                     break
-                time.sleep(self.sleep_time)
+                else:
+                    exit()
 
     def get_account_status(self) -> {}:
         # Format: {"symbol_1": [risk_1, equity_1, withdrawable_1], "symbol_2": [risk_2, equity_2, withdrawable_2]}
         risk_list = {}
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_account)
         for asset in mainAccountData["assets"]:
-            # Todo: Consider also the balance that doesn't have open position
-            # Todo: Get the available balance
-            if int(asset["walletBalance"]) == 0 or int(asset["maintMargin"]) == 0:
-                continue
-            risk_list[f"BiMU_{asset['asset']}"] = [asset["maintMargin"]/asset["marginBalance"], asset["marginBalance"], 0]
+            if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
+                risk_list[f"BiMU_{asset['asset']}"] = [(asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
+                                                        asset["marginBalance"], asset["maxWithdrawAmount"]]
 
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_coin_account)
         for asset in mainAccountData["assets"]:
-            if int(asset["walletBalance"]) == 0 or int(asset["maintMargin"]) == 0:
-                continue
-            risk_list[f"BiMC_{asset['asset']}"] = [asset["maintMargin"]/asset["marginBalance"], asset["marginBalance"], 0]
+            if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
+                risk_list[f"BiMU_{asset['asset']}"] = [(asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
+                                                        asset["marginBalance"], asset["maxWithdrawAmount"]]
 
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
-                if int(usd["walletBalance"]) == 0 or int(usd["maintenanceMargin"]) == 0:
-                    continue
-                risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [usd["maintenanceMargin"]/usd["marginBalance"], usd["marginBalance"], 0]
+                if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
+                    risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [(usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
+                                                            usd["marginBalance"], usd["maxWithdrawAmount"]]
 
             coinm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
             for coin in coinm["deliveryAccountResp"]["assets"]:
-                if int(coin["walletBalance"]) == 0 or int(coin["maintenanceMargin"]) == 0:
-                    continue
-                risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [coin["maintenanceMargin"]/coin["marginBalance"], coin["marginBalance"], 0]
+                if coin["maintenanceMargin"] != 0 or coin["maxWithdrawAmount"] != 0:
+                    risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [(coin["maintenanceMargin"]/coin["marginBalance"]) if coin["marginBalance"] != 0 else 0,
+                                                            coin["marginBalance"], coin["maxWithdrawAmount"]]
 
         return risk_list
 

@@ -39,8 +39,10 @@ class OKXHandler:
             except Exception as error:
                 alarm.activate(message=f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
+                    time.sleep(self.sleep_time)
                     break
-                time.sleep(self.sleep_time)
+                else:
+                    exit()
 
     def get_account_status(self) -> bool:
         # Format: {"symbol_1": [risk_1, equity_1, withdrawable_1], "symbol_2": [risk_2, equity_2, withdrawable_2]}
@@ -52,7 +54,7 @@ class OKXHandler:
             if asset['ccy'] in usd_margin_list:
                 risk_list[f"OkMU_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
             else:
-                risk_list[f"OkMC_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], 0]
+                risk_list[f"OkMC_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
 
         for i, sub_acct in enumerate(self.subaccount_list):
             sub_data = self.send_http_request(self=self, func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
@@ -60,6 +62,6 @@ class OKXHandler:
                 if asset['ccy'] in usd_margin_list:
                     risk_list[f"Ok{i + 1}U_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
                 else:
-                    risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], 0]
+                    risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"],  asset["availBal"]]
 
         return risk_list
