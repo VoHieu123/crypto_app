@@ -130,19 +130,20 @@ class Controller(object):
         for symbol in self.labelDict.keys():
             currentListOfDict = self.model_.get_data(symbol=symbol)
             for dict in currentListOfDict:
-                if dict["risk"] > dict["alarm"] and "Bi" in symbol:
-                    alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
-                if dict["risk"] < dict["alarm"] and "Ok" in symbol:
-                    alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
-                if dict["risk"] > dict["alarm"] and "By" in symbol:
-                    alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                if dict["risk"] != 0:
+                    if dict["risk"] > dict["alarm"] and "Bi" in symbol:
+                        alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                    if dict["risk"] < dict["alarm"] and "Ok" in symbol:
+                        alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                    if dict["risk"] > dict["alarm"] and "By" in symbol:
+                        alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
 
-                if dict["equity"] < dict["equity_alarm"] and "Bi" in symbol:
-                    alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
-                if dict["equity"] < dict["equity_alarm"] and "Ok" in symbol:
-                    alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
-                if dict["equity"] < dict["equity_alarm"] and "By" in symbol:
-                    alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                    if dict["equity"] < dict["equity_alarm"] and "Bi" in symbol:
+                        alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                    if dict["equity"] < dict["equity_alarm"] and "Ok" in symbol:
+                        alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                    if dict["equity"] < dict["equity_alarm"] and "By" in symbol:
+                        alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
 
     def loop(self):
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):

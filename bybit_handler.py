@@ -15,6 +15,20 @@ class BybitHandler:
         # Todo: Get subaccount list
 
     @staticmethod
+    def convert_to_float(self, data):
+        if isinstance(data, dict):
+            return {key: self.convert_to_float(self=self, data=value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.convert_to_float(self=self, data=item) for item in data]
+        elif isinstance(data, str):
+            try:
+                return 0 if data == "" else float(data)
+            except ValueError:
+                return data
+        else:
+            return data
+
+    @staticmethod
     def send_http_request(self, func, **kwargs):
         retries_count = -1
         while True:
@@ -22,7 +36,7 @@ class BybitHandler:
             try:
                 data = func(**kwargs)
                 if data.get("retCode") == 0:
-                    return data["result"]
+                    return self.convert_to_float(self=self, data=data["result"])
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
@@ -38,15 +52,15 @@ class BybitHandler:
         data = self.send_http_request(self=self, func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
             if item["accountType"] == "UNIFIED":
-                mmr = float(item["accountMMRate"])
-                equity = float(item["totalEquity"])
+                mmr = item["accountMMRate"]
+                equity = item["totalEquity"]
 
         # Account asset should always be moved to Unified Trading Account before hand
         data = self.send_http_request(self=self, func=self.session.get_coin_balance,
                                       accountType="UNIFIED", coin="USDT",
                                       withTransferSafeAmount=1)
 
-        withdrawable = float(data["balance"]["transferSafeAmount"])
+        withdrawable = data["balance"]["transferSafeAmount"]
 
         if all(item is not None for item in [mmr, equity, withdrawable]):
             risk_list[f"ByMU_USDT"] = [mmr, equity, withdrawable]

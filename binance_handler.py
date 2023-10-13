@@ -11,12 +11,26 @@ class BinanceHandler:
             self.subaccount_list.append(sub_account["email"])
 
     @staticmethod
+    def convert_to_float(self, data):
+        if isinstance(data, dict):
+            return {key: self.convert_to_float(self=self, data=value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.convert_to_float(self=self, data=item) for item in data]
+        elif isinstance(data, str):
+            try:
+                return 0 if data == "" else float(data)
+            except ValueError:
+                return data
+        else:
+            return data
+
+    @staticmethod
     def send_http_request(self, func, **kwargs):
         retries_count = -1
         while True:
             retries_count += 1
             try:
-                return func(**kwargs)
+                return self.convert_to_float(self=self, data=func(**kwargs))
             except Exception as error:
                 alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
@@ -28,28 +42,30 @@ class BinanceHandler:
         risk_list = {}
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_account)
         for asset in mainAccountData["assets"]:
-            if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
+            # Todo: Consider also the balance that doesn't have open position
+            # Todo: Get the available balance
+            if int(asset["walletBalance"]) == 0 or int(asset["maintMargin"]) == 0:
                 continue
-            risk_list[f"BiMU_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"], 0)]
+            risk_list[f"BiMU_{asset['asset']}"] = [asset["maintMargin"]/asset["marginBalance"], asset["marginBalance"], 0]
 
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_coin_account)
         for asset in mainAccountData["assets"]:
-            if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
+            if int(asset["walletBalance"]) == 0 or int(asset["maintMargin"]) == 0:
                 continue
-            risk_list[f"BiMC_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"]), 0]
+            risk_list[f"BiMC_{asset['asset']}"] = [asset["maintMargin"]/asset["marginBalance"], asset["marginBalance"], 0]
 
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
-                if int(float(usd["walletBalance"])) == 0 or int(float(usd["maintenanceMargin"])) == 0:
+                if int(usd["walletBalance"]) == 0 or int(usd["maintenanceMargin"]) == 0:
                     continue
-                risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [float(usd["maintenanceMargin"])/float(usd["marginBalance"]), float(usd["marginBalance"]), 0]
+                risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [usd["maintenanceMargin"]/usd["marginBalance"], usd["marginBalance"], 0]
 
             coinm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
             for coin in coinm["deliveryAccountResp"]["assets"]:
-                if int(float(coin["walletBalance"])) == 0 or int(float(coin["maintenanceMargin"])) == 0:
+                if int(coin["walletBalance"]) == 0 or int(coin["maintenanceMargin"]) == 0:
                     continue
-                risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [float(coin["maintenanceMargin"])/float(coin["marginBalance"]), float(coin["marginBalance"]), 0]
+                risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [coin["maintenanceMargin"]/coin["marginBalance"], coin["marginBalance"], 0]
 
         return risk_list
 

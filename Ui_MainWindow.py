@@ -553,7 +553,7 @@ class Ui_MainWindow(object):
         self.comboBox_accountFrom.setItemText(3, _translate("MainWindow", "Sub3"))
         self.label_4.setText(_translate("MainWindow", "To:"))
         self.comboBox_withdrawTo.setItemText(0, _translate("MainWindow", "Binance"))
-        self.comboBox_withdrawTo.setItemText(1, _translate("MainWindow", "OKX"))
+        self.comboBox_withdrawTo.setItemText(1, _translate("MainWindow", "Okx"))
         self.comboBox_withdrawTo.setItemText(2, _translate("MainWindow", "Bybit"))
         self.comboBox_4.setItemText(0, _translate("MainWindow", "Main"))
         self.comboBox_4.setItemText(1, _translate("MainWindow", "Sub1"))

@@ -12,6 +12,20 @@ class OKXHandler:
             self.subaccount_list.append(subaccount_data["subAcct"])
 
     @staticmethod
+    def convert_to_float(self, data):
+        if isinstance(data, dict):
+            return {key: self.convert_to_float(self=self, data=value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.convert_to_float(self=self, data=item) for item in data]
+        elif isinstance(data, str):
+            try:
+                return 0 if data == "" else float(data)
+            except ValueError:
+                return data
+        else:
+            return data
+
+    @staticmethod
     def send_http_request(self, func, **kwargs):
         retries_count = -1
         while True:
@@ -19,7 +33,7 @@ class OKXHandler:
             try:
                 data = func(**kwargs)
                 if data.get("code") == "0":
-                    return data["data"]
+                    return self.convert_to_float(self=self, data=data["data"])
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
@@ -35,19 +49,17 @@ class OKXHandler:
 
         account_data = self.send_http_request(self=self, func=self.okx_account_api.get_account_balance)
         for asset in account_data[0]["details"]:
-            if asset["mgnRatio"] != '':
-                if asset['ccy'] in usd_margin_list:
-                    risk_list[f"OkMU_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"]), 0]
-                else:
-                    risk_list[f"OkMC_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"]), 0]
+            if asset['ccy'] in usd_margin_list:
+                risk_list[f"OkMU_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
+            else:
+                risk_list[f"OkMC_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], 0]
 
         for i, sub_acct in enumerate(self.subaccount_list):
             sub_data = self.send_http_request(self=self, func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
             for asset in sub_data[0]["details"]:
-                if asset["mgnRatio"] != '':
-                    if asset['ccy'] in usd_margin_list:
-                        risk_list[f"Ok{i + 1}U_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"]), 0]
-                    else:
-                        risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = [float(asset["mgnRatio"]), float(asset["eq"]), 0]
+                if asset['ccy'] in usd_margin_list:
+                    risk_list[f"Ok{i + 1}U_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
+                else:
+                    risk_list[f"Ok{i + 1}C_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], 0]
 
         return risk_list
