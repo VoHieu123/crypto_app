@@ -7,12 +7,13 @@ OKX_DEFAULT_EQUITY_ALARM = [100, 50]
 BYBIT_DEFAULT_EQUITY_ALARM = 100
 
 class Asset:
-    def __init__(self, symbol, asset_name, risk=-1, alarm=-1, equity=-1, equity_alarm=-1):
+    def __init__(self, symbol, asset_name, risk=-1, alarm=-1, equity=-1, equity_alarm=-1, withdrawable=-1):
         self.name = asset_name
         self.risk = risk
         self.equity = equity
         self.equity_alarm = equity_alarm
         self.alarm = alarm
+        self.withdrawable = withdrawable
         if equity_alarm == -1:
             if "Bi" in symbol:
                 self.equity_alarm = BIN_DEFAULT_EQUITY_ALARM[0] if "U" in symbol else BIN_DEFAULT_EQUITY_ALARM[1]
@@ -44,7 +45,6 @@ class Asset:
         self.equity_alarm = equity_alarm if equity_alarm != -1 else self.equity_alarm
 
 class Model(object):
-
     def __init__(self):
         self.risk_data = {
             "BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
@@ -52,7 +52,7 @@ class Model(object):
             "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
         }
 
-    def set_data(self, symbol, asset_name, risk=-1, alarm=-1, equity=-1, equity_alarm=-1) -> bool:
+    def set_data(self, symbol, asset_name, risk=-1, alarm=-1, equity=-1, equity_alarm=-1, withdrawable=-1) -> bool:
         if symbol in self.risk_data:
             for asset in self.risk_data[symbol]:
                 if asset.name == asset_name:
@@ -62,10 +62,11 @@ class Model(object):
                     asset.set_equity_alarm(equity_alarm)
                     return True
 
-            new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, alarm=alarm,
-                              equity=equity, equity_alarm=equity_alarm)
-            self.risk_data[symbol].append(new_asset)
-            return True
+            if all(attr != -1 for attr in [risk, equity, withdrawable]):
+                new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, alarm=alarm,
+                                equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable)
+                self.risk_data[symbol].append(new_asset)
+                return True
 
         return False
 
@@ -75,6 +76,7 @@ class Model(object):
             for asset in self.risk_data[symbol]:
                 if asset.is_valid_instance():
                     returnDict.append({"asset": asset.name, "risk": asset.risk, "alarm": asset.alarm,
-                                       "equity": asset.equity, "equity_alarm": asset.equity_alarm})
+                                       "equity": asset.equity, "equity_alarm": asset.equity_alarm,
+                                       "withdrawable": asset.withdrawable})
 
         return returnDict

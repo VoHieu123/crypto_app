@@ -106,9 +106,22 @@ class Controller(object):
             for key, value in risk_dict.items():
                 self.model_.set_data(symbol=self.substring_before(key, "_"),
                                      asset_name=self.substring_after(key, "_"),
-                                     risk=value[0], equity=value[1])
+                                     risk=value[0], equity=value[1], withdrawable=value[2])
 
     def upload_data(self):
+        self.upload_withdrawable()
+        self.upload_status()
+
+    def upload_withdrawable(self):
+        marketFrom = self.uiMainWindow_.comboBox_withdrawFrom.currentText()
+        accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
+        targetSymbol = f"{marketFrom[:2]}{'M' if accountFrom == 'Main' else accountFrom[-1:]}U"
+
+        for dict in self.model_.get_data(symbol=targetSymbol):
+            if dict["asset"] == "USDT":
+                self.uiMainWindow_.label_withdrawable.setText(f"{round(dict.get('withdrawable'), 1)}")
+
+    def upload_status(self):
         for symbol, qtLabel in self.labelDict.items():
             currentListOfDict = self.model_.get_data(symbol=symbol)
             qtLabel.setText(self.list_to_label(currentListOfDict))

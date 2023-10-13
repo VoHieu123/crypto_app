@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Crypto Alarm</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
@@ -25,6 +25,9 @@
      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_29" stretch="0,0,0,0,0,0,0,0,0,0,0,1,0">
+        <property name="spacing">
+         <number>10</number>
+        </property>
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -33,7 +36,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_2">
+         <widget class="QComboBox" name="comboBox_withdrawFrom">
           <item>
            <property name="text">
             <string>Binance</string>
@@ -41,7 +44,7 @@
           </item>
           <item>
            <property name="text">
-            <string>OKX</string>
+            <string>Okx</string>
            </property>
           </item>
           <item>
@@ -52,7 +55,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_3">
+         <widget class="QComboBox" name="comboBox_accountFrom">
           <item>
            <property name="text">
             <string>Main</string>
@@ -83,7 +86,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="comboBox_withdrawTo">
           <item>
            <property name="text">
             <string>Binance</string>
@@ -133,7 +136,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_5">
+         <widget class="QComboBox" name="comboBox_withdrawCoin">
           <item>
            <property name="text">
             <string>USDT</string>
@@ -142,16 +145,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_13">
+         <widget class="QLabel" name="label_23">
           <property name="text">
            <string>Available:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_22">
+         <widget class="QLabel" name="label_withdrawable">
           <property name="text">
-           <string>1000</string>
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -206,9 +209,12 @@
      </spacer>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,3,2,3">
+     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,10,4,8">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>10</number>
+        </property>
         <item>
          <widget class="QComboBox" name="comboBox_market">
           <item>
@@ -320,7 +326,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>215</height>
+           <height>260</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -328,19 +334,19 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <item>
-           <layout class="QGridLayout" name="gridLayout">
+           <layout class="QGridLayout" name="gridLayout" rowstretch="2,4,4">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -422,7 +428,7 @@
                <item>
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Binance</string>
+                  <string>Binance -&gt; Bybit -&gt; OKX</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -664,7 +670,7 @@
                <item>
                 <widget class="QLabel" name="label_15">
                  <property name="text">
-                  <string>Main</string>
+                  <string>Main account</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -697,7 +703,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>143</height>
+           <height>105</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_40">
@@ -705,16 +711,16 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_4">
@@ -724,29 +730,7 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item row="1" column="0">
-             <widget class="QFrame" name="frame_36">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_32">
-               <item>
-                <widget class="QLabel" name="label_31">
-                 <property name="text">
-                  <string>USD-M (Risk/Alarm)</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="1" column="1">
+            <item row="0" column="1">
              <widget class="QFrame" name="frame_13">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -768,19 +752,19 @@
               </layout>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QFrame" name="frame_14">
+            <item row="0" column="0">
+             <widget class="QFrame" name="frame_36">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Plain</enum>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_44">
+              <layout class="QHBoxLayout" name="horizontalLayout_32">
                <item>
-                <widget class="QLabel" name="label_6">
+                <widget class="QLabel" name="label_31">
                  <property name="text">
-                  <string>Main</string>
+                  <string>Unified (Risk/Alarm)</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -790,29 +774,7 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QFrame" name="frame_32">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_28">
-               <item>
-                <widget class="QLabel" name="label_By1U">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="1" column="3">
+            <item row="0" column="3">
              <widget class="QFrame" name="frame_40">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -834,17 +796,17 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="4">
-             <widget class="QFrame" name="frame_43">
+            <item row="0" column="2">
+             <widget class="QFrame" name="frame_32">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Plain</enum>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_39">
+              <layout class="QHBoxLayout" name="horizontalLayout_28">
                <item>
-                <widget class="QLabel" name="label_By3U">
+                <widget class="QLabel" name="label_By1U">
                  <property name="text">
                   <string/>
                  </property>
@@ -857,84 +819,18 @@
              </widget>
             </item>
             <item row="0" column="4">
-             <widget class="QFrame" name="frame_38">
+             <widget class="QFrame" name="frame_43">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Plain</enum>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_34">
+              <layout class="QHBoxLayout" name="horizontalLayout_39">
                <item>
-                <widget class="QLabel" name="label_33">
+                <widget class="QLabel" name="label_By3U">
                  <property name="text">
-                  <string>Sub-account 3</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QFrame" name="frame_35">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_31">
-               <item>
-                <widget class="QLabel" name="label_30">
-                 <property name="text">
-                  <string>Sub-account 2</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QFrame" name="frame_34">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_30">
-               <item>
-                <widget class="QLabel" name="label_29">
-                 <property name="text">
-                  <string>Bybit</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QFrame" name="frame_37">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_33">
-               <item>
-                <widget class="QLabel" name="label_32">
-                 <property name="text">
-                  <string>Sub-account 1</string>
+                  <string/>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -967,7 +863,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>215</height>
+           <height>208</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_27">
@@ -975,16 +871,16 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>5</number>
+           <number>0</number>
           </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
@@ -995,116 +891,6 @@
              <number>0</number>
             </property>
             <item row="0" column="2">
-             <widget class="QFrame" name="frame_25">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_20">
-               <item>
-                <widget class="QLabel" name="label_20">
-                 <property name="text">
-                  <string>Sub-account 1</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="1" column="3">
-             <widget class="QFrame" name="frame_28">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_23">
-               <item>
-                <widget class="QLabel" name="label_Ok2U">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="4">
-             <widget class="QFrame" name="frame_26">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_21">
-               <item>
-                <widget class="QLabel" name="label_21">
-                 <property name="text">
-                  <string>Sub-account 3</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="2" column="3">
-             <widget class="QFrame" name="frame_29">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_24">
-               <item>
-                <widget class="QLabel" name="label_Ok2C">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="1" column="4">
-             <widget class="QFrame" name="frame_31">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_26">
-               <item>
-                <widget class="QLabel" name="label_Ok3U">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="1" column="2">
              <widget class="QFrame" name="frame_20">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -1126,7 +912,29 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="0" column="3">
+             <widget class="QFrame" name="frame_28">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_23">
+               <item>
+                <widget class="QLabel" name="label_Ok2U">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="0" column="0">
              <widget class="QFrame" name="frame_24">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -1148,139 +956,7 @@
               </layout>
              </widget>
             </item>
-            <item row="2" column="4">
-             <widget class="QFrame" name="frame_30">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_25">
-               <item>
-                <widget class="QLabel" name="label_Ok3C">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QFrame" name="frame_22">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_17">
-               <item>
-                <widget class="QLabel" name="label_17">
-                 <property name="text">
-                  <string>OKX</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QFrame" name="frame_21">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_16">
-               <item>
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>Coin-M (Risk/Alarm)</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QFrame" name="frame_27">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_22">
-               <item>
-                <widget class="QLabel" name="label_Ok1C">
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QFrame" name="frame_23">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_18">
-               <item>
-                <widget class="QLabel" name="label_18">
-                 <property name="text">
-                  <string>Sub-account 2</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QFrame" name="frame_11">
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_47">
-               <item>
-                <widget class="QLabel" name="label_11">
-                 <property name="text">
-                  <string>Main</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="2" column="1">
+            <item row="1" column="1">
              <widget class="QFrame" name="frame_44">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -1302,7 +978,95 @@
               </layout>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="1" column="4">
+             <widget class="QFrame" name="frame_30">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_25">
+               <item>
+                <widget class="QLabel" name="label_Ok3C">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QFrame" name="frame_21">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <item>
+                <widget class="QLabel" name="label_16">
+                 <property name="text">
+                  <string>Coin-M (Risk/Alarm)</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QFrame" name="frame_29">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_24">
+               <item>
+                <widget class="QLabel" name="label_Ok2C">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QFrame" name="frame_27">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_22">
+               <item>
+                <widget class="QLabel" name="label_Ok1C">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="0" column="1">
              <widget class="QFrame" name="frame_45">
               <property name="frameShape">
                <enum>QFrame::Box</enum>
@@ -1313,6 +1077,28 @@
               <layout class="QHBoxLayout" name="horizontalLayout_46">
                <item>
                 <widget class="QLabel" name="label_OkMU">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QFrame" name="frame_31">
+              <property name="frameShape">
+               <enum>QFrame::Box</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_26">
+               <item>
+                <widget class="QLabel" name="label_Ok3U">
                  <property name="text">
                   <string/>
                  </property>

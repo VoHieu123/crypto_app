@@ -26,20 +26,32 @@ class BybitHandler:
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
-                alarm.activate(message=f"Bybit error: {error}. Retries number: {retries_count}.")
+                alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
                     break
                 time.sleep(self.sleep_time)
 
     def get_account_status(self) -> {}:
+        # Format: {"symbol": [risk, equity, withdrawable]}
         risk_list = {}
+        mmr, equity, withdrawable = None, None, None
         data = self.send_http_request(self=self, func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
             if item["accountType"] == "UNIFIED":
-                risk_list[f"ByMU_ALL"] = [float(item["accountMMRate"]), float(item["totalEquity"])]
-                return risk_list
+                mmr = float(item["accountMMRate"])
+                equity = float(item["totalEquity"])
 
-        return {}
+        # Account asset should always be moved to Unified Trading Account before hand
+        data = self.send_http_request(self=self, func=self.session.get_coin_balance,
+                                      accountType="UNIFIED", coin="USDT",
+                                      withTransferSafeAmount=1)
+
+        withdrawable = float(data["balance"]["transferSafeAmount"])
+
+        if all(item is not None for item in [mmr, equity, withdrawable]):
+            risk_list[f"ByMU_USDT"] = [mmr, equity, withdrawable]
+
+        return risk_list
 
     def transfer_money(amt) -> bool:
         # data = session.get_coin_info(coin="USDT")

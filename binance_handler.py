@@ -18,37 +18,38 @@ class BinanceHandler:
             try:
                 return func(**kwargs)
             except Exception as error:
-                alarm.activate(message=f"Binance error: {error}. Retries number: {retries_count}.")
+                alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
                     break
                 time.sleep(self.sleep_time)
 
     def get_account_status(self) -> {}:
+        # Format: {"symbol_1": [risk_1, equity_1, withdrawable_1], "symbol_2": [risk_2, equity_2, withdrawable_2]}
         risk_list = {}
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_account)
         for asset in mainAccountData["assets"]:
             if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
                 continue
-            risk_list[f"BiMU_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"])]
+            risk_list[f"BiMU_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"], 0)]
 
         mainAccountData = self.send_http_request(self=self, func=self.binance_client.futures_coin_account)
         for asset in mainAccountData["assets"]:
             if int(float(asset["walletBalance"])) == 0 or int(float(asset["maintMargin"])) == 0:
                 continue
-            risk_list[f"BiMC_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"])]
+            risk_list[f"BiMC_{asset['asset']}"] = [float(asset["maintMargin"])/float(asset["marginBalance"]), float(asset["marginBalance"]), 0]
 
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
                 if int(float(usd["walletBalance"])) == 0 or int(float(usd["maintenanceMargin"])) == 0:
                     continue
-                risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [float(usd["maintenanceMargin"])/float(usd["marginBalance"]), float(usd["marginBalance"])]
+                risk_list[f"Bi{i + 1}U_{usd['asset']}"] = [float(usd["maintenanceMargin"])/float(usd["marginBalance"]), float(usd["marginBalance"]), 0]
 
             coinm = self.send_http_request(self=self, func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
             for coin in coinm["deliveryAccountResp"]["assets"]:
                 if int(float(coin["walletBalance"])) == 0 or int(float(coin["maintenanceMargin"])) == 0:
                     continue
-                risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [float(coin["maintenanceMargin"])/float(coin["marginBalance"]), float(coin["marginBalance"])]
+                risk_list[f"Bi{i + 1}C_{coin['asset']}"] = [float(coin["maintenanceMargin"])/float(coin["marginBalance"]), float(coin["marginBalance"]), 0]
 
         return risk_list
 
