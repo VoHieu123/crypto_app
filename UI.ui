@@ -172,7 +172,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="lineEdit_withdrawAmount">
           <property name="placeholderText">
            <string>Enter amount</string>
           </property>

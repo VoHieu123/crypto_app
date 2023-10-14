@@ -53,7 +53,17 @@ class Controller(object):
     def substring_before(s, delim):
         return s.partition(delim)[0]
 
-    def transfer_threshold_button_clicked(self):
+    # Todo: Update data everytime the combo boxes are clicked
+
+    def transfer_button_clicked(self):
+        print("Clicked")
+        self.update_data()
+        self.upload_data()
+        print("Finished")
+        try:
+            withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
+        except:
+            return
         moduleDict = {"Binance": self.BinanceHandler_,
                       "Bybit": self.BybitHandler_,
                       "Okx": self.OKXHandler_}
@@ -62,9 +72,7 @@ class Controller(object):
         exchangeTo = self.uiMainWindow_.comboBox_exchangeTo.currentText()
         accountTo = self.uiMainWindow_.comboBox_accountTo.currentText()
         coin = self.uiMainWindow_.comboBox_withdrawCoin.currentText()
-        withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
 
-        self.update_data()
         # Todo: Check if the withdrawal amount is enough
         # Then move to money to funding wallet
         # The money maybe less than the requested amount
@@ -133,21 +141,24 @@ class Controller(object):
         risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
         for key, value in risk_dict.items():
             self.model_.set_data(symbol=self.substring_before(key, "_"),
-                                    asset_name=self.substring_after(key, "_"),
-                                    risk=value[0], equity=value[1], withdrawable=value[2])
+                                 asset_name=self.substring_after(key, "_"),
+                                 risk=value[0], equity=value[1], withdrawable=value[2])
 
     def upload_data(self):
         self.upload_withdrawable()
         self.upload_status()
 
     def upload_withdrawable(self):
-        marketFrom = self.uiMainWindow_.comboBox_withdrawFrom.currentText()
+        marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
         accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
         targetSymbol = f"{marketFrom[:2]}{'M' if accountFrom == 'Main' else accountFrom[-1:]}U"
 
         for dict in self.model_.get_data(symbol=targetSymbol):
             if dict["asset"] == "USDT":
                 self.uiMainWindow_.label_withdrawable.setText(f"{round(dict.get('withdrawable'), 1)}")
+                return
+            
+        self.uiMainWindow_.label_withdrawable.setText("0")
 
     def upload_status(self):
         for symbol, qtLabel in self.labelDict.items():
