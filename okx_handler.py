@@ -11,6 +11,9 @@ class OKXHandler:
         for subaccount_data in data:
             self.subaccount_list.append(subaccount_data["subAcct"])
 
+        self.subaccount_list = sorted(self.subaccount_list, key=lambda x: x[-1])
+
+
     @staticmethod
     def convert_to_float(self, data):
         if isinstance(data, dict):
