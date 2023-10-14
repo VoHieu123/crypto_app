@@ -5,6 +5,7 @@ import Controller
 import threading
 import Model
 import const
+import utils
 import binance_handler,bybit_handler, okx_handler
 
 exitFlag = False
@@ -23,6 +24,7 @@ def backgroundTask(controller):
         controller.loop()
 
 def main():
+    utils.synchronize_time()
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
     while True:

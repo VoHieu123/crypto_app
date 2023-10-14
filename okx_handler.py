@@ -1,5 +1,5 @@
 from okx import SubAccount, Account
-import time, alarm, const
+import time, alarm, const, utils
 
 class OKXHandler:
     def __init__(self, apiKey, secretKey, password, sleepTime=3):
@@ -40,11 +40,13 @@ class OKXHandler:
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
-                alarm.activate(message=f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
+                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
+                    utils.synchronize_time()
                     time.sleep(self.sleep_time)
                     break
                 else:
+                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
                     exit()
 
     def get_account_status(self) -> bool:

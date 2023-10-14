@@ -1,6 +1,6 @@
 from pybit.unified_trading import HTTP
 import const, time, alarm
-import uuid
+import utils
 
 class BybitHandler:
     def __init__(self, apiKey, secretKey, sleepTime=3):
@@ -19,10 +19,6 @@ class BybitHandler:
             exit("Bybit error: subMemberIds and transferableSubMemberIds are different.")
         for i, uid in enumerate(subaccount_data['transferableSubMemberIds']):
             self.account_uid_dict[f"Sub{i + 1}"] = int(uid)
-
-    @staticmethod
-    def generate_uuid():
-        return str(uuid.uuid4())
 
     @staticmethod
     def convert_to_float(self, data):
@@ -50,11 +46,13 @@ class BybitHandler:
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
-                alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                 if retries_count >= const.MAX_RETRIES:
+                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
+                    utils.synchronize_time()
                     time.sleep(self.sleep_time)
                     break
                 else:
+                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
                     exit()
 
     def get_account_status(self) -> {}:
