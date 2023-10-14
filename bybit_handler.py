@@ -78,7 +78,10 @@ class BybitHandler:
 
         return risk_list
 
-    def transfer_money(amt) -> bool:
+    def transfer_money_internal(amt, accountFrom, accountTo):
+        pass
+
+    def transfer_money_global(amt) -> bool:
         # data = session.get_coin_info(coin="USDT")
         # if data["retCode"] == 0:
         #     data = data["result"]["rows"][0]

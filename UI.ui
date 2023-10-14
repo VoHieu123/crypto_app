@@ -36,7 +36,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_withdrawFrom">
+         <widget class="QComboBox" name="comboBox_exchangeFrom">
           <item>
            <property name="text">
             <string>Binance</string>
@@ -86,7 +86,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_withdrawTo">
+         <widget class="QComboBox" name="comboBox_exchangeTo">
           <item>
            <property name="text">
             <string>Binance</string>
@@ -105,7 +105,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_4">
+         <widget class="QComboBox" name="comboBox_accountTo">
           <item>
            <property name="text">
             <string>Main</string>
@@ -179,7 +179,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="button_transfer">
           <property name="text">
            <string>Transfer</string>
           </property>

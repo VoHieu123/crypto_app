@@ -14,6 +14,7 @@ class Controller(object):
         self.uiMainWindow_ = uiMainWindow
         self.model_ = model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
+        self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1", "2", "3"]
@@ -51,6 +52,33 @@ class Controller(object):
     @staticmethod
     def substring_before(s, delim):
         return s.partition(delim)[0]
+
+    def transfer_threshold_button_clicked(self):
+        moduleDict = {"Binance": self.BinanceHandler_,
+                      "Bybit": self.BybitHandler_,
+                      "Okx": self.OKXHandler_}
+        exchangeFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
+        accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
+        exchangeTo = self.uiMainWindow_.comboBox_exchangeTo.currentText()
+        accountTo = self.uiMainWindow_.comboBox_accountTo.currentText()
+        coin = self.uiMainWindow_.comboBox_withdrawCoin.currentText()
+        withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
+
+        self.update_data()
+        # Todo: Check if the withdrawal amount is enough
+        # Then move to money to funding wallet
+        # The money maybe less than the requested amount
+        # If so => confirm from user
+        # Execute the move,
+        # constantly fetch data from server/subcribe to a socket to check withdrawal progress
+        # Binance: cannot be cancelled, Bybit and Okx: can be cancelled
+        # For auto-pilot situation, no confirmation and UI needed
+
+        # Internal transfer: Only prompt a simple message
+        if exchangeFrom == exchangeTo:
+            moduleDict[exchangeFrom].transfer_money_internal()
+        else:
+            pass
 
     def change_threshold_button_clicked(self):
         try:
@@ -99,14 +127,14 @@ class Controller(object):
         return returnStr[:-1]
 
     def update_data(self):
-            bin_risk = self.BinanceHandler_.get_account_status()
-            okx_risk = self.OKXHandler_.get_account_status()
-            bybit_risk = self.BybitHandler_.get_account_status()
-            risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
-            for key, value in risk_dict.items():
-                self.model_.set_data(symbol=self.substring_before(key, "_"),
-                                     asset_name=self.substring_after(key, "_"),
-                                     risk=value[0], equity=value[1], withdrawable=value[2])
+        bin_risk = self.BinanceHandler_.get_account_status()
+        okx_risk = self.OKXHandler_.get_account_status()
+        bybit_risk = self.BybitHandler_.get_account_status()
+        risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
+        for key, value in risk_dict.items():
+            self.model_.set_data(symbol=self.substring_before(key, "_"),
+                                    asset_name=self.substring_after(key, "_"),
+                                    risk=value[0], equity=value[1], withdrawable=value[2])
 
     def upload_data(self):
         self.upload_withdrawable()
