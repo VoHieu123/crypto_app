@@ -1,80 +1,86 @@
 from pybit.unified_trading import HTTP
 import const, time, alarm
 import utils
+import pandas as pd
 
 class BybitHandler:
-    def __init__(self, apiKey, secretKey, sleepTime=3):
+    def __init__(self, apiKey, secretKey):
         self.session = HTTP(
             testnet=False,
             api_key=apiKey,
             api_secret=secretKey,
         )
-
-        self.sleep_time = sleepTime
         self.account_uid_dict = {}
-        subaccount_data = self.send_http_request(self=self, func=self.session.get_sub_uid)
-        main_uid = self.send_http_request(self=self, func=self.session.get_uid_wallet_type)
+        subaccount_data = self.send_http_request(func=self.session.get_sub_uid)
+        main_uid = self.send_http_request(func=self.session.get_uid_wallet_type)
         self.account_uid_dict["Main"] = int(main_uid["accounts"][0]["uid"])
         if subaccount_data['subMemberIds'] != subaccount_data['transferableSubMemberIds']:
             exit("Bybit error: subMemberIds and transferableSubMemberIds are different.")
         for i, uid in enumerate(subaccount_data['transferableSubMemberIds']):
             self.account_uid_dict[f"Sub{i + 1}"] = int(uid)
 
-    @staticmethod
-    def convert_to_float(self, data):
-        if isinstance(data, dict):
-            return {key: self.convert_to_float(self=self, data=value) for key, value in data.items()}
-        elif isinstance(data, list):
-            return [self.convert_to_float(self=self, data=item) for item in data]
-        elif isinstance(data, str):
-            try:
-                return 0 if data == "" else float(data)
-            except ValueError:
-                return data
-        else:
-            return data
+    def get_open_position(self):
+        cursor = None
+        data = pd.DataFrame()
+        while True:
+            currentData = self.send_http_request(func=self.session.get_positions,
+                                          category="linear", settleCoin="USDT",
+                                          limit=200, cursor=cursor)
+            cursor = currentData["nextPageCursor"]
+            if len(currentData["list"]) == 0:
+                break
+            currentData = pd.DataFrame(currentData["list"])
+            currentData = currentData[["positionValue", "side"]]
+            data = pd.concat([data, currentData])
+
+        long_pos = data[data["side"] == "Buy"]["positionValue"].sum()
+        short_pos = data[data["side"] == "Sell"]["positionValue"].sum()
+
+        return long_pos, short_pos
 
     @staticmethod
-    def send_http_request(self, func, **kwargs):
+    def send_http_request(func, **kwargs):
         retries_count = -1
         while True:
             retries_count += 1
             try:
                 data = func(**kwargs)
                 if data.get("retCode") == 0:
-                    return self.convert_to_float(self=self, data=data["result"])
+                    return utils.convert_to_float(data["result"])
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
-                if retries_count >= const.MAX_RETRIES:
+                if retries_count < const.MAX_RETRIES:
                     alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
                     utils.synchronize_time()
-                    time.sleep(self.sleep_time)
-                    break
+                    time.sleep(const.SLEEP_TIME)
                 else:
                     alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
                     exit()
 
+    # Todo: Haven't done it for subaccount
     def get_account_status(self) -> {}:
         # Format: {"symbol": [risk, equity, withdrawable]}
-        risk_list = {}
-        mmr, equity, withdrawable = None, None, None
-        data = self.send_http_request(self=self, func=self.session.get_wallet_balance, accountType="UNIFIED")
+        status_list = {}
+        mmr, equity, withdrawable, position = None, None, None, None
+        data = self.send_http_request(func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
             mmr = item["accountMMRate"]
             equity = item["totalEquity"]
 
         # Account asset should always be moved to Unified Trading Account before hand
-        data = self.send_http_request(self=self, func=self.session.get_coin_balance,
+        data = self.send_http_request(func=self.session.get_coin_balance,
                                       accountType="UNIFIED", coin="USDT",
                                       withTransferSafeAmount=1)
 
         withdrawable = data["balance"]["transferSafeAmount"]
 
-        if all(item is not None for item in [mmr, equity, withdrawable]):
-            risk_list[f"ByMU_USDT"] = [mmr, equity, withdrawable]
+        long_pos, short_pos = self.get_open_position()
 
-        return risk_list
+        if all(item is not None for item in [mmr, equity, withdrawable]):
+            status_list[f"ByMU_USDT"] = [mmr, equity, withdrawable, long_pos, short_pos]
+
+        return status_list
 
     def transfer_money_internal(amt, accountFrom, accountTo):
         pass

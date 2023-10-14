@@ -54,12 +54,9 @@ class Controller(object):
         return s.partition(delim)[0]
 
     # Todo: Update data everytime the combo boxes are clicked
-
     def transfer_button_clicked(self):
-        print("Clicked")
         self.update_data()
-        self.upload_data()
-        print("Finished")
+        self.upload_withdrawable()
         try:
             withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
         except:
@@ -135,18 +132,26 @@ class Controller(object):
         return returnStr[:-1]
 
     def update_data(self):
-        bin_risk = self.BinanceHandler_.get_account_status()
-        okx_risk = self.OKXHandler_.get_account_status()
-        bybit_risk = self.BybitHandler_.get_account_status()
-        risk_dict = ChainMap(bin_risk, okx_risk, bybit_risk)
-        for key, value in risk_dict.items():
-            self.model_.set_data(symbol=self.substring_before(key, "_"),
-                                 asset_name=self.substring_after(key, "_"),
-                                 risk=value[0], equity=value[1], withdrawable=value[2])
+        # Define a list or dictionary of handlers
+        handlers = {
+            "Binance": self.BinanceHandler_,
+            "OKX": self.OKXHandler_,
+            "Bybit": self.BybitHandler_
+        }
+
+        # Iterate through the handlers and set data in the model
+        for handler in handlers.values():
+            risk_data = handler.get_account_status()
+            for key, value in risk_data.items():
+                symbol = self.substring_before(key, "_")
+                asset_name = self.substring_after(key, "_")
+                risk, equity, withdrawable = value[0], value[1], value[2]
+                self.model_.set_data(symbol=symbol, asset_name=asset_name, risk=risk, equity=equity, withdrawable=withdrawable)
+
 
     def upload_data(self):
         self.upload_withdrawable()
-        self.upload_status()
+        self.upload_risk()
 
     def upload_withdrawable(self):
         marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
@@ -157,10 +162,10 @@ class Controller(object):
             if dict["asset"] == "USDT":
                 self.uiMainWindow_.label_withdrawable.setText(f"{round(dict.get('withdrawable'), 1)}")
                 return
-            
+
         self.uiMainWindow_.label_withdrawable.setText("0")
 
-    def upload_status(self):
+    def upload_risk(self):
         for symbol, qtLabel in self.labelDict.items():
             currentListOfDict = self.model_.get_data(symbol=symbol)
             qtLabel.setText(self.list_to_label(currentListOfDict))
@@ -185,6 +190,7 @@ class Controller(object):
                         alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
 
     def loop(self):
+        # Todo: Stop this when transferring
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):
             pass
 

@@ -26,11 +26,11 @@ def sound_thread():
     sound.stop()
 
 def activate(message, alarm):
-    if alarm:
+    if alarm == True:
         thread = threading.Thread(target=sound_thread)
         thread.start()
-    try:
-        telegram_send.send(messages=[message])
-    except:
-        pass
+        try:
+            telegram_send.send(messages=[message])
+        except:
+            pass
     print(message)
