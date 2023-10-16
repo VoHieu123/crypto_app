@@ -1,5 +1,34 @@
 import uuid
 
+class Range:
+    def __init__(self, start: float, end: float):
+        if start > end:
+            exit("Range object error.")
+        self.start = start
+        self.end = end
+
+    def __eq__(self, __value: object) -> bool:
+        return self.start == __value.start and self.end == __value.end
+
+    def out_of_range(self, number) -> bool:
+        return number < self.start or number > self.end
+
+def change_last_letter(word, new_letter):
+        if len(word) < 1:
+            return word
+
+        word_list = list(word)
+        word_list[-1] = new_letter
+        modified_word = ''.join(word_list)
+
+        return modified_word
+
+def substring_after(s, delim):
+    return s.partition(delim)[2]
+
+def substring_before(s, delim):
+    return s.partition(delim)[0]
+
 def convert_to_float(data):
     if isinstance(data, dict):
         return {key: convert_to_float(value) for key, value in data.items()}
@@ -18,20 +47,13 @@ def generate_uuid():
 
 def auto_format(number):
 
+    number = float(number)
+
     if (abs(number) < 0.0001):
-        return str(round(number, 6))
+        return str(round(number, 5))
 
-    num_str = str(number)
+    integer_part, decimal_part = (str(number)).split('.')
+    integer_len = len(integer_part)
+    integer_str = '{:,}'.format(int(integer_part))
 
-    if '.' not in num_str:
-        return str(number)
-    else:
-        integer_part, decimal_part = num_str.split('.')
-        integer_len = len(integer_part)
-
-        decimal_presicion = 5 - integer_len if integer_len < 3 else 1
-
-        integer_str = '{:,}'.format(int(integer_part))
-        returnStr = f'{integer_str}.{decimal_part[0:decimal_presicion]}'
-
-    return returnStr
+    return integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'

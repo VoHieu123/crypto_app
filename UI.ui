@@ -301,7 +301,7 @@
         <item>
          <widget class="QLineEdit" name="lineEdit_threshold">
           <property name="placeholderText">
-           <string>Enter alarm threshold</string>
+           <string>Enter alarm range. E.x: (1 - 20)</string>
           </property>
          </widget>
         </item>

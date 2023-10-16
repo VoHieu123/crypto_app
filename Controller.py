@@ -1,4 +1,6 @@
-import utils
+from utils import auto_format as fmt
+from utils import substring_after, substring_before, change_last_letter
+from utils import Range
 import time, alarm
 
 class Controller(object):
@@ -25,33 +27,14 @@ class Controller(object):
         for market in markets:
             for subaccount in subaccounts:
                 if market == "Bi" or market == "Ok":
-                    for coinType in coinTypes:
-                        label_key = f"{market}{subaccount}{coinType}"
-                        label_name = f"label_{market}{subaccount}{coinType}"
+                    for coin_type in coinTypes:
+                        label_key = f"{market}{subaccount}{coin_type}"
+                        label_name = f"label_{market}{subaccount}{coin_type}"
                         self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
                 else:
                     label_key = f"{market}{subaccount}U"
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
-
-    @staticmethod
-    def change_last_letter(word, new_letter):
-        if len(word) < 1:
-            return word
-
-        word_list = list(word)
-        word_list[-1] = new_letter
-        modified_word = ''.join(word_list)
-
-        return modified_word
-
-    @staticmethod
-    def substring_after(s, delim):
-        return s.partition(delim)[2]
-
-    @staticmethod
-    def substring_before(s, delim):
-        return s.partition(delim)[0]
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
@@ -87,14 +70,15 @@ class Controller(object):
 
     def change_threshold_button_clicked(self):
         try:
-            alarm = float(self.uiMainWindow_.lineEdit_threshold.text())
+            alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
+            alarm = Range(float(substring_before(alarm, "-")), float(substring_after(alarm, "-")))
         except:
             return
         asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
         market = self.uiMainWindow_.comboBox_market.currentText()
-        coinType = self.uiMainWindow_.comboBox_coinType.currentText()
-        alarmType = self.uiMainWindow_.comboBox_alarmType.currentText()
-        subAcc = self.uiMainWindow_.comboBox_subAcc.currentText()
+        coin_type = self.uiMainWindow_.comboBox_coinType.currentText()
+        alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
+        sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
 
         self.uiMainWindow_.lineEdit_threshold.setText("")
         self.uiMainWindow_.lineEdit_assetName.setText("")
@@ -111,28 +95,33 @@ class Controller(object):
             "COINM": "C"
         }
 
-        symbol = "".join(symbol_mappings.get(item, "") for item in [market, subAcc, coinType])
+        symbol = "".join(symbol_mappings.get(item, "") for item in [market, sub_acc, coin_type])
 
         if "By" in symbol:
-            symbol = self.change_last_letter(symbol, "U")
+            symbol = change_last_letter(symbol, "U")
 
-        if alarmType == "Risk":
-            self.model_.set_data(symbol=symbol, asset_name=asset, alarm=alarm)
-        elif alarmType == "Equity":
+        if alarm_type == "Risk":
+            self.model_.set_data(symbol=symbol, asset_name=asset, risk_alarm=alarm)
+        elif alarm_type == "Equity":
             self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
-        elif alarmType == "Position":
+        elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
         self.upload_data()
+        self.alarm_if()
 
     @staticmethod
     def list_to_label(list):
         returnStr = ""
         for dict in list:
             position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
-            returnStr += "(" + dict["asset"] + ") " + "RISK" + ": " + utils.auto_format(dict["risk"]) + "/" + utils.auto_format(dict["alarm"]) + "\n"
-            returnStr += "EQUITY: " + utils.auto_format(dict["equity"]) + "/" + utils.auto_format(dict["equity_alarm"]) + "\n"
-            returnStr += "LONG/SHORT: " + utils.auto_format(dict["long_pos"]) + "/" + utils.auto_format(dict["short_pos"]) + "\n"
-            returnStr += "POSITION: " + utils.auto_format(position) + "/" + utils.auto_format(dict["position_alarm"]) + "\n"
+            returnStr += "(" + dict["asset"] + ") "
+            if dict["risk"] > 0:
+                returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start) + "/" + fmt(dict["risk"]) + "/" + fmt(dict["risk_alarm"].end) + "\n"
+            if dict["equity"] > 0:
+                returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start) + "/" + fmt(dict["equity"]) + "/" + fmt(dict["equity_alarm"].end) + "\n"
+            if dict["long_pos"] != 0 and dict["short_pos"] != 0:
+                returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "\n"
+                returnStr += "POSITION: " + fmt(dict["position_alarm"].start) + "/" + fmt(position) + "/" + fmt(dict["position_alarm"].end) + "\n"
 
         return returnStr[:-1]
 
@@ -148,8 +137,8 @@ class Controller(object):
         for handler in handlers.values():
             risk_data = handler.get_account_status()
             for key, value in risk_data.items():
-                symbol = self.substring_before(key, "_")
-                asset_name = self.substring_after(key, "_")
+                symbol = substring_before(key, "_")
+                asset_name = substring_after(key, "_")
                 risk, equity, withdrawable, = value.get("risk"), value.get("equity"), value.get("withdrawable")
                 long_pos, short_pos = value.get("long_pos"), value.get("short_pos")
                 self.model_.set_data(symbol=symbol, asset_name=asset_name,
@@ -183,27 +172,27 @@ class Controller(object):
             symbol_list = self.model_.get_data(symbol=symbol)
             for dict in symbol_list:
                 if dict["risk"] != 0:
-                    if dict["risk"] > dict["alarm"] and "Bi" in symbol:
+                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "Bi" in symbol:
                         alarm.activate(message=f"Binance Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
-                    if dict["risk"] < dict["alarm"] and "Ok" in symbol:
+                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "Ok" in symbol:
                         alarm.activate(message=f"OKX Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
-                    if dict["risk"] > dict["alarm"] and "By" in symbol:
+                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "By" in symbol:
                         alarm.activate(message=f"Byb Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
 
-                    if dict["equity"] < dict["equity_alarm"] and "Bi" in symbol:
+                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "Bi" in symbol:
                         alarm.activate(message=f"Binance Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
-                    if dict["equity"] < dict["equity_alarm"] and "Ok" in symbol:
+                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "Ok" in symbol:
                         alarm.activate(message=f"OKX Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
-                    if dict["equity"] < dict["equity_alarm"] and "By" in symbol:
+                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "By" in symbol:
                         alarm.activate(message=f"Byb Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
 
                     position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
-                        if position > dict["position_alarm"] and "Bi" in symbol:
+                        if dict["position_alarm"].out_of_range(position) and "Bi" in symbol:
                             alarm.activate(message=f"Binance Sub{symbol[2]} position alarm {dict['asset']}: {position}")
-                        if position > dict["position_alarm"] and "Ok" in symbol:
+                        if dict["position_alarm"].out_of_range(position) and "Ok" in symbol:
                             alarm.activate(message=f"OKX Sub{symbol[2]} position alarm {dict['asset']}: {position}")
-                        if position > dict["position_alarm"] and "By" in symbol:
+                        if dict["position_alarm"].out_of_range(position) and "By" in symbol:
                             alarm.activate(message=f"Byb Sub{symbol[2]} position alarm {dict['asset']}: {position}")
 
     def loop(self):
