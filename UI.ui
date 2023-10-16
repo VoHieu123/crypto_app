@@ -351,7 +351,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QGridLayout" name="gridLayout" rowstretch="2,4,4">
+           <layout class="QGridLayout" name="gridLayout" rowstretch="2,4,4" columnstretch="3,5,5,5,5">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -411,7 +411,7 @@
                <item>
                 <widget class="QLabel" name="label_5">
                  <property name="text">
-                  <string>Coin-M (Risk/Alarm)</string>
+                  <string>Coin-M</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -433,7 +433,7 @@
                <item>
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Binance -&gt; Bybit -&gt; OKX</string>
+                  <string>BIN &gt; BYB &gt; OKX</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -455,7 +455,7 @@
                <item>
                 <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>USD-M (Risk/Alarm)</string>
+                  <string>USD-M</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -728,7 +728,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QGridLayout" name="gridLayout_4">
+           <layout class="QGridLayout" name="gridLayout_4" columnstretch="3,5,5,5,5" columnminimumwidth="0,0,0,0,0">
             <property name="bottomMargin">
              <number>0</number>
             </property>
@@ -769,7 +769,7 @@
                <item>
                 <widget class="QLabel" name="label_31">
                  <property name="text">
-                  <string>Unified (Risk/Alarm)</string>
+                  <string>Unified</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -888,7 +888,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QGridLayout" name="gridLayout_3">
+           <layout class="QGridLayout" name="gridLayout_3" columnstretch="3,5,5,5,5">
             <property name="bottomMargin">
              <number>0</number>
             </property>
@@ -951,7 +951,7 @@
                <item>
                 <widget class="QLabel" name="label_19">
                  <property name="text">
-                  <string>USD-M (Risk/Alarm)</string>
+                  <string>USD-M</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -1017,7 +1017,7 @@
                <item>
                 <widget class="QLabel" name="label_16">
                  <property name="text">
-                  <string>Coin-M (Risk/Alarm)</string>
+                  <string>Coin-M</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>

@@ -78,9 +78,12 @@ class BinanceHandler:
                                                          "long_pos": long_pos, "short_pos": short_pos}
 
         for i, sub_account in enumerate(self.subaccount_list):
-            long_pos, short_pos = self.get_sub_usdm_open_positions(sub_account)
             usdm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
+                if usd["asset"] == "USDT":
+                    long_pos, short_pos = self.get_sub_usdm_open_positions(sub_account)
+                else:
+                    long_pos, short_pos = 0, 0
                 if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
                     status_list[f"Bi{i + 1}U_{usd['asset']}"] = {"risk": (usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
                                                                  "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],

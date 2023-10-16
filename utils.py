@@ -17,18 +17,21 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 def auto_format(number):
-    return str(round(number, 6))
-    # num_str = str(number)
 
-    # if '.' in num_str:
-    #     integer_part, decimal_part = num_str.split('.')
-    #     integer_len = len(integer_part)
-    # else:
-    #     integer_len = 0
+    if (abs(number) < 0.0001):
+        return str(round(number, 6))
 
-    # if (abs(number) > 0.0001):
-    #     returnStr = str(round(number, 5 - integer_len if integer_len < 3 else None))
-    # else:
-    #     returnStr = str(round(number, 5))
+    num_str = str(number)
 
-    # return returnStr
+    if '.' not in num_str:
+        return str(number)
+    else:
+        integer_part, decimal_part = num_str.split('.')
+        integer_len = len(integer_part)
+
+        decimal_presicion = 5 - integer_len if integer_len < 3 else 1
+
+        integer_str = '{:,}'.format(int(integer_part))
+        returnStr = f'{integer_str}.{decimal_part[0:decimal_presicion]}'
+
+    return returnStr

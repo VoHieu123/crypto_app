@@ -129,7 +129,7 @@ class Controller(object):
         returnStr = ""
         for dict in list:
             position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
-            returnStr += dict["asset"] + ": " + utils.auto_format(dict["risk"]) + "/" + utils.auto_format(dict["alarm"]) + "\n"
+            returnStr += "(" + dict["asset"] + ") " + "RISK" + ": " + utils.auto_format(dict["risk"]) + "/" + utils.auto_format(dict["alarm"]) + "\n"
             returnStr += "EQUITY: " + utils.auto_format(dict["equity"]) + "/" + utils.auto_format(dict["equity_alarm"]) + "\n"
             returnStr += "LONG/SHORT: " + utils.auto_format(dict["long_pos"]) + "/" + utils.auto_format(dict["short_pos"]) + "\n"
             returnStr += "POSITION: " + utils.auto_format(position) + "/" + utils.auto_format(dict["position_alarm"]) + "\n"
