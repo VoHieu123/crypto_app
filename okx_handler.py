@@ -6,18 +6,45 @@ class OKXHandler:
         self.okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.subaccount_list = []
+        self.sub_api_list = []
         data = self.send_http_request(func=self.okx_subaccount_api.get_subaccount_list)
         for subaccount_data in data:
             self.subaccount_list.append(subaccount_data["subAcct"])
+            # Todo: self.sub_api_list.append()
 
         self.subaccount_list = sorted(self.subaccount_list, key=lambda x: x[-1])
 
-    # Todo: Later
-    def get_usdm_open_positions(self, sub_account):
-        pass
+    def get_open_positions(self, sub_account=None):
 
-    def get_coinm_open_positions(self, sub_account):
-        pass
+        def handle_position(positions):
+            long_pos_usdm, short_pos__usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
+            for position in positions:
+                if "USDT" in position["instId"] or "USDC" in position["instId"]:
+                    if position["pos"] > 0:
+                        long_pos_usdm += position["notionalUsd"]
+                    else:
+                        short_pos__usdm += position["notionalUsd"]
+                else:
+                    if position["pos"] > 0:
+                        long_pos_coinm += position["notionalUsd"]
+                    else:
+                        short_pos_coinm += position["notionalUsd"]
+
+            return long_pos_usdm, short_pos__usdm, long_pos_coinm, short_pos_coinm
+
+        positions = 0, 0, 0, 0
+        if sub_account != None:
+            if sub_account in self.subaccount_list:
+                # Todo: later
+                sub_account_index = self.subaccount_list.index(sub_account)
+                sub_api = Account.AccountAPI(api_key=const.TA_OKX_API_KEY_SUB1, flag="0", debug=False,
+                                            api_secret_key=const.TA_OKX_SECRET_KEY_SUB1,
+                                            passphrase=const.TA_OKX_PASSPHRASE_SUB1)
+                positions = self.send_http_request(func=sub_api.get_positions)
+        else:
+            positions = self.send_http_request(func=self.okx_account_api.get_positions)
+
+        return handle_position(positions)
 
     @staticmethod
     def send_http_request(func, **kwargs):
@@ -33,30 +60,35 @@ class OKXHandler:
             except Exception as error:
                 if retries_count < const.MAX_RETRIES:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
-                    utils.synchronize_time()
                     time.sleep(const.SLEEP_TIME)
                 else:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
                     exit()
 
     def get_account_status(self) -> bool:
-        # Format: {"symbol_1": [risk_1, equity_1, withdrawable_1], "symbol_2": [risk_2, equity_2, withdrawable_2]}
         status_list = {}
         usd_margin_list = ["USDT", "USDC"]
+
+        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_open_positions()
 
         account_data = self.send_http_request(func=self.okx_account_api.get_account_balance)
         for asset in account_data[0]["details"]:
             if asset['ccy'] in usd_margin_list:
-                status_list[f"OkMU_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
+                status_list[f"OkMU_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
+                                                       "long_pos": long_pos_usdm, "short_pos": short_pos_usdm}
             else:
-                status_list[f"OkMC_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
+                status_list[f"OkMC_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
+                                                       "long_pos": long_pos_coinm, "short_pos": short_pos_coinm}
 
         for i, sub_acct in enumerate(self.subaccount_list):
             sub_data = self.send_http_request(func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
             for asset in sub_data[0]["details"]:
+                long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_open_positions(sub_acct)
                 if asset['ccy'] in usd_margin_list:
-                    status_list[f"Ok{i + 1}U_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"], asset["availBal"]]
+                    status_list[f"Ok{i + 1}U_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
+                                                                 "long_pos": long_pos_usdm, "short_pos": short_pos_usdm}
                 else:
-                    status_list[f"Ok{i + 1}C_{asset['ccy']}"] = [asset["mgnRatio"], asset["eq"],  asset["availBal"]]
+                    status_list[f"Ok{i + 1}C_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
+                                                                 "long_pos": long_pos_coinm, "short_pos": short_pos_coinm}
 
         return status_list

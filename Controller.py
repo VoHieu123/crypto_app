@@ -145,8 +145,9 @@ class Controller(object):
             for key, value in risk_data.items():
                 symbol = self.substring_before(key, "_")
                 asset_name = self.substring_after(key, "_")
-                risk, equity, withdrawable = value[0], value[1], value[2]
-                self.model_.set_data(symbol=symbol, asset_name=asset_name, risk=risk, equity=equity, withdrawable=withdrawable)
+                risk, equity, withdrawable = value.get("risk"), value.get("equity"), value.get("withdrawable")
+                self.model_.set_data(symbol=symbol, asset_name=asset_name,
+                                     risk=risk, equity=equity, withdrawable=withdrawable)
 
 
     def upload_data(self):

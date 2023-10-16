@@ -5,7 +5,6 @@ import Controller
 import threading
 import Model
 import const
-import utils
 import binance_handler,bybit_handler, okx_handler
 
 exitFlag = False
@@ -19,14 +18,18 @@ class MyWindow(QMainWindow):
         exitFlag = True
 
 
-def backgroundTask(controller):
-    while not exitFlag:
-        controller.loop()
+def backgroundTask(controller, app):
+    try:
+        while not exitFlag:
+            controller.loop()
+    except SystemExit as e:
+        app.exit()
+    except Exception as e:
+        pass
 
 def main():
-    utils.synchronize_time()
-    choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
-    # choice = 1
+    # choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
+    choice = 1
 
     while True:
         if choice == 1:
@@ -52,14 +55,14 @@ def main():
 
     BybitHandler = bybit_handler.BybitHandler(apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
     BinanceHandler = binance_handler.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
-    OKXHandler = okx_handler.OKXHandler(chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
+    OKXHandler = okx_handler.OKXHandler(apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
     app = QApplication(sys.argv)
     MainWindow = MyWindow()
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
     model = Model.Model()
     controller = Controller.Controller(ui, model, binanceHandler=BinanceHandler, okxHandler=OKXHandler, bybitHandler=BybitHandler)
-    backgroudThread = threading.Thread(target=backgroundTask, args=(controller, ))
+    backgroudThread = threading.Thread(target=backgroundTask, args=(controller, app))
     backgroudThread.start()
     MainWindow.show()
     sys.exit(app.exec())

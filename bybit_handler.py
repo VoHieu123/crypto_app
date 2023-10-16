@@ -52,7 +52,6 @@ class BybitHandler:
             except Exception as error:
                 if retries_count < const.MAX_RETRIES:
                     alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
-                    utils.synchronize_time()
                     time.sleep(const.SLEEP_TIME)
                 else:
                     alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
@@ -60,9 +59,8 @@ class BybitHandler:
 
     # Todo: Haven't done it for subaccount
     def get_account_status(self) -> {}:
-        # Format: {"symbol": [risk, equity, withdrawable]}
         status_list = {}
-        mmr, equity, withdrawable, position = None, None, None, None
+        mmr, equity, withdrawable, long_pos, short_pos = None, None, None, None, None
         data = self.send_http_request(func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
             mmr = item["accountMMRate"]
@@ -77,8 +75,10 @@ class BybitHandler:
 
         long_pos, short_pos = self.get_open_position()
 
-        if all(item is not None for item in [mmr, equity, withdrawable]):
-            status_list[f"ByMU_USDT"] = [mmr, equity, withdrawable, long_pos, short_pos]
+        # Todo: Currently assuming USDT is the only currency
+        if all(item is not None for item in [mmr, equity, withdrawable, long_pos, short_pos]):
+            status_list[f"ByMU_USDT"] = {"risk": mmr, "equity": equity, "withdrawable": withdrawable,
+                                         "long_pos": long_pos, "short_pos": short_pos}
 
         return status_list
 

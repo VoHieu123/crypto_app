@@ -12,7 +12,7 @@ class BinanceHandler:
         for sub_account in subaccount_data["subAccounts"]:
             self.subaccount_list.append(sub_account["email"])
 
-    def get_usdm_open_positions(self, sub_account):
+    def get_sub_usdm_open_positions(self, sub_account):
         long_pos, short_pos = 0, 0
         usd = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=1)
         usd = pd.DataFrame(usd["futurePositionRiskVOS"])
@@ -26,10 +26,10 @@ class BinanceHandler:
 
         return long_pos, short_pos
 
-    def get_coinm_open_positions(self, sub_account):
+    def get_sub_coinm_open_positions(self, sub_account):
         long_pos, short_pos = 0, 0
         coin = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=2)
-        coin = pd.DataFrame(coin["deliveryPositionRiskVos"])
+        coin = pd.DataFrame(coin["deliveryPositionRiskVOS"])
         coin = coin[coin["positionAmount"] != 0]
         if not coin.empty:
             coin = coin[["positionAmount", "markPrice"]]
@@ -50,40 +50,50 @@ class BinanceHandler:
             except Exception as error:
                 if retries_count < const.MAX_RETRIES:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
-                    utils.synchronize_time()
                     time.sleep(const.SLEEP_TIME)
                 else:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
                     exit()
 
     def get_account_status(self) -> {}:
-        # Format: {"symbol_1": [risk_1, equity_1, withdrawable_1], "symbol_2": [risk_2, equity_2, withdrawable_2]}
         status_list = {}
         mainAccountData = self.send_http_request(func=self.binance_client.futures_account)
+        long_pos, short_pos = 0, 0
+        # Todo: Later
+        for position in mainAccountData["positions"]:
+            if position["initialMargin"] == 0:
+                continue
+
         for asset in mainAccountData["assets"]:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
-                # Todo: This should be a dictionary
-                status_list[f"BiMU_{asset['asset']}"] = [(asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
-                                                        asset["marginBalance"], asset["maxWithdrawAmount"]]
+                status_list[f"BiMU_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
+                                                         "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
+                                                         "long_pos": long_pos, "short_pos": short_pos}
 
         mainAccountData = self.send_http_request(func=self.binance_client.futures_coin_account)
         for asset in mainAccountData["assets"]:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
-                status_list[f"BiMU_{asset['asset']}"] = [(asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
-                                                       asset["marginBalance"], asset["maxWithdrawAmount"]]
+                status_list[f"BiMC_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
+                                                         "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
+                                                         "long_pos": long_pos, "short_pos": short_pos}
 
         for i, sub_account in enumerate(self.subaccount_list):
+            long_pos, short_pos = self.get_sub_usdm_open_positions(sub_account)
             usdm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
                 if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
-                    status_list[f"Bi{i + 1}U_{usd['asset']}"] = [(usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
-                                                               usd["marginBalance"], usd["maxWithdrawAmount"]]
+                    status_list[f"Bi{i + 1}U_{usd['asset']}"] = {"risk": (usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
+                                                                 "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],
+                                                                 "long_pos": long_pos, "short_pos": short_pos}
 
+            long_pos, short_pos = self.get_sub_coinm_open_positions(sub_account)
             coinm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
             for coin in coinm["deliveryAccountResp"]["assets"]:
                 if coin["maintenanceMargin"] != 0 or coin["maxWithdrawAmount"] != 0:
-                    status_list[f"Bi{i + 1}C_{coin['asset']}"] = [(coin["maintenanceMargin"]/coin["marginBalance"]) if coin["marginBalance"] != 0 else 0,
-                                                                coin["marginBalance"], coin["maxWithdrawAmount"]]
+                    status_list[f"Bi{i + 1}C_{coin['asset']}"] = {"risk": (coin["maintenanceMargin"]/coin["marginBalance"]) if coin["marginBalance"] != 0 else 0,
+                                                                 "equity": coin["marginBalance"], "withdrawable": coin["maxWithdrawAmount"],
+                                                                 "long_pos": long_pos, "short_pos": short_pos}
+
         return status_list
 
     def transfer_money(self, to, amount, subAccount=None):

@@ -2,9 +2,9 @@ BIN_DEFAULT_ALARM = [0.5, 0.6]
 OKX_DEFAULT_ALARM = [3, 3]
 BYBIT_DEFAULT_ALARM = 0.5
 
-BIN_DEFAULT_EQUITY_ALARM = [100, 50]
-OKX_DEFAULT_EQUITY_ALARM = [100, 50]
-BYBIT_DEFAULT_EQUITY_ALARM = 100
+BIN_DEFAULT_EQUITY_ALARM = [8000, 600]
+OKX_DEFAULT_EQUITY_ALARM = [8000, 600]
+BYBIT_DEFAULT_EQUITY_ALARM = 8000
 
 class Asset:
     def __init__(self, symbol, asset_name, risk=-1, alarm=-1, equity=-1, equity_alarm=-1, withdrawable=-1):

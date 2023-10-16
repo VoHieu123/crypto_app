@@ -19,23 +19,3 @@ def convert_to_float(data):
 
 def generate_uuid():
     return str(uuid.uuid4())
-
-def synchronize_time():
-    ntp_server = 'pool.ntp.org'  # Use a reliable NTP server
-
-    client = ntplib.NTPClient()
-
-    retries_count = -1
-    while True:
-        retries_count += 1
-        try:
-            response = client.request(ntp_server)
-            # Update the system time with the NTP server's time
-            datetime.utcfromtimestamp(response.tx_time).replace(microsecond=0)
-            break
-        except Exception as error:
-            if retries_count < const.MAX_RETRIES:
-                print(error)
-                time.sleep(const.SLEEP_TIME)
-            else:
-                exit(error)
