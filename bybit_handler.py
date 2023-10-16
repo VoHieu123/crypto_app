@@ -36,7 +36,7 @@ class BybitHandler:
         long_pos = data[data["side"] == "Buy"]["positionValue"].sum()
         short_pos = data[data["side"] == "Sell"]["positionValue"].sum()
 
-        return long_pos, short_pos
+        return long_pos, short_pos*(-1)
 
     @staticmethod
     def send_http_request(func, **kwargs):
@@ -54,7 +54,7 @@ class BybitHandler:
                     alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
+                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     exit()
 
     # Todo: Haven't done it for subaccount

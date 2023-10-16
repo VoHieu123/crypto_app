@@ -30,7 +30,7 @@ class OKXHandler:
                     else:
                         short_pos_coinm += position["notionalUsd"]
 
-            return long_pos_usdm, short_pos__usdm, long_pos_coinm, short_pos_coinm
+            return long_pos_usdm, short_pos__usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
         positions = 0, 0, 0, 0
         if sub_account != None:
@@ -62,7 +62,7 @@ class OKXHandler:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
+                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     exit()
 
     def get_account_status(self) -> bool:

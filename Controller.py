@@ -1,4 +1,4 @@
-from collections import ChainMap
+import utils
 import time, alarm
 
 class Controller(object):
@@ -120,14 +120,19 @@ class Controller(object):
             self.model_.set_data(symbol=symbol, asset_name=asset, alarm=alarm)
         elif alarmType == "Equity":
             self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
+        elif alarmType == "Position":
+            self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
         self.upload_data()
 
     @staticmethod
     def list_to_label(list):
         returnStr = ""
         for dict in list:
-            returnStr += dict["asset"] + ": " + str(round(dict["risk"], 4)) + "/" + str(round(dict["alarm"], 4)) + "\n"
-            returnStr += "EQUITY: " + str(round(dict["equity"], 4)) + "/" + str(round(dict["equity_alarm"], 4)) + "\n"
+            position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
+            returnStr += dict["asset"] + ": " + utils.auto_format(dict["risk"]) + "/" + utils.auto_format(dict["alarm"]) + "\n"
+            returnStr += "EQUITY: " + utils.auto_format(dict["equity"]) + "/" + utils.auto_format(dict["equity_alarm"]) + "\n"
+            returnStr += "LONG/SHORT: " + utils.auto_format(dict["long_pos"]) + "/" + utils.auto_format(dict["short_pos"]) + "\n"
+            returnStr += "POSITION: " + utils.auto_format(position) + "/" + utils.auto_format(dict["position_alarm"]) + "\n"
 
         return returnStr[:-1]
 
@@ -145,9 +150,11 @@ class Controller(object):
             for key, value in risk_data.items():
                 symbol = self.substring_before(key, "_")
                 asset_name = self.substring_after(key, "_")
-                risk, equity, withdrawable = value.get("risk"), value.get("equity"), value.get("withdrawable")
+                risk, equity, withdrawable, = value.get("risk"), value.get("equity"), value.get("withdrawable")
+                long_pos, short_pos = value.get("long_pos"), value.get("short_pos")
                 self.model_.set_data(symbol=symbol, asset_name=asset_name,
-                                     risk=risk, equity=equity, withdrawable=withdrawable)
+                                     risk=risk, equity=equity, withdrawable=withdrawable,
+                                     long_pos=long_pos, short_pos=short_pos)
 
 
     def upload_data(self):
@@ -168,27 +175,36 @@ class Controller(object):
 
     def upload_risk(self):
         for symbol, qtLabel in self.labelDict.items():
-            currentListOfDict = self.model_.get_data(symbol=symbol)
-            qtLabel.setText(self.list_to_label(currentListOfDict))
+            symbol_list = self.model_.get_data(symbol=symbol)
+            qtLabel.setText(self.list_to_label(symbol_list))
 
     def alarm_if(self):
         for symbol in self.labelDict.keys():
-            currentListOfDict = self.model_.get_data(symbol=symbol)
-            for dict in currentListOfDict:
+            symbol_list = self.model_.get_data(symbol=symbol)
+            for dict in symbol_list:
                 if dict["risk"] != 0:
                     if dict["risk"] > dict["alarm"] and "Bi" in symbol:
-                        alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                        alarm.activate(message=f"Binance Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
                     if dict["risk"] < dict["alarm"] and "Ok" in symbol:
-                        alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                        alarm.activate(message=f"OKX Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
                     if dict["risk"] > dict["alarm"] and "By" in symbol:
-                        alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['risk']}")
+                        alarm.activate(message=f"Byb Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
 
                     if dict["equity"] < dict["equity_alarm"] and "Bi" in symbol:
-                        alarm.activate(message=f"Binance Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                        alarm.activate(message=f"Binance Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
                     if dict["equity"] < dict["equity_alarm"] and "Ok" in symbol:
-                        alarm.activate(message=f"OKX Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                        alarm.activate(message=f"OKX Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
                     if dict["equity"] < dict["equity_alarm"] and "By" in symbol:
-                        alarm.activate(message=f"Byb Sub{symbol[2]} {dict['asset']}: {dict['equity']}")
+                        alarm.activate(message=f"Byb Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
+
+                    position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
+                    if position != 0:
+                        if position > dict["position_alarm"] and "Bi" in symbol:
+                            alarm.activate(message=f"Binance Sub{symbol[2]} position alarm {dict['asset']}: {position}")
+                        if position > dict["position_alarm"] and "Ok" in symbol:
+                            alarm.activate(message=f"OKX Sub{symbol[2]} position alarm {dict['asset']}: {position}")
+                        if position > dict["position_alarm"] and "By" in symbol:
+                            alarm.activate(message=f"Byb Sub{symbol[2]} position alarm {dict['asset']}: {position}")
 
     def loop(self):
         # Todo: Stop this when transferring

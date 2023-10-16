@@ -25,7 +25,7 @@ def sound_thread():
     time.sleep(10)
     sound.stop()
 
-def activate(message, alarm):
+def activate(message, alarm=True):
     if alarm == True:
         thread = threading.Thread(target=sound_thread)
         thread.start()

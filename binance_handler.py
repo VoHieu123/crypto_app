@@ -52,7 +52,7 @@ class BinanceHandler:
                     alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=True)
+                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     exit()
 
     def get_account_status(self) -> {}:
