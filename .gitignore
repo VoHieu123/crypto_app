@@ -5,3 +5,4 @@ __pycache__
 *.spec
 _*
 *.exe
+computer_specific.py
