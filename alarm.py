@@ -1,6 +1,7 @@
 import telegram_send
 import pygame.mixer
 import threading, time
+import computer_specific
 
 # from telegram import Bot, InputFile
 
@@ -17,10 +18,9 @@ import threading, time
 # with open(sound_file_path, 'rb') as sound_file:
 #     bot.send_audio(chat_id=chat_id, audio=InputFile(sound_file))
 
-
 def sound_thread():
     pygame.mixer.init()
-    sound = pygame.mixer.Sound('Reveille.wav')
+    sound = pygame.mixer.Sound(computer_specific.SOUND_PATH)
     sound.play()
     time.sleep(10)
     sound.stop()

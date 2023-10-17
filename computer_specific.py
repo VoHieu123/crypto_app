@@ -1,0 +1,1 @@
+SOUND_PATH = "C:/Users/user.000/Desktop/CryptoApp/Reveille.wav"
