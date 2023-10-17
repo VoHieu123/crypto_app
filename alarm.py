@@ -20,6 +20,7 @@ import computer_specific
 
 def sound_thread():
     pygame.mixer.init()
+    # Todo: Check if the file path exists
     sound = pygame.mixer.Sound(computer_specific.SOUND_PATH)
     sound.play()
     time.sleep(10)
