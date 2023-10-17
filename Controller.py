@@ -2,14 +2,16 @@ from utils import auto_format as fmt
 from utils import substring_after, substring_before, change_last_letter
 from utils import Range
 import time, alarm
+from utils import Communication
 
-class Controller(object):
+class Controller():
     labelDict = {}
     save_frequency_m = 10
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, uiMainWindow, model, binanceHandler, okxHandler, bybitHandler):
+    def __init__ (self, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
+        self.communication_ = communication
         self.BinanceHandler_ = binanceHandler
         self.BybitHandler_ = bybitHandler
         self.OKXHandler_ = okxHandler
@@ -116,14 +118,14 @@ class Controller(object):
             position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
             returnStr += "(" + dict["asset"] + ") "
             if dict["risk"] > 0:
-                returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start) + "/" + fmt(dict["risk"]) + "/" + fmt(dict["risk_alarm"].end) + "\n"
+                returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"]) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
             if dict["equity"] > 0:
-                returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start) + "/" + fmt(dict["equity"]) + "/" + fmt(dict["equity_alarm"].end) + "\n"
+                returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"]) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
             if dict["long_pos"] != 0 and dict["short_pos"] != 0:
-                returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "\n"
-                returnStr += "POSITION: " + fmt(dict["position_alarm"].start) + "/" + fmt(position) + "/" + fmt(dict["position_alarm"].end) + "\n"
+                returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "<br>"
+                returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red") + "/" + fmt(position) + "/" + fmt(dict["position_alarm"].end, color="blue") + "<br>"
 
-        return returnStr[:-1]
+        return returnStr[:-4]
 
     def update_data(self):
         # Define a list or dictionary of handlers
@@ -195,13 +197,17 @@ class Controller(object):
                         if dict["position_alarm"].out_of_range(position) and "By" in symbol:
                             alarm.activate(message=f"Byb Sub{symbol[2]} position alarm {dict['asset']}: {position}")
 
-    def loop(self):
+    def data_loop(self):
         # Todo: Stop this when transferring
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):
             pass
 
         if int(self.currentTime/self.retrieveFrequencyS) < int(time.time()/self.retrieveFrequencyS):
             self.update_data()
-            self.upload_data()
             self.alarm_if()
+            self.communication_.ui_signal.emit()
             self.currentTime = time.time()
+
+    # This loop must not modify the Model object
+    def ui_update(self):
+        self.upload_data()

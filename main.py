@@ -6,22 +6,32 @@ import threading
 import Model
 import const
 import binance_handler,bybit_handler, okx_handler
+from utils import Communication
 
 exitFlag = False
 
 class MyWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, communication: Communication):
         super().__init__()
+        self.communication_ = communication
+        self.communication_.ui_signal.connect(self.update_ui)
+        self.controller_ = None
+
+    def set_up(self, controller):
+        self.controller_ = controller
+
+    def update_ui(self):
+        if self.controller_ is not None:
+            self.controller_.ui_update()
 
     def closeEvent(self, event):
         global exitFlag
         exitFlag = True
 
-
-def backgroundTask(controller, app):
+def data_task(controller, app):
     try:
         while not exitFlag:
-            controller.loop()
+            controller.data_loop()
     except SystemExit as e:
         app.exit()
     except Exception as e:
@@ -56,14 +66,18 @@ def main():
     BinanceHandler = binance_handler.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
     OKXHandler = okx_handler.OKXHandler(apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
     app = QApplication(sys.argv)
-    MainWindow = MyWindow()
+    communication = Communication()
+    MainWindow = MyWindow(communication)
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
     model = Model.Model()
-    controller = Controller.Controller(ui, model, binanceHandler=BinanceHandler, okxHandler=OKXHandler, bybitHandler=BybitHandler)
-    backgroudThread = threading.Thread(target=backgroundTask, args=(controller, app))
-    backgroudThread.start()
+    controller = Controller.Controller(ui, model, communication, binanceHandler=BinanceHandler,
+                                       okxHandler=OKXHandler, bybitHandler=BybitHandler)
+    MainWindow.set_up(controller=controller)
+
     MainWindow.show()
+    data_thread = threading.Thread(target=data_task, args=(controller, app))
+    data_thread.start()
     sys.exit(app.exec())
 
 if __name__ == '__main__':

@@ -1,4 +1,8 @@
 import uuid
+from PyQt6.QtCore import pyqtSignal, QObject
+
+class Communication(QObject):
+    ui_signal = pyqtSignal()
 
 class Range:
     def __init__(self, start: float, end: float):
@@ -45,15 +49,20 @@ def convert_to_float(data):
 def generate_uuid():
     return str(uuid.uuid4())
 
-def auto_format(number):
+def auto_format(number, color=None):
 
     number = float(number)
 
     if (abs(number) < 0.0001):
-        return str(round(number, 5))
+        return f"<font color='{color}'>{str(round(number, 5))}</font>" if color else str(round(number, 5))
 
     integer_part, decimal_part = (str(number)).split('.')
     integer_len = len(integer_part)
     integer_str = '{:,}'.format(int(integer_part))
 
-    return integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
+    returnStr = integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
+
+    if color:
+        returnStr = f"<font color='{color}'>{returnStr}</font>"
+
+    return returnStr
