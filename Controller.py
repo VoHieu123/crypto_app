@@ -10,7 +10,8 @@ class Controller():
     retrieveFrequencyS = 20
     currentTime = 0
 
-    def __init__ (self, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
+    def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
+        self.identity_ = identity
         self.communication_ = communication
         self.BinanceHandler_ = binanceHandler
         self.BybitHandler_ = bybitHandler
@@ -174,28 +175,30 @@ class Controller():
             symbol_list = self.model_.get_data(symbol=symbol)
             for dict in symbol_list:
                 if dict["risk"] != 0:
-                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "Bi" in symbol:
-                        alarm.activate(message=f"Binance Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
-                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "Ok" in symbol:
-                        alarm.activate(message=f"OKX Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
-                    if dict["risk_alarm"].out_of_range(dict["risk"]) and "By" in symbol:
-                        alarm.activate(message=f"Byb Sub{symbol[2]} risk alarm {dict['asset']}: {dict['risk']}")
+                    send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
+                    if "Bi" in symbol:
+                        send_symbol += "Binance "
+                    elif "Ok" in symbol:
+                        send_symbol += "OKX "
+                    elif "By" in symbol: 
+                        send_symbol += "Bybit "
+                    
+                    if symbol[2] != "M":
+                        send_symbol += f"Sub{symbol[2]} "
+                    else:
+                        send_symbol += "Main "
+    
+                    if dict["risk_alarm"].out_of_range(dict["risk"]):
+                        alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}")
 
-                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "Bi" in symbol:
-                        alarm.activate(message=f"Binance Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
-                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "Ok" in symbol:
-                        alarm.activate(message=f"OKX Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
-                    if dict["equity_alarm"].out_of_range(dict["equity"]) and "By" in symbol:
-                        alarm.activate(message=f"Byb Sub{symbol[2]} equity alarm {dict['asset']}: {dict['equity']}")
+                    if dict["equity_alarm"].out_of_range(dict["equity"]):
+                        alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}")
 
                     position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
-                        if dict["position_alarm"].out_of_range(position) and "Bi" in symbol:
-                            alarm.activate(message=f"Binance Sub{symbol[2]} position alarm {dict['asset']}: {position}")
-                        if dict["position_alarm"].out_of_range(position) and "Ok" in symbol:
-                            alarm.activate(message=f"OKX Sub{symbol[2]} position alarm {dict['asset']}: {position}")
-                        if dict["position_alarm"].out_of_range(position) and "By" in symbol:
-                            alarm.activate(message=f"Byb Sub{symbol[2]} position alarm {dict['asset']}: {position}")
+                        if dict["position_alarm"].out_of_range(position):
+                            alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}")
+
 
     def data_loop(self):
         # Todo: Stop this when transferring

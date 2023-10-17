@@ -42,6 +42,7 @@ def main():
 
     while True:
         if choice == 1:
+            identity = "TA"
             chosenBinAPIKey = const.TA_BIN_API_KEY
             chosenBinSecretKey = const.TA_BIN_SECRET_KEY
             chosenOKXAPIKey = const.TA_OKX_API_KEY
@@ -51,6 +52,7 @@ def main():
             chosenBybSecretKey = const.TA_BYB_SECRET_KEY
             break
         elif choice == 2:
+            identity = "ST"
             chosenBinAPIKey = const.ST_BIN_API_KEY
             chosenBinSecretKey = const.ST_BIN_SECRET_KEY
             chosenOKXAPIKey = const.ST_OKX_API_KEY
@@ -71,7 +73,7 @@ def main():
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
     model = Model.Model()
-    controller = Controller.Controller(ui, model, communication, binanceHandler=BinanceHandler,
+    controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
 
