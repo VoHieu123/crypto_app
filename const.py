@@ -23,5 +23,3 @@ MAX_RETRIES = 5
 
 # Todo: Status to show that the programm is running
 # Todo: Pernamently store the data
-# Todo: Main account Binance positions
-# Todo: Highlight what is alarming

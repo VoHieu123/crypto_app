@@ -110,23 +110,6 @@ class Controller():
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
         self.upload_data()
-        self.alarm_if()
-
-    @staticmethod
-    def list_to_label(list):
-        returnStr = ""
-        for dict in list:
-            position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
-            returnStr += "(" + dict["asset"] + ") "
-            if dict["risk"] > 0:
-                returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"]) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
-            if dict["equity"] > 0:
-                returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"]) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
-            if dict["long_pos"] != 0 and dict["short_pos"] != 0:
-                returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "<br>"
-                returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red") + "/" + fmt(position) + "/" + fmt(dict["position_alarm"].end, color="blue") + "<br>"
-
-        return returnStr[:-4]
 
     def update_data(self):
         # Define a list or dictionary of handlers
@@ -166,39 +149,54 @@ class Controller():
         self.uiMainWindow_.label_withdrawable.setText("0")
 
     def upload_risk(self):
-        for symbol, qtLabel in self.labelDict.items():
-            symbol_list = self.model_.get_data(symbol=symbol)
-            qtLabel.setText(self.list_to_label(symbol_list))
-
-    def alarm_if(self):
-        for symbol in self.labelDict.keys():
-            symbol_list = self.model_.get_data(symbol=symbol)
-            for dict in symbol_list:
+        def signal_user(list):
+            returnStr = ""
+            for dict in list:
+                position_color = None
+                risk_color = None
+                equity_color = None
                 if dict["risk"] != 0:
                     send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
                     if "Bi" in symbol:
                         send_symbol += "Binance "
                     elif "Ok" in symbol:
                         send_symbol += "OKX "
-                    elif "By" in symbol: 
+                    elif "By" in symbol:
                         send_symbol += "Bybit "
-                    
+
                     if symbol[2] != "M":
                         send_symbol += f"Sub{symbol[2]} "
                     else:
                         send_symbol += "Main "
-    
+
                     if dict["risk_alarm"].out_of_range(dict["risk"]):
+                        risk_color = "yellow"
                         alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}")
 
                     if dict["equity_alarm"].out_of_range(dict["equity"]):
+                        equity_color = "yellow"
                         alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}")
 
                     position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
                         if dict["position_alarm"].out_of_range(position):
+                            position_color = "yellow"
                             alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}")
 
+                position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
+                returnStr += "(" + dict["asset"] + ") "
+                if dict["risk"] > 0:
+                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"], color=risk_color) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
+                if dict["equity"] > 0:
+                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"], color=equity_color) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                if dict["long_pos"] != 0 and dict["short_pos"] != 0:
+                    returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "<br>"
+                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red") + "/" + fmt(position, color=position_color) + "/" + fmt(dict["position_alarm"].end, color="blue") + "<br>"
+
+            return returnStr[:-4]
+        for symbol, qtLabel in self.labelDict.items():
+            symbol_list = self.model_.get_data(symbol=symbol)
+            qtLabel.setText(signal_user(symbol_list))
 
     def data_loop(self):
         # Todo: Stop this when transferring
@@ -207,7 +205,6 @@ class Controller():
 
         if int(self.currentTime/self.retrieveFrequencyS) < int(time.time()/self.retrieveFrequencyS):
             self.update_data()
-            self.alarm_if()
             self.communication_.ui_signal.emit()
             self.currentTime = time.time()
 

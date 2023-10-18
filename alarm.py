@@ -34,4 +34,3 @@ def activate(message, alarm=True):
             telegram_send.send(messages=[message])
         except:
             pass
-    print(message)
