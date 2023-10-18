@@ -59,10 +59,9 @@ class BinanceHandler:
         status_list = {}
         mainAccountData = self.send_http_request(func=self.binance_client.futures_account)
         long_pos, short_pos = 0, 0
-        # Todo: Later
-        for position in mainAccountData["positions"]:
-            if position["initialMargin"] == 0:
-                continue
+        usd = pd.DataFrame(mainAccountData["positions"])
+        long_pos = usd[usd["positionAmt"] > 0]["notional"].sum()
+        short_pos = usd[usd["positionAmt"] < 0]["notional"].sum()
 
         for asset in mainAccountData["assets"]:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
@@ -71,6 +70,10 @@ class BinanceHandler:
                                                          "long_pos": long_pos, "short_pos": short_pos}
 
         mainAccountData = self.send_http_request(func=self.binance_client.futures_coin_account)
+        long_pos, short_pos = 0, 0
+        coin = pd.DataFrame(mainAccountData["positions"])
+        long_pos = coin[coin["positionAmt"] > 0]["notionalValue"].sum()
+        short_pos = coin[coin["positionAmt"] < 0]["notionalValue"].sum()
         for asset in mainAccountData["assets"]:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
                 status_list[f"BiMC_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
