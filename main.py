@@ -76,6 +76,7 @@ def main():
     controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
+    MainWindow.setWindowTitle("Tuan Anh" if choice else "Steve")
 
     MainWindow.show()
     data_thread = threading.Thread(target=data_task, args=(controller, app))
