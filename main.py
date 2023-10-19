@@ -7,6 +7,7 @@ import Model
 import const
 import binance_handler,bybit_handler, okx_handler
 from utils import Communication
+import alarm
 
 exitFlag = False
 
@@ -32,10 +33,10 @@ def data_task(controller, app):
     try:
         while not exitFlag:
             controller.data_loop()
-    except SystemExit as e:
-        app.exit()
     except Exception as e:
-        pass
+        print(e)
+        alarm.activate(message=f"Program exit abruptly with message {e}!", alarm=False)
+        app.exit()
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
@@ -76,7 +77,7 @@ def main():
     controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
-    MainWindow.setWindowTitle("Tuan Anh" if choice else "Steve")
+    MainWindow.setWindowTitle("Steve" if choice else "Tuan Anh")
 
     MainWindow.show()
     data_thread = threading.Thread(target=data_task, args=(controller, app))

@@ -20,8 +20,7 @@ import computer_specific
 
 def sound_thread():
     pygame.mixer.init()
-    # Todo: Check if the file path exists
-    sound = pygame.mixer.Sound(computer_specific.SOUND_PATH)
+    sound = pygame.mixer.Sound("Reveille.wav")
     sound.play()
     time.sleep(10)
     sound.stop()
@@ -30,7 +29,7 @@ def activate(message, alarm=True):
     if alarm == True:
         thread = threading.Thread(target=sound_thread)
         thread.start()
-        try:
-            telegram_send.send(messages=[message])
-        except:
-            pass
+    try:
+        telegram_send.send(messages=[message])
+    except:
+        pass

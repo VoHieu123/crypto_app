@@ -21,5 +21,4 @@ ST_BYB_SECRET_KEY = "ufxUxocJNmVx5CBUiqLtk4tDrBwhwr0UFhGI"
 SLEEP_TIME = 1
 MAX_RETRIES = 5
 
-# Todo: Status to show that the programm is running
 # Todo: Pernamently store the data

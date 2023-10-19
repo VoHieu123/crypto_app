@@ -3,14 +3,16 @@ from utils import substring_after, substring_before, change_last_letter
 from utils import Range
 import time, alarm
 from utils import Communication
+from PyQt6.QtGui import QMovie
+from PyQt6.QtCore import QTimer
 
 class Controller():
-    labelDict = {}
-    save_frequency_m = 10
-    retrieveFrequencyS = 20
-    currentTime = 0
-
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
+        self.labelDict = {}
+        self.save_frequency_m = 10
+        self.retrieve_frequency = 20
+        self.keep_alive_frequency = 200
+        self.currentTime = 0
         self.identity_ = identity
         self.communication_ = communication
         self.BinanceHandler_ = binanceHandler
@@ -20,6 +22,16 @@ class Controller():
         self.model_ = model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
+
+        self.current_frame = 0
+        self.movie = QMovie("infinity.gif")
+
+        self.uiMainWindow_.label_infinity.setFixedSize(50, 20)
+        self.uiMainWindow_.label_infinity.setMovie(self.movie)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.check_keep_alive)
+        self.timer.start(self.keep_alive_frequency)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1", "2", "3"]
@@ -38,6 +50,12 @@ class Controller():
                     label_key = f"{market}{subaccount}U"
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
+
+    def check_keep_alive(self):
+        self.current_frame += 1
+        if self.current_frame >= self.movie.frameCount():
+            self.current_frame = 0
+        self.movie.jumpToFrame(self.current_frame)
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
@@ -109,7 +127,8 @@ class Controller():
             self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
-        self.upload_data()
+        self.upload_withdrawable()
+        self.upload_risk()
 
     def update_data(self):
         # Define a list or dictionary of handlers
@@ -132,10 +151,6 @@ class Controller():
                                      long_pos=long_pos, short_pos=short_pos)
 
 
-    def upload_data(self):
-        self.upload_withdrawable()
-        self.upload_risk()
-
     def upload_withdrawable(self):
         marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
         accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
@@ -152,9 +167,9 @@ class Controller():
         def signal_user(list):
             returnStr = ""
             for dict in list:
-                position_color = None
-                risk_color = None
-                equity_color = None
+                position_background_color = None
+                risk_background_color = None
+                equity_background_color = None
                 if dict["risk"] != 0:
                     send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
                     if "Bi" in symbol:
@@ -170,28 +185,28 @@ class Controller():
                         send_symbol += "Main "
 
                     if dict["risk_alarm"].out_of_range(dict["risk"]):
-                        risk_color = "yellow"
+                        risk_background_color = "yellow"
                         alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}")
 
                     if dict["equity_alarm"].out_of_range(dict["equity"]):
-                        equity_color = "yellow"
+                        equity_background_color = "yellow"
                         alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}")
 
                     position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
                         if dict["position_alarm"].out_of_range(position):
-                            position_color = "yellow"
+                            position_background_color = "yellow"
                             alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}")
 
                 position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                 returnStr += "(" + dict["asset"] + ") "
                 if dict["risk"] > 0:
-                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"], color=risk_color) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
+                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"], background_color=risk_background_color) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
                 if dict["equity"] > 0:
-                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"], color=equity_color) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"], background_color=equity_background_color) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if dict["long_pos"] != 0 and dict["short_pos"] != 0:
                     returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "<br>"
-                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red") + "/" + fmt(position, color=position_color) + "/" + fmt(dict["position_alarm"].end, color="blue") + "<br>"
+                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red") + "/" + fmt(position, background_color=position_background_color) + "/" + fmt(dict["position_alarm"].end, color="blue") + "<br>"
 
             return returnStr[:-4]
         for symbol, qtLabel in self.labelDict.items():
@@ -203,11 +218,12 @@ class Controller():
         if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):
             pass
 
-        if int(self.currentTime/self.retrieveFrequencyS) < int(time.time()/self.retrieveFrequencyS):
+        if int(self.currentTime/self.retrieve_frequency) < int(time.time()/self.retrieve_frequency):
             self.update_data()
             self.communication_.ui_signal.emit()
             self.currentTime = time.time()
 
-    # This loop must not modify the Model object
+    # These loops must not modify the Model objects
     def ui_update(self):
-        self.upload_data()
+        self.upload_withdrawable()
+        self.upload_risk()

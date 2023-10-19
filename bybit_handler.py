@@ -50,11 +50,12 @@ class BybitHandler:
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
+                message = f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}."
                 if retries_count < const.MAX_RETRIES:
-                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
+                    print(message)
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
+                    alarm.activate(message=message)
                     exit()
 
     # Todo: Haven't done it for subaccount

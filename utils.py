@@ -49,12 +49,13 @@ def convert_to_float(data):
 def generate_uuid():
     return str(uuid.uuid4())
 
-def auto_format(number, color=None):
+def auto_format(number, color="black", background_color=None):
 
     number = float(number)
 
     if (abs(number) < 0.0001):
-        return f"<font color='{color}'>{str(round(number, 5))}</font>" if color else str(round(number, 5))
+        return f"<span style='background-color: {background_color}; color: {color};'>{str(round(number, 5))}</span>" \
+               if background_color else f"<span style='color: {color};'>{str(round(number, 5))}</span>"
 
     integer_part, decimal_part = (str(number)).split('.')
     integer_len = len(integer_part)
@@ -62,7 +63,7 @@ def auto_format(number, color=None):
 
     returnStr = integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
 
-    if color:
-        returnStr = f"<font color='{color}'>{returnStr}</font>"
+    returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
+                f"<span style='color: {color};'>{returnStr}</span>"
 
     return returnStr

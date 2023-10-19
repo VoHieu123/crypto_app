@@ -48,11 +48,12 @@ class BinanceHandler:
             try:
                 return utils.convert_to_float(func(**kwargs))
             except Exception as error:
+                message = f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}."
                 if retries_count < const.MAX_RETRIES:
-                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.", alarm=False)
+                    print(message)
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
+                    alarm.activate(message=message)
                     exit()
 
     def get_account_status(self) -> {}:
