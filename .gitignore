@@ -6,3 +6,4 @@ __pycache__
 _*
 *.exe
 computer_specific.py
+*.pkl

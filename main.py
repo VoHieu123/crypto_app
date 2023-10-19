@@ -73,11 +73,11 @@ def main():
     MainWindow = MyWindow(communication)
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
-    model = Model.Model()
+    model = Model.Model(identity)
     controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
-    MainWindow.setWindowTitle("Steve" if choice else "Tuan Anh")
+    MainWindow.setWindowTitle("Steve" if choice == 2 else "Tuan Anh")
 
     MainWindow.show()
     data_thread = threading.Thread(target=data_task, args=(controller, app))

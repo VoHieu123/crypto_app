@@ -73,9 +73,13 @@ class Asset:
         self.position_alarm = position_alarm if position_alarm != Range(-1, -1) else self.position_alarm
 
 class Model(object):
-    def __init__(self):
-        if os.path.exists(cs.PICKLE_PATH):
-            with open(cs.PICKLE_PATH, "rb") as pkl_file:
+    def __init__(self, identity):
+        if identity == "TA":
+            self.pickle_path = cs.PICKLE_PATH[:-4] + "_ta" + ".pkl"
+        elif identity == "ST":
+            self.pickle_path = cs.PICKLE_PATH[:-4] + "_st" + ".pkl"
+        if os.path.exists(self.pickle_path):
+            with open(self.pickle_path, "rb") as pkl_file:
                 self.risk_data = pickle.load(pkl_file)
         else:
             self.risk_data = {
@@ -85,7 +89,7 @@ class Model(object):
             }
 
     def save_data(self):
-        with open(cs.PICKLE_PATH, "wb") as pkl_file:
+        with open(self.pickle_path, "wb") as pkl_file:
             pickle.dump(self.risk_data, pkl_file)
 
     def set_data(self, symbol, asset_name,
