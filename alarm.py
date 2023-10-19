@@ -20,7 +20,7 @@ import computer_specific
 
 def sound_thread():
     pygame.mixer.init()
-    sound = pygame.mixer.Sound("Reveille.wav")
+    sound = pygame.mixer.Sound(computer_specific.SOUND_PATH)
     sound.play()
     time.sleep(10)
     sound.stop()

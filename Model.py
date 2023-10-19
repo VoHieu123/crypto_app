@@ -1,4 +1,5 @@
 from utils import Range
+import pickle, os
 
 BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
 OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
@@ -50,13 +51,6 @@ class Asset:
             elif "By" in symbol:
                 self.risk_alarm = BYBIT_DEFAULT_RISK_ALARM
 
-        # attributes = dir(self)
-
-        # # Filter and print the attributes (excluding methods and built-in attributes)
-        # for attribute in attributes:
-        #     if not callable(getattr(self, attribute)) and not attribute.startswith("__"):
-        #         print(f"{attribute}: {getattr(self, attribute)}")
-
     def is_valid_instance(self) -> bool:
         if any(attribute == -1 for attribute in [self.risk, self.equity, self.long_pos, self.short_pos]):
             return False
@@ -79,11 +73,19 @@ class Asset:
 
 class Model(object):
     def __init__(self):
-        self.risk_data = {
-            "BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
-            "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
-            "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
-        }
+        if os.path.exists("settings.pkl"):
+            with open("settings.pkl", "rb") as pkl_file:
+                self.risk_data = pickle.load(pkl_file)
+        else:
+            self.risk_data = {
+                "BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
+                "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
+                "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
+            }
+
+    def save_data(self):
+        with open("settings.pkl", "wb") as pkl_file:
+            pickle.dump(self.risk_data, pkl_file)
 
     def set_data(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
@@ -98,6 +100,7 @@ class Model(object):
                     asset.set_position_alarm(position_alarm)
                     asset.set_long_pos(long_pos)
                     asset.set_short_pos(short_pos)
+                    self.save_data()
                     return True
 
             if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos]):
@@ -105,6 +108,7 @@ class Model(object):
                                 equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
                                 long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm)
                 self.risk_data[symbol].append(new_asset)
+                self.save_data()
                 return True
 
         return False

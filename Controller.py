@@ -11,7 +11,7 @@ class Controller():
         self.labelDict = {}
         self.save_frequency_m = 10
         self.retrieve_frequency = 20
-        self.keep_alive_frequency = 200
+        self.keep_alive_frequency = 500
         self.currentTime = 0
         self.identity_ = identity
         self.communication_ = communication
@@ -90,8 +90,10 @@ class Controller():
             pass
 
     def change_threshold_button_clicked(self):
+        alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
+        self.uiMainWindow_.lineEdit_threshold.setText("")
+        self.uiMainWindow_.lineEdit_assetName.setText("")
         try:
-            alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
             alarm = Range(float(substring_before(alarm, "-")), float(substring_after(alarm, "-")))
         except:
             return
@@ -100,9 +102,6 @@ class Controller():
         coin_type = self.uiMainWindow_.comboBox_coinType.currentText()
         alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
         sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
-
-        self.uiMainWindow_.lineEdit_threshold.setText("")
-        self.uiMainWindow_.lineEdit_assetName.setText("")
 
         symbol_mappings = {
             "Binance": "Bi",
