@@ -142,7 +142,6 @@ class Controller():
                                      risk=risk, equity=equity, withdrawable=withdrawable,
                                      long_pos=long_pos, short_pos=short_pos)
 
-
     def upload_withdrawable(self):
         marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
         accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()

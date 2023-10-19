@@ -30,11 +30,11 @@ class BybitHandler:
             if len(currentData["list"]) == 0:
                 break
             currentData = pd.DataFrame(currentData["list"])
-            currentData = currentData[["positionValue", "side"]]
+            currentData = currentData[["avgPrice", "side", "size"]]
             data = pd.concat([data, currentData])
 
-        long_pos = data[data["side"] == "Buy"]["positionValue"].sum()
-        short_pos = data[data["side"] == "Sell"]["positionValue"].sum()
+        long_pos = (data[data["side"] == "Buy"]["avgPrice"]*data[data["side"] == "Buy"]["size"]).sum()
+        short_pos = (data[data["side"] == "Sell"]["avgPrice"]*data[data["side"] == "Sell"]["size"]).sum()
 
         return long_pos, short_pos*(-1)
 
