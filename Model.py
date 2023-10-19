@@ -1,5 +1,6 @@
 from utils import Range
 import pickle, os
+import computer_specific as cs
 
 BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
 OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
@@ -73,8 +74,8 @@ class Asset:
 
 class Model(object):
     def __init__(self):
-        if os.path.exists("settings.pkl"):
-            with open("settings.pkl", "rb") as pkl_file:
+        if os.path.exists(cs.PICKLE_PATH):
+            with open(cs.PICKLE_PATH, "rb") as pkl_file:
                 self.risk_data = pickle.load(pkl_file)
         else:
             self.risk_data = {
@@ -84,7 +85,7 @@ class Model(object):
             }
 
     def save_data(self):
-        with open("settings.pkl", "wb") as pkl_file:
+        with open(cs.PICKLE_PATH, "wb") as pkl_file:
             pickle.dump(self.risk_data, pkl_file)
 
     def set_data(self, symbol, asset_name,

@@ -5,6 +5,7 @@ import time, alarm
 from utils import Communication
 from PyQt6.QtGui import QMovie
 from PyQt6.QtCore import QTimer
+import computer_specific as cs
 
 class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
@@ -24,7 +25,7 @@ class Controller():
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
 
         self.current_frame = 0
-        self.movie = QMovie("infinity.gif")
+        self.movie = QMovie(cs.GIF_PATH)
 
         self.uiMainWindow_.label_infinity.setFixedSize(50, 20)
         self.uiMainWindow_.label_infinity.setMovie(self.movie)
