@@ -3,17 +3,16 @@ from utils import substring_after, substring_before, change_last_letter
 from utils import Range
 import time, alarm
 from utils import Communication
-from PyQt6.QtGui import QMovie
 from PyQt6.QtCore import QTimer
-import computer_specific as cs
+import datetime
 
 class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
         self.labelDict = {}
         self.save_frequency_m = 10
         self.retrieve_frequency = 20
-        self.keep_alive_frequency = 1000
-        self.currentTime = 0
+        self.keep_alive_frequency = 5000
+        self.currentTime = time.time()
         self.identity_ = identity
         self.communication_ = communication
         self.BinanceHandler_ = binanceHandler
@@ -24,14 +23,10 @@ class Controller():
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
 
-        # self.current_frame = 0
-        # self.movie = QMovie(cs.GIF_PATH)
-
-        # self.uiMainWindow_.label_infinity.setFixedSize(50, 20)
-        # self.uiMainWindow_.label_infinity.setMovie(self.movie)
+        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")
 
         self.timer = QTimer()
-        self.timer.timeout.connect(self.check_keep_alive)
+        self.timer.timeout.connect(self.keep_alive)
         self.timer.start(self.keep_alive_frequency)
 
         markets = ["Bi", "Ok", "By"]
@@ -52,11 +47,8 @@ class Controller():
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
 
-    def check_keep_alive(self):
-        # self.current_frame += 1
-        # if self.current_frame >= self.movie.frameCount():
-        #     self.current_frame = 0
-        # self.movie.jumpToFrame(self.current_frame)
+    def keep_alive(self):
+        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
