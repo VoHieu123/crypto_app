@@ -12,7 +12,7 @@ class Controller():
         self.labelDict = {}
         self.save_frequency_m = 10
         self.retrieve_frequency = 20
-        self.keep_alive_frequency = 500
+        self.keep_alive_frequency = 1000
         self.currentTime = 0
         self.identity_ = identity
         self.communication_ = communication
@@ -24,11 +24,11 @@ class Controller():
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
 
-        self.current_frame = 0
-        self.movie = QMovie(cs.GIF_PATH)
+        # self.current_frame = 0
+        # self.movie = QMovie(cs.GIF_PATH)
 
-        self.uiMainWindow_.label_infinity.setFixedSize(50, 20)
-        self.uiMainWindow_.label_infinity.setMovie(self.movie)
+        # self.uiMainWindow_.label_infinity.setFixedSize(50, 20)
+        # self.uiMainWindow_.label_infinity.setMovie(self.movie)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_keep_alive)
@@ -53,10 +53,10 @@ class Controller():
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
 
     def check_keep_alive(self):
-        self.current_frame += 1
-        if self.current_frame >= self.movie.frameCount():
-            self.current_frame = 0
-        self.movie.jumpToFrame(self.current_frame)
+        # self.current_frame += 1
+        # if self.current_frame >= self.movie.frameCount():
+        #     self.current_frame = 0
+        # self.movie.jumpToFrame(self.current_frame)
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
@@ -92,13 +92,13 @@ class Controller():
 
     def change_threshold_button_clicked(self):
         alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
+        asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
         self.uiMainWindow_.lineEdit_threshold.setText("")
         self.uiMainWindow_.lineEdit_assetName.setText("")
         try:
             alarm = Range(float(substring_before(alarm, "-")), float(substring_after(alarm, "-")))
         except:
             return
-        asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
         market = self.uiMainWindow_.comboBox_market.currentText()
         coin_type = self.uiMainWindow_.comboBox_coinType.currentText()
         alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
