@@ -1,8 +1,10 @@
 from okx import SubAccount, Account
 import time, alarm, const, utils
+import pandas as pd
 
 class OKXHandler:
-    def __init__(self, apiKey, secretKey, password):
+    def __init__(self, model, apiKey, secretKey, password):
+        self.model_ = model
         self.okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.subaccount_list = []
@@ -17,20 +19,23 @@ class OKXHandler:
     def get_open_positions(self, sub_account=None):
 
         def handle_position(positions):
-            long_pos_usdm, short_pos__usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
+            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
             for position in positions:
-                if "USDT" in position["instId"] or "USDC" in position["instId"]:
+                if "USDT" in position["instId"]:
+                    coin = position["instId"].replace("-", "")
+                    coin = coin.replace("SWAP", "")
+                    price = self.model_.get_universal_mark_price(coin)
                     if position["pos"] > 0:
-                        long_pos_usdm += position["notionalUsd"]
-                    else:
-                        short_pos__usdm += position["notionalUsd"]
-                else:
-                    if position["pos"] > 0:
-                        long_pos_coinm += position["notionalUsd"]
-                    else:
-                        short_pos_coinm += position["notionalUsd"]
+                        long_pos_usdm += position["notionalCcy"]*price
+                    elif position["pos"] < 0:
+                        short_pos_usdm += position["notionalCcy"]*price
+                # else:
+                #     if position["pos"] > 0:
+                #         long_pos_coinm += position["notionalUsd"]
+                #     else:
+                #         short_pos_coinm += position["notionalUsd"]
 
-            return long_pos_usdm, short_pos__usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
+            return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
         positions = 0, 0, 0, 0
         if sub_account != None:
@@ -40,11 +45,11 @@ class OKXHandler:
                 sub_api = Account.AccountAPI(api_key=const.TA_OKX_API_KEY_SUB1, flag="0", debug=False,
                                             api_secret_key=const.TA_OKX_SECRET_KEY_SUB1,
                                             passphrase=const.TA_OKX_PASSPHRASE_SUB1)
-                positions = self.send_http_request(func=sub_api.get_positions)
+                positions = self.send_http_request(func=sub_api.get_position_risk, instType="SWAP")
         else:
-            positions = self.send_http_request(func=self.okx_account_api.get_positions)
+            positions = self.send_http_request(func=self.okx_account_api.get_position_risk, instType="SWAP")
 
-        return handle_position(positions)
+        return handle_position(positions[0]["posData"])
 
     @staticmethod
     def send_http_request(func, **kwargs):

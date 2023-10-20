@@ -3,7 +3,8 @@ import time, alarm, const, utils
 import pandas as pd
 
 class BinanceHandler:
-    def __init__(self, apiKey, secretKey):
+    def __init__(self, model, apiKey, secretKey):
+        self.model_ = model
         self.binance_client = Client(api_key=apiKey, api_secret=secretKey)
         self.subaccount_list = []
         subaccount_data = self.send_http_request(func=self.binance_client.get_sub_account_list)
@@ -103,6 +104,15 @@ class BinanceHandler:
 
         return status_list
 
+    def get_universal_mark_prices(self):
+        usdm = self.send_http_request(func=self.binance_client.futures_mark_price)
+        usdm = pd.DataFrame(usdm)
+        usdm = usdm[["markPrice", "symbol"]]
+        # coinm = self.send_http_request(func=self.binance_client.futures_coin_mark_price)
+        # coinm = pd.DataFrame(coinm)
+        # coinm = coinm[["markPrice", "symbol"]]
+        return usdm
+
     def transfer_money(self, to, amount, subAccount=None):
         # coins_data = self.binance_client.get_all_coins_info()
         # for coin_data in coins_data:
@@ -120,5 +130,5 @@ class BinanceHandler:
         pass
 
 
-# handler = BinanceHandler(apiKey="P9Z0jtiqSvr9cKMnsgHmjpBNpOZAaoAs7O5uVu0ScscQHReq9fMxsb1gTxtm2AsY", secretKey="bOVuS18DGDXlHpw94EwqnV2cH6EDC8v3v96LykSFLzUpsLRXHpWmhgrEQvBWFGzy")
-# handler.transfer_money(to="Bybit", amount=4488.71)
+# handler = BinanceHandler(apiKey="Yw5nx7bXvx9Wz9w9uIt1v93QD5NWw18Hu19m6WW6qRbca7VVxgdOMJkN0UId7Ixn", secretKey="4mwZ8eVpMBfOn2nw69BRqsdNfdCMauPJnUvCfIEZwIKKe89cAxcO48CR31pdicqy")
+# handler.get_universal_mark_prices()

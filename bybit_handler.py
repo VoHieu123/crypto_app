@@ -4,7 +4,8 @@ import utils
 import pandas as pd
 
 class BybitHandler:
-    def __init__(self, apiKey, secretKey):
+    def __init__(self, model, apiKey, secretKey):
+        self.model_ = model
         self.session = HTTP(
             testnet=False,
             api_key=apiKey,
@@ -30,11 +31,16 @@ class BybitHandler:
             if len(currentData["list"]) == 0:
                 break
             currentData = pd.DataFrame(currentData["list"])
-            currentData = currentData[["markPrice", "side", "size"]]
+            currentData = currentData[["symbol", "markPrice", "side", "size"]]
             data = pd.concat([data, currentData])
-
-        long_pos = (data[data["side"] == "Buy"]["markPrice"]*data[data["side"] == "Buy"]["size"]).sum()
-        short_pos = (data[data["side"] == "Sell"]["markPrice"]*data[data["side"] == "Sell"]["size"]).sum()
+        long_pos, short_pos = 0, 0
+        for _, row in data.iterrows():
+            coin = row["symbol"]
+            price = self.model_.get_universal_mark_price(coin)
+            if row["side"] == "Buy":
+                long_pos += row["size"]*price
+            elif row["side"] == "Sell":
+                short_pos += row["size"]*price
 
         return long_pos, short_pos*(-1)
 

@@ -130,6 +130,8 @@ class Controller():
             "Bybit": self.BybitHandler_
         }
 
+        self.model_.set_universal_mark_prices(self.BinanceHandler_.get_universal_mark_prices())
+
         # Iterate through the handlers and set data in the model
         for handler in handlers.values():
             risk_data = handler.get_account_status()

@@ -65,15 +65,15 @@ def main():
         else:
             choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
-    BybitHandler = bybit_handler.BybitHandler(apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
-    BinanceHandler = binance_handler.BinanceHandler(apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
-    OKXHandler = okx_handler.OKXHandler(apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
+    model = Model.Model(identity)
+    BybitHandler = bybit_handler.BybitHandler(model=model, apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
+    BinanceHandler = binance_handler.BinanceHandler(model=model, apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
+    OKXHandler = okx_handler.OKXHandler(model=model, apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
     app = QApplication(sys.argv)
     communication = Communication()
     MainWindow = MyWindow(communication)
     ui = Ui_MainWindow.Ui_MainWindow()
     ui.setupUi(MainWindow)
-    model = Model.Model(identity)
     controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)

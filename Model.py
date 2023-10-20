@@ -1,6 +1,7 @@
 from utils import Range
 import pickle, os
 import computer_specific as cs
+import pandas as pd
 
 BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
 OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
@@ -87,6 +88,27 @@ class Model(object):
                 "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
                 "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
             }
+
+        self.universal_mark_prices = {}
+
+    def set_universal_mark_prices(self, usdm, coinm=None):
+        self.universal_mark_prices["usdm"] = usdm
+        # self.universal_mark_prices["coinm"] = coinm
+
+    def get_universal_mark_price(self, coin, type="usdm"):
+        price = 0
+
+        if type == "usdm":
+            df = self.universal_mark_prices[type]
+            if coin in df['symbol'].values:
+                price = df[df['symbol'] == coin]['markPrice'].values[0]
+            else:
+                print("No")
+        # Todo: Later
+        # elif type == "coinm":
+        #     price = self.universal_mark_prices[type]
+
+        return price
 
     def save_data(self):
         with open(self.pickle_path, "wb") as pkl_file:
