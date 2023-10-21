@@ -1,7 +1,6 @@
 from utils import Range
 import pickle, os
 import computer_specific as cs
-import pandas as pd
 
 BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
 OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
@@ -19,6 +18,7 @@ class Asset:
     def __init__(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
                  withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1)):
+
         self.name = asset_name
         self.risk = risk
         self.equity = equity
@@ -28,6 +28,7 @@ class Asset:
         self.long_pos = long_pos
         self.short_pos = short_pos
         self.position_alarm = position_alarm
+        self.symbol = symbol
 
         if position_alarm == Range(-1, -1):
             if "Bi" in symbol:
@@ -57,6 +58,12 @@ class Asset:
         if any(attribute == -1 for attribute in [self.risk, self.equity, self.long_pos, self.short_pos]):
             return False
         return True
+
+    def get_settings_copy(self):
+        return Asset(symbol=self.symbol, asset_name=self.name, risk=-1,
+                     risk_alarm=self.risk_alarm,
+                     equity=-1, equity_alarm=self.equity_alarm, withdrawable=-1,
+                     long_pos=-1, short_pos=-1, position_alarm=self.position_alarm)
 
     def set_long_pos(self, long_pos):
         self.long_pos = long_pos if long_pos != -1 else self.long_pos
@@ -110,9 +117,17 @@ class Model(object):
 
         return price
 
-    def save_data(self):
+    def __del__(self):
+        data = {"BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
+                "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
+                "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []}
+
+        for symbol, list in self.risk_data.items():
+            for asset in list:
+                data[symbol].append(asset.get_settings_copy())
+
         with open(self.pickle_path, "wb") as pkl_file:
-            pickle.dump(self.risk_data, pkl_file)
+            pickle.dump(data, pkl_file)
 
     def set_data(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
@@ -127,7 +142,6 @@ class Model(object):
                     asset.set_position_alarm(position_alarm)
                     asset.set_long_pos(long_pos)
                     asset.set_short_pos(short_pos)
-                    self.save_data()
                     return True
 
             if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos]):
@@ -135,7 +149,6 @@ class Model(object):
                                 equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
                                 long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm)
                 self.risk_data[symbol].append(new_asset)
-                self.save_data()
                 return True
 
         return False
