@@ -51,6 +51,7 @@ class BinanceHandler:
             except Exception as error:
                 message = f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}."
                 if retries_count < const.MAX_RETRIES:
+                    utils.resynch()
                     print(message)
                     time.sleep(const.SLEEP_TIME)
                 else:

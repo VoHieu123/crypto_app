@@ -1,6 +1,5 @@
 from okx import SubAccount, Account
 import time, alarm, const, utils
-import pandas as pd
 
 class OKXHandler:
     def __init__(self, model, apiKey, secretKey, password):
@@ -17,7 +16,6 @@ class OKXHandler:
         self.subaccount_list = sorted(self.subaccount_list, key=lambda x: x[-1])
 
     def get_open_positions(self, sub_account=None):
-
         def handle_position(positions):
             long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
             for position in positions:
@@ -65,6 +63,7 @@ class OKXHandler:
             except Exception as error:
                 message = f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}."
                 if retries_count < const.MAX_RETRIES:
+                    utils.resynch()
                     print(message)
                     time.sleep(const.SLEEP_TIME)
                 else:

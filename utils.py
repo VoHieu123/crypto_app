@@ -1,5 +1,13 @@
 import uuid
 from PyQt6.QtCore import pyqtSignal, QObject
+import subprocess
+
+def resynch():
+    try:
+        subprocess.run(['w32tm', '/resync'], check=True)
+    except:
+        print("Synchronize failed!")
+        pass
 
 class Communication(QObject):
     ui_signal = pyqtSignal()
