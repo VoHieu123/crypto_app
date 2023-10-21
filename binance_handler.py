@@ -130,6 +130,5 @@ class BinanceHandler:
         #     pass
         pass
 
-
 # handler = BinanceHandler(apiKey="Yw5nx7bXvx9Wz9w9uIt1v93QD5NWw18Hu19m6WW6qRbca7VVxgdOMJkN0UId7Ixn", secretKey="4mwZ8eVpMBfOn2nw69BRqsdNfdCMauPJnUvCfIEZwIKKe89cAxcO48CR31pdicqy")
 # handler.get_universal_mark_prices()

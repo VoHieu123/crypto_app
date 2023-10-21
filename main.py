@@ -5,7 +5,7 @@ import Controller
 import threading
 import Model
 import const
-import binance_handler,bybit_handler, okx_handler
+import binance_handler, bybit_handler, okx_handler
 from utils import Communication
 import alarm
 
