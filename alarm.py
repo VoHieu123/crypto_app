@@ -25,7 +25,7 @@ def sound_thread():
     time.sleep(10)
     sound.stop()
 
-def activate(message, alarm=True):
+def activate(message, alarm=False):
     if alarm == True:
         # Todo: So many threads?
         thread = threading.Thread(target=sound_thread)

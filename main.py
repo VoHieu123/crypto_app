@@ -35,7 +35,7 @@ def data_task(controller, app):
             controller.data_loop()
     except Exception as e:
         print(e)
-        alarm.activate(message=f"Program exit abruptly with message {e}!", alarm=False)
+        alarm.activate(message=f"Program exit abruptly with message {e}!")
         app.exit()
 
 def main():

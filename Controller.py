@@ -179,17 +179,17 @@ class Controller():
 
                     if dict["risk_alarm"].out_of_range(dict["risk"]):
                         risk_background_color = "yellow"
-                        alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}")
+                        alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}", alarm=True)
 
                     if dict["equity_alarm"].out_of_range(dict["equity"]):
                         equity_background_color = "yellow"
-                        alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}")
+                        alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}", alarm=True)
 
                     position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
                         if dict["position_alarm"].out_of_range(position):
                             position_background_color = "yellow"
-                            alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}")
+                            alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}", alarm=True)
 
                 position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                 returnStr += "(" + dict["asset"] + ") "
