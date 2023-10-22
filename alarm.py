@@ -2,21 +2,12 @@ import telegram_send
 import pygame.mixer
 import threading, time
 import computer_specific
+from telegram import Bot
 
-# from telegram import Bot, InputFile
+# Todo: Evan user id
 
-# # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-# bot = Bot(token='6157706837:AAH8uz73oVZlU6dmDuHPVovX_EL8fUHL-J8')
-
-# # Replace 'chat_id' with the chat ID of the user or group you want to send the sound to
-# chat_id = '42652'
-
-# # Replace 'your_sound_file.ogg' with the path to your sound file
-# sound_file_path = 'Reveille.wav'
-
-# # Send the sound file
-# with open(sound_file_path, 'rb') as sound_file:
-#     bot.send_audio(chat_id=chat_id, audio=InputFile(sound_file))
+bot = Bot(token='6157706837:AAH8uz73oVZlU6dmDuHPVovX_EL8fUHL-J8')
+user_ids = ["6228170215"]
 
 def sound_thread():
     pygame.mixer.init()
@@ -31,6 +22,7 @@ def activate(message, alarm=False):
         thread = threading.Thread(target=sound_thread)
         thread.start()
     try:
-        telegram_send.send(messages=[message])
+        for user_id in user_ids:
+            bot.send_message(chat_id=user_id, text=message)
     except:
         pass
