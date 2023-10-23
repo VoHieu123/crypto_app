@@ -1,6 +1,5 @@
 from pybit.unified_trading import HTTP
-import const, time, alarm
-import utils
+import const, time, utils
 import pandas as pd
 
 class BybitHandler:
@@ -56,14 +55,12 @@ class BybitHandler:
                 else:
                     raise Exception(message=f"Received corrupted data: {data['msg']}.")
             except Exception as error:
-                message = f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}."
+                utils.resynch()
                 if retries_count < const.MAX_RETRIES:
-                    utils.resynch()
-                    print(message)
+                    print(f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=message)
-                    exit()
+                    exit(error)
 
     # Todo: Haven't done it for subaccount
     def get_account_status(self) -> {}:

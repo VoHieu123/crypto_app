@@ -3,16 +3,15 @@ from utils import substring_after, substring_before, change_last_letter
 from utils import Range
 import time, alarm
 from utils import Communication
-from PyQt6.QtCore import QTimer
 import datetime
 
 class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
         self.labelDict = {}
         self.save_frequency_m = 10
-        self.retrieve_frequency = 20
+        self.retrieve_frequency = 30
         self.keep_alive_frequency = 5000
-        self.currentTime = time.time()
+        self.current_time = 0
         self.identity_ = identity
         self.communication_ = communication
         self.BinanceHandler_ = binanceHandler
@@ -22,12 +21,6 @@ class Controller():
         self.model_ = model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
-
-        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.keep_alive)
-        self.timer.start(self.keep_alive_frequency)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1", "2", "3"]
@@ -46,9 +39,6 @@ class Controller():
                     label_key = f"{market}{subaccount}U"
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
-
-    def keep_alive(self):
-        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
@@ -208,15 +198,13 @@ class Controller():
 
     def data_loop(self):
         # Todo: Stop this when transferring
-        if int(self.currentTime/(self.save_frequency_m*60)) < int(time.time()/(self.save_frequency_m*60)):
-            pass
-
-        if int(self.currentTime/self.retrieve_frequency) < int(time.time()/self.retrieve_frequency):
+        if int(self.current_time/self.retrieve_frequency) < int(time.time()/self.retrieve_frequency):
             self.update_data()
             self.communication_.ui_signal.emit()
-            self.currentTime = time.time()
+            self.current_time = time.time()
 
     # These loops must not modify the Model objects
     def ui_update(self):
         self.upload_withdrawable()
         self.upload_risk()
+        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")

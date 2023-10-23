@@ -1,5 +1,5 @@
 from binance import Client
-import time, alarm, const, utils
+import time, const, utils
 import pandas as pd
 
 class BinanceHandler:
@@ -49,14 +49,12 @@ class BinanceHandler:
             try:
                 return utils.convert_to_float(func(**kwargs))
             except Exception as error:
-                message = f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}."
+                utils.resynch()
                 if retries_count < const.MAX_RETRIES:
-                    utils.resynch()
-                    print(message)
+                    print(f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    alarm.activate(message=message)
-                    exit()
+                    exit(error)
 
     def get_account_status(self) -> {}:
         status_list = {}

@@ -9,14 +9,13 @@ import binance_handler, bybit_handler, okx_handler
 from utils import Communication
 import alarm
 
-exitFlag = False
-
 class MyWindow(QMainWindow):
     def __init__(self, communication: Communication):
         super().__init__()
         self.communication_ = communication
         self.communication_.ui_signal.connect(self.update_ui)
         self.controller_ = None
+        self.exit_flag = False
 
     def set_up(self, controller):
         self.controller_ = controller
@@ -26,17 +25,14 @@ class MyWindow(QMainWindow):
             self.controller_.ui_update()
 
     def closeEvent(self, event):
-        global exitFlag
-        exitFlag = True
+        self.exit_flag = True
 
-def data_task(controller, app):
-    try:
-        while not exitFlag:
+def data_task(controller, window: MyWindow):
+    while not window.exit_flag:
+        try:
             controller.data_loop()
-    except Exception as e:
-        print(e)
-        alarm.activate(message=f"Program exit abruptly with message {e}!")
-        app.exit()
+        except Exception as e:
+            alarm.activate(message=f"Program runs again because of error: {e}")
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
@@ -80,7 +76,7 @@ def main():
     MainWindow.setWindowTitle("Steve" if choice == 2 else "Tuan Anh")
 
     MainWindow.show()
-    data_thread = threading.Thread(target=data_task, args=(controller, app))
+    data_thread = threading.Thread(target=data_task, args=(controller, MainWindow))
     data_thread.start()
     sys.exit(app.exec())
 
