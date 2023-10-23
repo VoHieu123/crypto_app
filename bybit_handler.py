@@ -53,14 +53,14 @@ class BybitHandler:
                 if data.get("retCode") == 0:
                     return utils.convert_to_float(data["result"])
                 else:
-                    raise Exception(message=f"Received corrupted data: {data['msg']}.")
+                    raise Exception(f"Received corrupted data: {data['msg']}.")
             except Exception as error:
                 utils.resynch()
                 if retries_count < const.MAX_RETRIES:
                     print(f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    raise Exception(message=f"Error: {error}.")
+                    raise Exception(f"Error: {error}.")
 
     # Todo: Haven't done it for subaccount
     def get_account_status(self) -> {}:
