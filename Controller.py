@@ -42,6 +42,7 @@ class Controller():
 
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
+        # Todo: What if error happens here?
         self.update_data()
         self.upload_withdrawable()
         try:
@@ -109,7 +110,6 @@ class Controller():
             self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
-        self.upload_withdrawable()
         self.upload_risk()
 
     def update_data(self):

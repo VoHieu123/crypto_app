@@ -66,7 +66,7 @@ class OKXHandler:
                     print(f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    exit(error)
+                    raise Exception(message=f"Error: {error}.")
 
     def get_account_status(self) -> {}:
         status_list = {}

@@ -32,7 +32,8 @@ def data_task(controller, window: MyWindow):
         try:
             controller.data_loop()
         except Exception as e:
-            alarm.activate(message=f"Program runs again because of error: {e}")
+            print(e)
+            alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))

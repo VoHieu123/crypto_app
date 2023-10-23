@@ -60,7 +60,7 @@ class BybitHandler:
                     print(f"Bybit error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
-                    exit(error)
+                    raise Exception(message=f"Error: {error}.")
 
     # Todo: Haven't done it for subaccount
     def get_account_status(self) -> {}:
