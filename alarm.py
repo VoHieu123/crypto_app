@@ -11,7 +11,7 @@ def sound_thread():
     sound.stop()
 
 bot = Bot(token='6157706837:AAH8uz73oVZlU6dmDuHPVovX_EL8fUHL-J8')
-user_ids = {"Hieu": "6228170215", "Evan": "..."}
+user_ids = {"Hieu": "6228170215", "Evan": "1531898366"}
 
 def activate(message, to=["Hieu", "Evan"], alarm=False):
     if alarm == True:
