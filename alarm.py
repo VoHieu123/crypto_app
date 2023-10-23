@@ -10,7 +10,8 @@ def sound_thread():
     time.sleep(10)
     sound.stop()
 
-bot = Bot(token='6157706837:AAH8uz73oVZlU6dmDuHPVovX_EL8fUHL-J8')
+# 6483313153:AAFUrrHFLS4cQGC-Raif32Pc-wE-OtQocDM
+bot = Bot(token=computer_specific.BOT)
 user_ids = {"Hieu": "6228170215", "Evan": "..."}
 
 def activate(message, to=["Hieu", "Evan"], alarm=False):
