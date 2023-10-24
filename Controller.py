@@ -148,11 +148,22 @@ class Controller():
 
     def upload_risk(self):
         def signal_user(list):
+
+            def calculate_position_risk(long_pos, short_pos):
+                    if long_pos == 0 or short_pos == 0:
+                        return 0
+                    a = long_pos/(long_pos+abs(short_pos))
+                    b = abs(short_pos)/(long_pos+abs(short_pos))
+                    return abs(a-b)
+            
             returnStr = ""
             for dict in list:
                 position_background_color = None
                 risk_background_color = None
                 equity_background_color = None
+
+                position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
+
                 if dict["risk"] != 0:
                     send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
                     if "Bi" in symbol:
@@ -175,26 +186,17 @@ class Controller():
                         equity_background_color = "yellow"
                         alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}", alarm=True)
 
-                    position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                     if position != 0:
                         if dict["position_alarm"].out_of_range(position):
                             position_background_color = "yellow"
                             alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}", alarm=True)
 
-                def calculate_position_risk(long_pos, short_pos):
-                    if long_pos == 0 or short_pos == 0:
-                        return 0
-                    a = long_pos/(long_pos+abs(short_pos))
-                    b = abs(short_pos)/(long_pos+abs(short_pos))
-                    return abs(a-b)
-
-                position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
                 returnStr += "(" + dict["asset"] + ") "
                 if dict["risk"] > 0:
                     returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red", format="%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format="%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format="%") + "<br>"
                 if dict["equity"] > 0:
                     returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
-                if dict["long_pos"] != 0 and dict["short_pos"] != 0:
+                if position != 0:
                     returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
                     returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
 
