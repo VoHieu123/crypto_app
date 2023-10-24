@@ -191,12 +191,12 @@ class Controller():
                 position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
                 returnStr += "(" + dict["asset"] + ") "
                 if dict["risk"] > 0:
-                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red", format="%") + "/" + fmt(dict["risk"], background_color=risk_background_color, format="%") + "/" + fmt(dict["risk_alarm"].end, color="blue", format="%") + "<br>"
+                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red", format="%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format="%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format="%") + "<br>"
                 if dict["equity"] > 0:
-                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"], background_color=equity_background_color) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if dict["long_pos"] != 0 and dict["short_pos"] != 0:
-                    returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + "/" + fmt(dict["short_pos"]) + "<br>"
-                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red", format="%") + "/" + fmt(position, background_color=position_background_color, format="%") + "/" + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
+                    returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
+                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
 
             return returnStr[:-4]
         for symbol, qtLabel in self.labelDict.items():

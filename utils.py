@@ -57,14 +57,14 @@ def convert_to_float(data):
 def generate_uuid():
     return str(uuid.uuid4())
 
-def auto_format(number, color="black", background_color=None, format=None):
+def auto_format(number, color="black", background_color=None, format=None, font_weight="normal"):
 
     number = float(number)
 
     if format is None:
         if (abs(number) < 0.0001):
-            return f"<span style='background-color: {background_color}; color: {color};'>{str(round(number, 5))}</span>" \
-                if background_color else f"<span style='color: {color};'>{str(round(number, 5))}</span>"
+            return f"<span style='background-color: {background_color};font-weight: {font_weight}; color: {color};'>{str(round(number, 5))}</span>" \
+                if background_color else f"<span style='color: {color};font-weight: {font_weight};'>{str(round(number, 5))}</span>"
 
         integer_part, decimal_part = (str(number)).split('.')
         integer_len = len(integer_part)
@@ -72,11 +72,11 @@ def auto_format(number, color="black", background_color=None, format=None):
 
         returnStr = integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
 
-        returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
-                    f"<span style='color: {color};'>{returnStr}</span>"
+        returnStr = f"<span style='background-color: {background_color}; font-weight: {font_weight}; color: {color};'>{returnStr}</span>" if background_color else \
+                    f"<span style='color: {color}; font-weight: {font_weight};'>{returnStr}</span>"
     elif format == "%":
         returnStr = "{:.2%}".format(number)
-        returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
-                    f"<span style='color: {color};'>{returnStr}</span>"
+        returnStr = f"<span style='background-color: {background_color}; font-weight: {font_weight}; color: {color};'>{returnStr}</span>" if background_color else \
+                    f"<span style='color: {color}; font-weight: {font_weight};'>{returnStr}</span>"
 
     return returnStr
