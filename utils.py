@@ -57,21 +57,26 @@ def convert_to_float(data):
 def generate_uuid():
     return str(uuid.uuid4())
 
-def auto_format(number, color="black", background_color=None):
+def auto_format(number, color="black", background_color=None, format=None):
 
     number = float(number)
 
-    if (abs(number) < 0.0001):
-        return f"<span style='background-color: {background_color}; color: {color};'>{str(round(number, 5))}</span>" \
-               if background_color else f"<span style='color: {color};'>{str(round(number, 5))}</span>"
+    if format is None:
+        if (abs(number) < 0.0001):
+            return f"<span style='background-color: {background_color}; color: {color};'>{str(round(number, 5))}</span>" \
+                if background_color else f"<span style='color: {color};'>{str(round(number, 5))}</span>"
 
-    integer_part, decimal_part = (str(number)).split('.')
-    integer_len = len(integer_part)
-    integer_str = '{:,}'.format(int(integer_part))
+        integer_part, decimal_part = (str(number)).split('.')
+        integer_len = len(integer_part)
+        integer_str = '{:,}'.format(int(integer_part))
 
-    returnStr = integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
+        returnStr = integer_str if integer_len >= 4 else f'{integer_str}.{decimal_part[0:(5 - integer_len)]}'
 
-    returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
-                f"<span style='color: {color};'>{returnStr}</span>"
+        returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
+                    f"<span style='color: {color};'>{returnStr}</span>"
+    elif format == "%":
+        returnStr = "{:.2%}".format(number)
+        returnStr = f"<span style='background-color: {background_color}; color: {color};'>{returnStr}</span>" if background_color else \
+                    f"<span style='color: {color};'>{returnStr}</span>"
 
     return returnStr

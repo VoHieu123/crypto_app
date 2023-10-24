@@ -184,7 +184,7 @@ class Controller():
                 position = abs(dict["long_pos"] + dict["short_pos"])/dict["long_pos"] if dict["long_pos"] > 0 else 0
                 returnStr += "(" + dict["asset"] + ") "
                 if dict["risk"] > 0:
-                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red") + "/" + fmt(dict["risk"], background_color=risk_background_color) + "/" + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
+                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red", format="%") + "/" + fmt(dict["risk"], background_color=risk_background_color, format="%") + "/" + fmt(dict["risk_alarm"].end, color="blue", format="%") + "<br>"
                 if dict["equity"] > 0:
                     returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + "/" + fmt(dict["equity"], background_color=equity_background_color) + "/" + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if dict["long_pos"] != 0 and dict["short_pos"] != 0:
