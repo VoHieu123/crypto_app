@@ -155,7 +155,7 @@ class Controller():
                     a = long_pos/(long_pos+abs(short_pos))
                     b = abs(short_pos)/(long_pos+abs(short_pos))
                     return abs(a-b)
-            
+
             returnStr = ""
             for dict in list:
                 position_background_color = None
