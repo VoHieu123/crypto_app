@@ -82,6 +82,7 @@ class Asset:
 
 class Model(object):
     def __init__(self, identity):
+        self.identity = identity
         if identity == "TA":
             self.pickle_path = cs.PICKLE_PATH[:-4] + "_ta" + ".pkl"
         elif identity == "ST":

@@ -6,14 +6,23 @@ class OKXHandler:
         self.model_ = model
         self.okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
-        self.subaccount_list = []
-        self.sub_api_list = []
+
+        self.subaccount_dict = {}
+        subaccount_list = []
         data = self.send_http_request(func=self.okx_subaccount_api.get_subaccount_list)
         for subaccount_data in data:
-            self.subaccount_list.append(subaccount_data["subAcct"])
-            # Todo: self.sub_api_list.append()
+            subaccount_list.append(subaccount_data["subAcct"])
+        subaccount_list = sorted(subaccount_list, key=lambda x: x[-1])
 
-        self.subaccount_list = sorted(self.subaccount_list, key=lambda x: x[-1])
+        for i, subaccount in enumerate(subaccount_list):
+            try:
+                api_key = getattr(const, f"{self.model_.identity}_OKX_API_KEY_SUB{i + 1}")
+                secret_key = getattr(const, f"{self.model_.identity}_OKX_SECRET_KEY_SUB{i + 1}")
+                password = getattr(const, f"{self.model_.identity}_OKX_PASSPHRASE_SUB{i + 1}")
+                self.subaccount_dict[subaccount] = Account.AccountAPI(api_key=api_key,api_secret_key=secret_key,
+                                                passphrase=password, flag="0", debug=False)
+            except:
+                pass
 
     def get_open_positions(self, sub_account=None):
         def handle_position(positions):
@@ -37,13 +46,8 @@ class OKXHandler:
 
         positions = 0, 0, 0, 0
         if sub_account != None:
-            if sub_account in self.subaccount_list:
-                # Todo: later
-                sub_account_index = self.subaccount_list.index(sub_account)
-                sub_api = Account.AccountAPI(api_key=const.TA_OKX_API_KEY_SUB1, flag="0", debug=False,
-                                            api_secret_key=const.TA_OKX_SECRET_KEY_SUB1,
-                                            passphrase=const.TA_OKX_PASSPHRASE_SUB1)
-                positions = self.send_http_request(func=sub_api.get_position_risk, instType="SWAP")
+            if sub_account in self.subaccount_dict:
+                positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk, instType="SWAP")
         else:
             positions = self.send_http_request(func=self.okx_account_api.get_position_risk, instType="SWAP")
 
@@ -83,7 +87,7 @@ class OKXHandler:
                 status_list[f"OkMC_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
                                                        "long_pos": long_pos_coinm, "short_pos": short_pos_coinm}
 
-        for i, sub_acct in enumerate(self.subaccount_list):
+        for i, sub_acct in enumerate(self.subaccount_dict):
             sub_data = self.send_http_request(func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
             for asset in sub_data[0]["details"]:
                 long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_open_positions(sub_acct)
