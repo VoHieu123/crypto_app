@@ -224,12 +224,12 @@
           </item>
           <item>
            <property name="text">
-            <string>OKX</string>
+            <string>Bybit</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Bybit</string>
+            <string>OKX</string>
            </property>
           </item>
          </widget>
@@ -281,12 +281,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Position</string>
+            <string>Equity</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Equity</string>
+            <string>Position</string>
            </property>
           </item>
          </widget>
