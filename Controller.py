@@ -150,8 +150,8 @@ class Controller():
         self.uiMainWindow_.label_withdrawable.setText("0")
 
     def upload_risk(self):
-        def signal_user(list):
-
+        def handle_frontend_data(list):
+            total_value = 0
             def calculate_position_risk(long_pos, short_pos):
                     if long_pos == 0 or short_pos == 0:
                         return 0
@@ -161,6 +161,7 @@ class Controller():
 
             returnStr = ""
             for dict in list:
+                total_value += dict["equity"]
                 position_background_color = None
                 risk_background_color = None
                 equity_background_color = None
@@ -207,13 +208,21 @@ class Controller():
                     returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
                     returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
 
-            return returnStr[:-4]
+            return total_value, returnStr[:-4]
+
+        total_value = 0
         for symbol, qtLabel in self.labelDict.items():
             symbol_list = self.model_.get_data(symbol=symbol)
             if symbol_list:
-                qtLabel.setText(signal_user(symbol_list))
+                value, stringText = handle_frontend_data(symbol_list)
+                total_value += value
+                qtLabel.setText(stringText)
+
+        self.uiMainWindow_.label_totalValue.setText(f"Total: {round(total_value, 2)};")
 
     def data_loop(self):
+        if int(self.current_time/self.save_frequency_m) < int(time.time()/self.save_frequency_m):
+            pass
         # Todo: Stop this when transferring
         if int(self.current_time/self.retrieve_frequency) < int(time.time()/self.retrieve_frequency):
             self.update_data()

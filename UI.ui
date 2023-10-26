@@ -211,7 +211,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,10,4,8">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,3,3,0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,3,3,0,0,1,0">
         <property name="spacing">
          <number>10</number>
         </property>
@@ -309,6 +309,13 @@
          <widget class="QPushButton" name="button_changeThreshold">
           <property name="text">
            <string>Change</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_totalValue">
+          <property name="text">
+           <string>Total: 0</string>
           </property>
          </widget>
         </item>

@@ -62,6 +62,11 @@ class Asset:
                [self.risk, self.equity, self.long_pos, self.short_pos, self.initial, self.maintenance]):
             return False
         return True
+    
+    def get_data_copy(self):
+        return Asset(symbol=self.symbol, asset_name=self.name, risk=self.risk, equity=self.equity,
+                     withdrawable=self.withdrawable, long_pos=self.long_pos,
+                     short_pos=self.short_pos, initial=self.initial, maintenance=self.maintenance)
 
     def get_settings_copy(self):
         return Asset(symbol=self.symbol, asset_name=self.name,
@@ -139,6 +144,21 @@ class Model(object):
 
         with open(self.pickle_path, "wb") as pkl_file:
             pickle.dump(data, pkl_file)
+
+    def save_data(self):
+        data = {"BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
+                "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
+                "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []}
+
+        for symbol, assets in self.risk_data.items():
+            for asset in assets:
+                data = asset.get_data_copy()
+                attribute_names = ["name", "risk", "equity", "withdrawable",
+                                   "long_pos", "short_pos", "initial", "maintenance"]
+
+                dict = {key: getattr(data, key) for key in attribute_names}
+                data[symbol].append()
+
 
     def set_data(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
