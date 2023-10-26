@@ -56,9 +56,8 @@ class OKXHandler:
 
             return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
-        if sub_account != None:
-            if sub_account in self.subaccount_dict:
-                positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk, instType="SWAP")
+        if sub_account in self.subaccount_dict:
+            positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk, instType="SWAP")
         else:
             positions = self.send_http_request(func=self.okx_account_api.get_position_risk, instType="SWAP")
 
@@ -103,7 +102,7 @@ class OKXHandler:
 
         for i, sub_acct in enumerate(self.subaccount_dict):
             sub_data = self.send_http_request(func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
-            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short(sub_acct)
+            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short(sub_account=sub_acct)
             for asset in sub_data[0]["details"]:
                 im, mm = self.get_margins(ccy=asset['ccy'], sub_account=sub_acct)
                 if asset['ccy'] in usd_margin_list:
