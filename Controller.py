@@ -128,11 +128,12 @@ class Controller():
             for key, value in risk_data.items():
                 symbol = substring_before(key, "_")
                 asset_name = substring_after(key, "_")
-                risk, equity, withdrawable, = value.get("risk"), value.get("equity"), value.get("withdrawable")
+                risk, equity, withdrawable = value.get("risk"), value.get("equity"), value.get("withdrawable")
                 long_pos, short_pos = value.get("long_pos"), value.get("short_pos")
+                initial, maintenance = value.get("initial"), value.get("maintenance")
                 self.model_.set_data(symbol=symbol, asset_name=asset_name,
                                      risk=risk, equity=equity, withdrawable=withdrawable,
-                                     long_pos=long_pos, short_pos=short_pos)
+                                     long_pos=long_pos, short_pos=short_pos, initial=initial, maintenance=maintenance)
 
     def upload_withdrawable(self):
         marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
@@ -140,7 +141,7 @@ class Controller():
         targetSymbol = f"{marketFrom[:2]}{'M' if accountFrom == 'Main' else accountFrom[-1:]}U"
 
         for dict in self.model_.get_data(symbol=targetSymbol):
-            if dict["asset"] == "USDT":
+            if dict["name"] == "USDT":
                 self.uiMainWindow_.label_withdrawable.setText(f"{round(dict.get('withdrawable'), 1)}")
                 return
 
@@ -191,19 +192,24 @@ class Controller():
                             position_background_color = "yellow"
                             alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}", alarm=True)
 
-                returnStr += "(" + dict["asset"] + ") "
+                returnStr += "(" + dict["name"] + ") "
+                returnStr += "TRF: " + fmt(0) + " / " + fmt(dict["withdrawable"]) + "<br>"
+                if dict["initial"] > 0:
+                    returnStr += "MRG: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"]) + "<br>"
                 if dict["risk"] > 0:
-                    returnStr += "RISK" + ": " + fmt(dict["risk_alarm"].start, color="red", format="%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format="%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format="%") + "<br>"
+                    format = None if "Ok" in symbol else "%"
+                    returnStr += "RSK: " + fmt(dict["risk_alarm"].start, color="red", format=format) + " / " + fmt(dict["risk"], background_color=risk_background_color, format=format, font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format=format) + "<br>"
                 if dict["equity"] > 0:
-                    returnStr += "EQUITY: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                    returnStr += "EQT: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if position != 0:
-                    returnStr += "LONG/SHORT: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
-                    returnStr += "POSITION: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
+                    returnStr += "LG/ST: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
+                    returnStr += "PST: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
 
             return returnStr[:-4]
         for symbol, qtLabel in self.labelDict.items():
             symbol_list = self.model_.get_data(symbol=symbol)
-            qtLabel.setText(signal_user(symbol_list))
+            if symbol_list:
+                qtLabel.setText(signal_user(symbol_list))
 
     def data_loop(self):
         # Todo: Stop this when transferring

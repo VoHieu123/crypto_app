@@ -17,7 +17,8 @@ BYBIT_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
 class Asset:
     def __init__(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
-                 withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1)):
+                 withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
+                 initial=-1, maintenance=-1):
 
         self.name = asset_name
         self.risk = risk
@@ -29,6 +30,8 @@ class Asset:
         self.short_pos = short_pos
         self.position_alarm = position_alarm
         self.symbol = symbol
+        self.initial = initial
+        self.maintenance = maintenance
 
         if position_alarm == Range(-1, -1):
             if "Bi" in symbol:
@@ -55,22 +58,29 @@ class Asset:
                 self.risk_alarm = BYBIT_DEFAULT_RISK_ALARM
 
     def is_valid_instance(self) -> bool:
-        if any(attribute == -1 for attribute in [self.risk, self.equity, self.long_pos, self.short_pos]):
+        if any(attribute == -1 for attribute in \
+               [self.risk, self.equity, self.long_pos, self.short_pos, self.initial, self.maintenance]):
             return False
         return True
 
     def get_settings_copy(self):
-        return Asset(symbol=self.symbol, asset_name=self.name, risk=-1,
+        return Asset(symbol=self.symbol, asset_name=self.name,
                      risk_alarm=self.risk_alarm,
-                     equity=-1, equity_alarm=self.equity_alarm, withdrawable=-1,
-                     long_pos=-1, short_pos=-1, position_alarm=self.position_alarm)
+                     equity_alarm=self.equity_alarm,
+                     position_alarm=self.position_alarm)
 
+    def set_withdrawable(self, withdrawable):
+        self.withdrawable = withdrawable if withdrawable != -1 else self.withdrawable
     def set_long_pos(self, long_pos):
         self.long_pos = long_pos if long_pos != -1 else self.long_pos
     def set_short_pos(self, short_pos):
         self.short_pos = short_pos if short_pos != -1 else self.short_pos
     def set_risk(self, risk):
         self.risk = risk if risk != -1 else self.risk
+    def set_initial(self, initial):
+        self.initial = initial if initial != -1 else self.initial
+    def set_maintenance(self, maintenance):
+        self.maintenance = maintenance if maintenance != -1 else self.maintenance
     def set_equity(self, equity):
         self.equity = equity if equity != -1 else self.equity
     def set_risk_alarm(self, risk_alarm: Range):
@@ -132,7 +142,8 @@ class Model(object):
 
     def set_data(self, symbol, asset_name,
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
-                 withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1)) -> bool:
+                 withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
+                 initial=-1, maintenance=-1) -> bool:
         if symbol in self.risk_data:
             for asset in self.risk_data[symbol]:
                 if asset.name == asset_name:
@@ -143,12 +154,16 @@ class Model(object):
                     asset.set_position_alarm(position_alarm)
                     asset.set_long_pos(long_pos)
                     asset.set_short_pos(short_pos)
+                    asset.set_initial(initial)
+                    asset.set_maintenance(maintenance)
+                    asset.set_withdrawable(withdrawable)
                     return True
 
-            if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos]):
+            if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos, maintenance, initial]):
                 new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, risk_alarm=risk_alarm,
-                                equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
-                                long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm)
+                                  equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
+                                  long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm,
+                                  initial=initial, maintenance=maintenance)
                 self.risk_data[symbol].append(new_asset)
                 return True
 
@@ -159,9 +174,10 @@ class Model(object):
         if symbol in self.risk_data:
             for asset in self.risk_data[symbol]:
                 if asset.is_valid_instance():
-                    returnDict.append({"asset": asset.name, "risk": asset.risk, "risk_alarm": asset.risk_alarm,
-                                       "equity": asset.equity, "equity_alarm": asset.equity_alarm,
-                                       "withdrawable": asset.withdrawable, "long_pos": asset.long_pos,
-                                       "short_pos": asset.short_pos, "position_alarm": asset.position_alarm})
+                    attribute_names = ["name", "risk", "equity", "withdrawable",
+                                       "risk_alarm", "equity_alarm", "position_alarm",
+                                       "long_pos", "short_pos", "initial", "maintenance"]
+
+                    returnDict.append({key: getattr(asset, key) for key in attribute_names})
 
         return returnDict

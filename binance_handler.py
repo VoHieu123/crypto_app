@@ -68,7 +68,7 @@ class BinanceHandler:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
                 status_list[f"BiMU_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
                                                          "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
-                                                         "long_pos": long_pos, "short_pos": short_pos}
+                                                         "long_pos": long_pos, "short_pos": short_pos, "initial": asset["initialMargin"], "maintenance": asset["maintMargin"]}
 
         mainAccountData = self.send_http_request(func=self.binance_client.futures_coin_account)
         long_pos, short_pos = 0, 0
@@ -79,7 +79,8 @@ class BinanceHandler:
             if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
                 status_list[f"BiMC_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
                                                          "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
-                                                         "long_pos": long_pos, "short_pos": short_pos}
+                                                         "long_pos": long_pos, "short_pos": short_pos, "initial": asset["initialMargin"],
+                                                         "maintenance": asset["maintMargin"]}
 
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
@@ -91,7 +92,8 @@ class BinanceHandler:
                 if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
                     status_list[f"Bi{i + 1}U_{usd['asset']}"] = {"risk": (usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
                                                                  "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],
-                                                                 "long_pos": long_pos, "short_pos": short_pos}
+                                                                 "long_pos": long_pos, "short_pos": short_pos, "initial": usd["initialMargin"],
+                                                                 "maintenance": usd["maintenanceMargin"]}
 
             long_pos, short_pos = self.get_sub_coinm_open_positions(sub_account)
             coinm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
@@ -99,7 +101,8 @@ class BinanceHandler:
                 if coin["maintenanceMargin"] != 0 or coin["maxWithdrawAmount"] != 0:
                     status_list[f"Bi{i + 1}C_{coin['asset']}"] = {"risk": (coin["maintenanceMargin"]/coin["marginBalance"]) if coin["marginBalance"] != 0 else 0,
                                                                  "equity": coin["marginBalance"], "withdrawable": coin["maxWithdrawAmount"],
-                                                                 "long_pos": long_pos, "short_pos": short_pos}
+                                                                 "long_pos": long_pos, "short_pos": short_pos, "initial": coin["initialMargin"],
+                                                                 "maintenance": coin["maintenanceMargin"]}
 
         return status_list
 

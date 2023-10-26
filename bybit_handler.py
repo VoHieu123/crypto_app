@@ -68,8 +68,12 @@ class BybitHandler:
         mmr, equity, withdrawable, long_pos, short_pos = None, None, None, None, None
         data = self.send_http_request(func=self.session.get_wallet_balance, accountType="UNIFIED")
         for item in data["list"]:
-            mmr = item["accountMMRate"]
-            equity = item["totalEquity"]
+            if item["accountType"] == "UNIFIED":
+                mmr = item["accountMMRate"]
+                equity = item["totalEquity"]
+                im = item["totalInitialMargin"]
+                mm = item["totalMaintenanceMargin"]
+                break
 
         # Account asset should always be moved to Unified Trading Account before hand
         data = self.send_http_request(func=self.session.get_coin_balance,
@@ -83,7 +87,8 @@ class BybitHandler:
         # Todo: Currently assuming USDT is the only currency
         if all(item is not None for item in [mmr, equity, withdrawable, long_pos, short_pos]):
             status_list[f"ByMU_USDT"] = {"risk": mmr, "equity": equity, "withdrawable": withdrawable,
-                                         "long_pos": long_pos, "short_pos": short_pos}
+                                         "long_pos": long_pos, "short_pos": short_pos,
+                                         "initial": im, "maintenance": mm}
 
         return status_list
 

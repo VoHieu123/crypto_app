@@ -29,11 +29,12 @@ class MyWindow(QMainWindow):
 
 def data_task(controller, window: MyWindow):
     while not window.exit_flag:
-        try:
-            controller.data_loop()
-        except Exception as e:
-            print(e)
-            alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
+        controller.data_loop()
+        # try:
+        #     controller.data_loop()
+        # except Exception as e:
+        #     print(f"Error: {e}")
+        #     alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))

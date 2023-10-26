@@ -63,8 +63,8 @@ def auto_format(number, color="black", background_color=None, format=None, font_
 
     if format is None:
         if (abs(number) < 0.0001):
-            return f"<span style='background-color: {background_color};font-weight: {font_weight}; color: {color};'>{str(round(number, 5))}</span>" \
-                if background_color else f"<span style='color: {color};font-weight: {font_weight};'>{str(round(number, 5))}</span>"
+            return f"<span style='background-color: {background_color};font-weight: {font_weight}; color: {color};'>{str(round(number, 6))}</span>" \
+                if background_color else f"<span style='color: {color};font-weight: {font_weight};'>{str(round(number, 6))}</span>"
 
         integer_part, decimal_part = (str(number)).split('.')
         integer_len = len(integer_part)

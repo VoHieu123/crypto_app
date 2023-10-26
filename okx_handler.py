@@ -24,7 +24,19 @@ class OKXHandler:
             except:
                 pass
 
-    def get_open_positions(self, sub_account=None):
+    def get_margins(self, ccy="USDT", sub_account=None):
+        im, mm = 0, 0
+        if sub_account:
+            margin_data = self.send_http_request(func=self.subaccount_dict[sub_account].get_positions, instType="SWAP")
+        else:
+            margin_data = self.send_http_request(func=self.okx_account_api.get_positions, instType="SWAP")
+        for margin in margin_data:
+            if margin["ccy"] == ccy and margin["mgnMode"] == "cross":
+                im += margin["imr"]
+                mm += margin["mmr"]
+        return im, mm
+
+    def get_long_short(self, ccy="USDT", sub_account=None):
         def handle_position(positions):
             long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
             for position in positions:
@@ -44,7 +56,6 @@ class OKXHandler:
 
             return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
-        positions = 0, 0, 0, 0
         if sub_account != None:
             if sub_account in self.subaccount_dict:
                 positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk, instType="SWAP")
@@ -76,26 +87,34 @@ class OKXHandler:
         status_list = {}
         usd_margin_list = ["USDT", "USDC"]
 
-        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_open_positions()
+        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short()
 
         account_data = self.send_http_request(func=self.okx_account_api.get_account_balance)
         for asset in account_data[0]["details"]:
             if asset['ccy'] in usd_margin_list:
+                im, mm = self.get_margins(asset['ccy'])
                 status_list[f"OkMU_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
-                                                       "long_pos": long_pos_usdm, "short_pos": short_pos_usdm}
+                                                       "long_pos": long_pos_usdm, "short_pos": short_pos_usdm,
+                                                       "initial": im, "maintenance": mm}
             else:
                 status_list[f"OkMC_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
-                                                       "long_pos": long_pos_coinm, "short_pos": short_pos_coinm}
+                                                       "long_pos": long_pos_coinm, "short_pos": short_pos_coinm,
+                                                       "initial": 0, "maintenance": 0}
 
         for i, sub_acct in enumerate(self.subaccount_dict):
             sub_data = self.send_http_request(func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
+            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short(sub_acct)
             for asset in sub_data[0]["details"]:
-                long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_open_positions(sub_acct)
+                im, mm = self.get_margins(ccy=asset['ccy'], sub_account=sub_acct)
                 if asset['ccy'] in usd_margin_list:
-                    status_list[f"Ok{i + 1}U_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
-                                                                 "long_pos": long_pos_usdm, "short_pos": short_pos_usdm}
+                    status_list[f"Ok{i + 1}U_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"],
+                                                                 "withdrawable": asset["availBal"],
+                                                                 "long_pos": long_pos_usdm, "short_pos": short_pos_usdm,
+                                                                 "initial": im, "maintenance": mm}
                 else:
-                    status_list[f"Ok{i + 1}C_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
-                                                                 "long_pos": long_pos_coinm, "short_pos": short_pos_coinm}
+                    status_list[f"Ok{i + 1}C_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"],
+                                                                 "withdrawable": asset["availBal"],
+                                                                 "long_pos": long_pos_coinm, "short_pos": short_pos_coinm,
+                                                                 "initial": im, "maintenance": mm}
 
         return status_list
