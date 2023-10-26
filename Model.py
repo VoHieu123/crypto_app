@@ -1,6 +1,9 @@
 from utils import Range
+from utils import substring_before, substring_after
 import pickle, os
 import computer_specific as cs
+import pandas as pd
+import const, openpyxl, datetime
 
 BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
 OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
@@ -62,7 +65,7 @@ class Asset:
                [self.risk, self.equity, self.long_pos, self.short_pos, self.initial, self.maintenance]):
             return False
         return True
-    
+
     def get_data_copy(self):
         return Asset(symbol=self.symbol, asset_name=self.name, risk=self.risk, equity=self.equity,
                      withdrawable=self.withdrawable, long_pos=self.long_pos,
@@ -97,6 +100,7 @@ class Asset:
 
 class Model(object):
     def __init__(self, identity):
+        self.account_history = pd.DataFrame()
         self.identity = identity
         if identity == "TA":
             self.pickle_path = cs.PICKLE_PATH[:-4] + "_ta" + ".pkl"
@@ -146,18 +150,73 @@ class Model(object):
             pickle.dump(data, pkl_file)
 
     def save_data(self):
-        data = {"BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
-                "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
-                "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []}
-
-        for symbol, assets in self.risk_data.items():
+        current_data = pd.DataFrame()
+        for assets in self.risk_data.values():
             for asset in assets:
-                data = asset.get_data_copy()
-                attribute_names = ["name", "risk", "equity", "withdrawable",
+                attribute_names = ["symbol", "name", "risk", "equity", "withdrawable",
                                    "long_pos", "short_pos", "initial", "maintenance"]
+                data = {key: getattr(asset.get_data_copy(), key) for key in attribute_names}
+                name = data["name"]
+                symbol = data["symbol"]
+                if name == "USDT":
+                    data = pd.DataFrame([data])
+                    data.drop(["name", "symbol"], axis=1, inplace=True)
+                    data.rename(columns={"risk": "Risk", "equity": "Asset",
+                                         "withdrawable": "Free", "long_pos": "Long",
+                                         "short_pos": "Short", "initial": "IM", "maintenance": "MM"}, inplace=True)
+                    data = data.add_prefix(f"{symbol}_")
+                    current_data = pd.concat([current_data, data], axis=1)
+        current_data.insert(0, "TIME", pd.Timestamp.now())
+        current_data['TAB'] = ""
+        self.account_history = pd.concat([self.account_history, current_data])
 
-                dict = {key: getattr(data, key) for key in attribute_names}
-                data[symbol].append()
+    def export_data(self):
+        # Todo: Check data integrity
+        name = f"data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
+        try:
+            self.account_history.to_excel(name, index=False)
+            workbook = openpyxl.load_workbook(name)
+            worksheet = workbook.active
+
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(cell.value)
+                    except:
+                        pass
+                if column_letter == "A":
+                    worksheet.column_dimensions[column_letter].width = (max_length + 2) * 3
+                else:
+                    worksheet.column_dimensions[column_letter].width = (max_length + 2) * 1.1
+
+            worksheet.insert_rows(1)
+            current_symbol = ""
+            cell_to_merge = 0
+            for cell in worksheet[2]:
+                if cell.value and cell.value != "TIME":
+                    symbol = substring_before(cell.value, "_")
+                    cell.value = substring_after(cell.value, "_")
+
+                    if symbol == current_symbol:
+                        cell_to_merge += 1
+                    else:
+                        if current_symbol != "":
+                            worksheet.merge_cells(start_row=1, end_row=1,
+                                                start_column=cell.column - 1 - cell_to_merge,
+                                                end_column=cell.column - 1)
+                            worksheet.cell(row=1, column=cell.column - 1 - cell_to_merge,
+                                            value=current_symbol)
+                        cell_to_merge = 0
+                        current_symbol = symbol
+
+            workbook.save(name)
+            workbook.close()
+        except Exception as e:
+            print(e)
+            pass
 
 
     def set_data(self, symbol, asset_name,

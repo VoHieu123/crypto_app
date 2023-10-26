@@ -7,3 +7,4 @@ _*
 *.exe
 computer_specific.py
 *.pkl
+*.xlsx

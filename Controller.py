@@ -8,7 +8,7 @@ import datetime
 class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
         self.labelDict = {}
-        self.save_frequency_m = 10
+        self.save_frequency_m = 10*60
         self.retrieve_frequency = 30
         self.keep_alive_frequency = 5000
         self.current_time = 0
@@ -21,6 +21,7 @@ class Controller():
         self.model_ = model
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
+        self.uiMainWindow_.button_export.clicked.connect(self.export_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1", "2", "3"]
@@ -72,6 +73,9 @@ class Controller():
             moduleDict[exchangeFrom].transfer_money_internal()
         else:
             pass
+
+    def export_button_clicked(self):
+        self.model_.export_data()
 
     def change_threshold_button_clicked(self):
         alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
@@ -221,16 +225,18 @@ class Controller():
         self.uiMainWindow_.label_totalValue.setText(f"Total: {round(total_value, 2)};")
 
     def data_loop(self):
-        if int(self.current_time/self.save_frequency_m) < int(time.time()/self.save_frequency_m):
-            pass
         # Todo: Stop this when transferring
         if int(self.current_time/self.retrieve_frequency) < int(time.time()/self.retrieve_frequency):
             self.update_data()
             self.communication_.ui_signal.emit()
-            self.current_time = time.time()
+
+        if int(self.current_time/self.save_frequency_m) < int(time.time()/self.save_frequency_m):
+           self.model_.save_data()
+
+        self.current_time = time.time()
 
     # These loops must not modify the Model objects
     def ui_update(self):
         self.upload_withdrawable()
         self.upload_risk()
-        self.uiMainWindow_.label_infinity.setText(f"Last update: {datetime.datetime.now().strftime('%H:%M:%S')}")
+        self.uiMainWindow_.label_infinity.setText(f"Update: {datetime.datetime.now().strftime('%H:%M:%S')}")
