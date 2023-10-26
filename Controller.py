@@ -76,6 +76,8 @@ class Controller():
     def change_threshold_button_clicked(self):
         alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
         asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
+        if asset == "":
+            asset = "USDT"
         self.uiMainWindow_.lineEdit_threshold.setText("")
         self.uiMainWindow_.lineEdit_assetName.setText("")
         try:
@@ -193,17 +195,17 @@ class Controller():
                             alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}", alarm=True)
 
                 returnStr += "(" + dict["name"] + ") "
-                returnStr += "TRF: " + fmt(0) + " / " + fmt(dict["withdrawable"]) + "<br>"
+                returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
                 if dict["initial"] > 0:
-                    returnStr += "MRG: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"]) + "<br>"
+                    returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                 if dict["risk"] > 0:
                     format = None if "Ok" in symbol else "%"
-                    returnStr += "RSK: " + fmt(dict["risk_alarm"].start, color="red", format=format) + " / " + fmt(dict["risk"], background_color=risk_background_color, format=format, font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format=format) + "<br>"
+                    returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", format=format) + " / " + fmt(dict["risk"], background_color=risk_background_color, format=format, font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format=format) + "<br>"
                 if dict["equity"] > 0:
-                    returnStr += "EQT: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                    returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if position != 0:
-                    returnStr += "LG/ST: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
-                    returnStr += "PST: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
+                    returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
+                    returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format="%") + " / " + fmt(position, background_color=position_background_color, format="%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format="%") + "<br>"
 
             return returnStr[:-4]
         for symbol, qtLabel in self.labelDict.items():

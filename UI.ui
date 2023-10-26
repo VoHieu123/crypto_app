@@ -294,7 +294,7 @@
         <item>
          <widget class="QLineEdit" name="lineEdit_assetName">
           <property name="placeholderText">
-           <string>Enter asset name</string>
+           <string>Enter asset name. Default: &quot;USDT&quot;.</string>
           </property>
          </widget>
         </item>

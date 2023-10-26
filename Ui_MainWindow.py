@@ -604,7 +604,7 @@ class Ui_MainWindow(object):
         self.comboBox_alarmType.setItemText(0, _translate("MainWindow", "Risk"))
         self.comboBox_alarmType.setItemText(1, _translate("MainWindow", "Equity"))
         self.comboBox_alarmType.setItemText(2, _translate("MainWindow", "Position"))
-        self.lineEdit_assetName.setPlaceholderText(_translate("MainWindow", "Enter asset name"))
+        self.lineEdit_assetName.setPlaceholderText(_translate("MainWindow", "Enter asset name. Default: \"USDT\"."))
         self.lineEdit_threshold.setPlaceholderText(_translate("MainWindow", "Enter alarm range. E.x: (1 - 20)"))
         self.button_changeThreshold.setText(_translate("MainWindow", "Change"))
         self.label_5.setText(_translate("MainWindow", "Coin-M"))
