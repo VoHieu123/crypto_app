@@ -41,6 +41,9 @@ class Controller():
                     label_name = f"label_{market}{subaccount}U"
                     self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
 
+        self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
+        self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
+
     # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
         # Todo: What if error happens here?
@@ -222,7 +225,7 @@ class Controller():
                 total_value += value
                 qtLabel.setText(stringText)
 
-        self.uiMainWindow_.label_totalValue.setText(f"Total: {round(total_value, 2)};")
+        self.uiMainWindow_.label_totalValue.setText(f"Total: {round(total_value, 2)}")
 
     def data_loop(self):
         # Todo: Stop this when transferring
@@ -239,4 +242,4 @@ class Controller():
     def ui_update(self):
         self.upload_withdrawable()
         self.upload_risk()
-        self.uiMainWindow_.label_infinity.setText(f"Update: {datetime.datetime.now().strftime('%H:%M:%S')}")
+        self.uiMainWindow_.label_infinity.setText(f"{datetime.datetime.now().strftime('%H:%M:%S')}")

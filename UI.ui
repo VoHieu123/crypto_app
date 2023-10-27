@@ -211,9 +211,9 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,10,4,8">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,3,3,0,0,0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,3,3,0,0,0,1">
         <property name="spacing">
-         <number>10</number>
+         <number>3</number>
         </property>
         <item>
          <widget class="QComboBox" name="comboBox_market">
@@ -321,8 +321,11 @@
         </item>
         <item>
          <widget class="QLabel" name="label_totalValue">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="text">
-           <string>Total: 0;</string>
+           <string>Total: 0</string>
           </property>
          </widget>
         </item>
@@ -331,6 +334,15 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -338,19 +350,6 @@
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>10</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>

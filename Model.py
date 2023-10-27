@@ -158,6 +158,9 @@ class Model(object):
                 attribute_names = ["symbol", "name", "risk", "equity", "withdrawable",
                                    "long_pos", "short_pos", "initial", "maintenance"]
                 data = {key: getattr(asset.get_data_copy(), key) for key in attribute_names}
+                if any(value  == -1 for value in data.values()):
+                    continue
+                    
                 name = data["name"]
                 symbol = data["symbol"]
                 if name == "USDT":
@@ -174,7 +177,7 @@ class Model(object):
 
     def export_data(self):
         # Todo: Check data integrity
-        name = f"{cs.DESKTOP_PATH}data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
+        name = f"{cs.DESKTOP_PATH}{self.identity.lower()}_data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
         try:
             self.account_history.to_excel(name, index=False)
             workbook = openpyxl.load_workbook(name)
