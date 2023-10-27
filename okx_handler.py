@@ -77,7 +77,7 @@ class OKXHandler:
             except Exception as error:
                 utils.resynch()
                 if retries_count < const.MAX_RETRIES:
-                    print(f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
+                    # print(f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
                     raise Exception(f"Error: {error}.")

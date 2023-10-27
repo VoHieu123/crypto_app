@@ -6,7 +6,7 @@ def resynch():
     try:
         subprocess.run(['w32tm', '/resync'], check=True)
     except:
-        print("Synchronize failed!")
+        # print("Synchronize failed!")
         pass
 
 class Communication(QObject):
