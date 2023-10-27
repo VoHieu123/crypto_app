@@ -188,16 +188,16 @@ class Controller():
 
                     if dict["risk_alarm"].out_of_range(dict["risk"]):
                         risk_background_color = "yellow"
-                        alarm.activate(message=f"{send_symbol}risk alarm {dict['asset']}: {dict['risk']}", alarm=True)
+                        alarm.activate(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
 
                     if dict["equity_alarm"].out_of_range(dict["equity"]):
                         equity_background_color = "yellow"
-                        alarm.activate(message=f" {send_symbol}equity alarm {dict['asset']}: {dict['equity']}", alarm=True)
+                        alarm.activate(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
 
                     if position != 0:
                         if dict["position_alarm"].out_of_range(position):
                             position_background_color = "yellow"
-                            alarm.activate(message=f"{send_symbol}position alarm {dict['asset']}: {position}", alarm=True)
+                            alarm.activate(message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
 
                 returnStr += "(" + dict["name"] + ") "
                 returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"

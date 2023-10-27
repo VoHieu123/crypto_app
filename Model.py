@@ -108,6 +108,8 @@ class Model(object):
             self.pickle_path = cs.PICKLE_PATH[:-4] + "_st" + ".pkl"
         if os.path.exists(self.pickle_path):
             with open(self.pickle_path, "rb") as pkl_file:
+                # Todo: Update problem
+                # settings = pickle.load(pkl_file)
                 self.risk_data = pickle.load(pkl_file)
         else:
             self.risk_data = {
@@ -172,7 +174,7 @@ class Model(object):
 
     def export_data(self):
         # Todo: Check data integrity
-        name = f"data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
+        name = f"{cs.DESKTOP_PATH}data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
         try:
             self.account_history.to_excel(name, index=False)
             workbook = openpyxl.load_workbook(name)
