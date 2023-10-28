@@ -57,11 +57,11 @@ def convert_to_float(data):
 def generate_uuid():
     return str(uuid.uuid4())
 
-def auto_format(number, color="black", background_color=None, format=None, font_weight="normal"):
+def auto_format(number, color="black", background_color=None, formatStr=None, font_weight="normal"):
 
     number = float(number)
 
-    if format is None:
+    if formatStr is None:
         if (abs(number) < 0.0001):
             return f"<span style='background-color: {background_color};font-weight: {font_weight}; color: {color};'>{str(round(number, 6))}</span>" \
                 if background_color else f"<span style='color: {color};font-weight: {font_weight};'>{str(round(number, 6))}</span>"
@@ -74,8 +74,8 @@ def auto_format(number, color="black", background_color=None, format=None, font_
 
         returnStr = f"<span style='background-color: {background_color}; font-weight: {font_weight}; color: {color};'>{returnStr}</span>" if background_color else \
                     f"<span style='color: {color}; font-weight: {font_weight};'>{returnStr}</span>"
-    elif format == "%":
-        returnStr = "{:.2%}".format(number)
+    else:
+        returnStr = f"{number:{formatStr}}"
         returnStr = f"<span style='background-color: {background_color}; font-weight: {font_weight}; color: {color};'>{returnStr}</span>" if background_color else \
                     f"<span style='color: {color}; font-weight: {font_weight};'>{returnStr}</span>"
 

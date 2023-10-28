@@ -160,7 +160,7 @@ class Model(object):
                 data = {key: getattr(asset.get_data_copy(), key) for key in attribute_names}
                 if any(value  == -1 for value in data.values()):
                     continue
-                    
+
                 name = data["name"]
                 symbol = data["symbol"]
                 if name == "USDT":
@@ -171,6 +171,19 @@ class Model(object):
                                          "short_pos": "Short", "initial": "IM", "maintenance": "MM"}, inplace=True)
                     data = data.add_prefix(f"{symbol}_")
                     current_data = pd.concat([current_data, data], axis=1)
+
+        data_type = ["Risk", "Asset", "Free", "Long", "Short", "IM", "MM"]
+
+        for type in data_type:
+            cols = [col for col in current_data.columns if col.endswith(type)]
+            current_data[f"Total_{type}"] = current_data[cols].sum(axis=1)
+
+        total_columns = [col for col in current_data.columns if col.startswith("Total_")]
+
+        # Reorder the DataFrame columns with "Total_" prefix at the beginning
+        new_column_order = total_columns + [col for col in current_data.columns if col not in total_columns]
+        current_data = current_data[new_column_order]
+
         current_data.insert(0, "TIME", pd.Timestamp.now())
         current_data['TAB'] = ""
         self.account_history = pd.concat([self.account_history, current_data])
