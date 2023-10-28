@@ -29,7 +29,6 @@ class MyWindow(QMainWindow):
 
 def data_task(controller, window: MyWindow):
     while not window.exit_flag:
-        controller.data_loop()
         try:
             controller.data_loop()
         except Exception as e:
