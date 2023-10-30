@@ -3,6 +3,7 @@ from utils import substring_after, substring_before, change_last_letter
 from utils import Range
 import time, alarm
 from utils import Communication
+from PyQt6.QtGui import QFont
 import datetime
 
 class Controller():
@@ -30,13 +31,18 @@ class Controller():
 
         self.labelDict = {}
 
+        font = QFont()
+        font.setPointSize(16)
+
         for market in markets:
             for subaccount in subaccounts:
                 for coin_type in coinTypes:
                     label_key = f"{market}{subaccount}{coin_type}"
                     label_name = f"label_{market}{subaccount}{coin_type}"
                     try:
-                        self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
+                        ui_label = getattr(self.uiMainWindow_, label_name)
+                        ui_label.setFont(font)
+                        self.labelDict[label_key] = ui_label
                     except Exception as e:
                         # print(e)
                         pass
@@ -170,51 +176,51 @@ class Controller():
 
             returnStr = ""
             for dict in list:
-                total_value += dict["equity"]
-                position_background_color = None
-                risk_background_color = None
-                equity_background_color = None
+                if dict["name"] == "USDT":
+                    total_value += dict["equity"]
+                    position_background_color = None
+                    risk_background_color = None
+                    equity_background_color = None
 
-                position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
+                    position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
 
-                if dict["risk"] != 0:
-                    send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
-                    if "Bi" in symbol:
-                        send_symbol += "Binance "
-                    elif "Ok" in symbol:
-                        send_symbol += "OKX "
-                    elif "By" in symbol:
-                        send_symbol += "Bybit "
+                    if dict["risk"] != 0:
+                        send_symbol = "Tuan Anh " if self.identity_ == "TA" else "Steve "
+                        if "Bi" in symbol:
+                            send_symbol += "Binance "
+                        elif "Ok" in symbol:
+                            send_symbol += "OKX "
+                        elif "By" in symbol:
+                            send_symbol += "Bybit "
 
-                    if symbol[2] != "M":
-                        send_symbol += f"Sub{symbol[2]} "
-                    else:
-                        send_symbol += "Main "
+                        if symbol[2] != "M":
+                            send_symbol += f"Sub{symbol[2]} "
+                        else:
+                            send_symbol += "Main "
 
-                    if dict["risk_alarm"].out_of_range(dict["risk"]):
-                        risk_background_color = "yellow"
-                        alarm.activate(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
+                        if dict["risk_alarm"].out_of_range(dict["risk"]):
+                            risk_background_color = "yellow"
+                            alarm.activate(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
 
-                    if dict["equity_alarm"].out_of_range(dict["equity"]):
-                        equity_background_color = "yellow"
-                        alarm.activate(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
+                        if dict["equity_alarm"].out_of_range(dict["equity"]):
+                            equity_background_color = "yellow"
+                            alarm.activate(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
 
+                        if position != 0:
+                            if dict["position_alarm"].out_of_range(position):
+                                position_background_color = "yellow"
+                                alarm.activate(message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
+
+                    returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
+                    if dict["initial"] > 0:
+                        returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
+                    if dict["risk"] > 0:
+                        returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", formatStr=".0%") + "<br>"
+                    if dict["equity"] > 0:
+                        returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                     if position != 0:
-                        if dict["position_alarm"].out_of_range(position):
-                            position_background_color = "yellow"
-                            alarm.activate(message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
-
-                returnStr += "(" + dict["name"] + ") "
-                returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
-                if dict["initial"] > 0:
-                    returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
-                if dict["risk"] > 0:
-                    returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", formatStr=".0%") + "<br>"
-                if dict["equity"] > 0:
-                    returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
-                if position != 0:
-                    returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
-                    returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(position, background_color=position_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", formatStr=".0%") + "<br>"
+                        returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
+                        returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(position, background_color=position_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", formatStr=".0%") + "<br>"
 
             return total_value, returnStr[:-4]
 
