@@ -211,7 +211,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,4,3,3">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,3,0,0,1,1">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,3,3,0,0,1,1">
         <property name="spacing">
          <number>3</number>
         </property>
@@ -246,16 +246,6 @@
             <string>Sub1</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Sub2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sub3</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>
@@ -278,9 +268,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_threshold">
+         <widget class="QLineEdit" name="lineEdit_lowerThreshold">
           <property name="placeholderText">
-           <string>Enter alarm range. E.x: (1 - 20)</string>
+           <string>Enter alarm lower bound</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_upperThreshold">
+          <property name="placeholderText">
+           <string>Enter alarm upper bound</string>
           </property>
          </widget>
         </item>

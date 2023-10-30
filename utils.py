@@ -14,7 +14,7 @@ class Communication(QObject):
 
 class Range:
     def __init__(self, start: float, end: float):
-        if start > end:
+        if start > end and start != -1 and end!= -1:
             exit("Range object error.")
         self.start = start
         self.end = end

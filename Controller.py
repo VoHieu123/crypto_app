@@ -90,11 +90,13 @@ class Controller():
         self.model_.export_data()
 
     def change_threshold_button_clicked(self):
-        alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
-        asset = "USDT"
-        self.uiMainWindow_.lineEdit_threshold.setText("")
+        lower_alarm = self.uiMainWindow_.lineEdit_lowerThreshold.text()
+        upper_alarm = self.uiMainWindow_.lineEdit_upperThreshold.text()
+        self.uiMainWindow_.lineEdit_lowerThreshold.setText("")
+        self.uiMainWindow_.lineEdit_upperThreshold.setText("")
         try:
-            alarm = Range(float(substring_before(alarm, "-")), float(substring_after(alarm, "-")))
+            alarm = Range(-1 if lower_alarm == "" else float(lower_alarm),
+                          -1 if upper_alarm == "" else float(upper_alarm))
         except:
             return
         market = self.uiMainWindow_.comboBox_market.currentText()
@@ -115,11 +117,11 @@ class Controller():
         symbol += "U"
 
         if alarm_type == "Risk":
-            self.model_.set_data(symbol=symbol, asset_name=asset, risk_alarm=alarm)
+            self.model_.set_data(symbol=symbol, asset_name="USDT", risk_alarm=alarm)
         elif alarm_type == "Equity":
-            self.model_.set_data(symbol=symbol, asset_name=asset, equity_alarm=alarm)
+            self.model_.set_data(symbol=symbol, asset_name="USDT", equity_alarm=alarm)
         elif alarm_type == "Position":
-            self.model_.set_data(symbol=symbol, asset_name=asset, position_alarm=alarm)
+            self.model_.set_data(symbol=symbol, asset_name="USDT", position_alarm=alarm)
         self.upload_risk()
 
     def update_data(self):

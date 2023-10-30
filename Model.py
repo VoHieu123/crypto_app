@@ -92,11 +92,20 @@ class Asset:
     def set_equity(self, equity):
         self.equity = equity if equity != -1 else self.equity
     def set_risk_alarm(self, risk_alarm: Range):
-        self.risk_alarm = risk_alarm if risk_alarm != Range(-1, -1) else self.risk_alarm
+        if risk_alarm.start != -1:
+            self.risk_alarm.start = risk_alarm.start
+        if risk_alarm.end != -1:
+            self.risk_alarm.end = risk_alarm.end
     def set_equity_alarm(self, equity_alarm: Range):
-        self.equity_alarm = equity_alarm if equity_alarm != Range(-1, -1) else self.equity_alarm
+        if equity_alarm.start!= -1:
+            self.equity_alarm.start = equity_alarm.start
+        if equity_alarm.end!= -1:
+            self.equity_alarm.end = equity_alarm.end
     def set_position_alarm(self, position_alarm: Range):
-        self.position_alarm = position_alarm if position_alarm != Range(-1, -1) else self.position_alarm
+        if position_alarm.start!= -1:
+            self.position_alarm.start = position_alarm.start
+        if position_alarm.end!= -1:
+            self.position_alarm.end = position_alarm.end
 
 class Model(object):
     def __init__(self, identity):
