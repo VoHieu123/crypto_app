@@ -1,5 +1,5 @@
 from utils import auto_format as fmt
-from utils import substring_after, substring_before, change_last_letter
+from utils import substring_after, substring_before
 from utils import Range
 import time, alarm
 from utils import Communication
