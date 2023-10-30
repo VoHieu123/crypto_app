@@ -59,6 +59,7 @@ def generate_uuid():
 
 def auto_format(number, color="black", background_color=None, formatStr=None, font_weight="normal"):
 
+    # Todo: seperate number format and string format
     number = float(number)
 
     if formatStr is None:

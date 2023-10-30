@@ -47,6 +47,11 @@ class Controller():
                         # print(e)
                         pass
 
+        label_const_list = [f"label_{name}" for name in ["binance", "okx", "bybit", "mainAccount", "subAccount1"]]
+        for label in label_const_list:
+            ui_label = getattr(self.uiMainWindow_, label)
+            ui_label.setFont(font)
+
         self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
         self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
 
@@ -88,17 +93,13 @@ class Controller():
 
     def change_threshold_button_clicked(self):
         alarm = self.uiMainWindow_.lineEdit_threshold.text().replace(" ", "")
-        asset = self.uiMainWindow_.lineEdit_assetName.text().upper()
-        if asset == "":
-            asset = "USDT"
+        asset = "USDT"
         self.uiMainWindow_.lineEdit_threshold.setText("")
-        self.uiMainWindow_.lineEdit_assetName.setText("")
         try:
             alarm = Range(float(substring_before(alarm, "-")), float(substring_after(alarm, "-")))
         except:
             return
         market = self.uiMainWindow_.comboBox_market.currentText()
-        coin_type = self.uiMainWindow_.comboBox_coinType.currentText()
         alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
         sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
 
@@ -110,14 +111,10 @@ class Controller():
             "Sub1": "1",
             "Sub2": "2",
             "Sub3": "3",
-            "USDM": "U",
-            "COINM": "C"
         }
 
-        symbol = "".join(symbol_mappings.get(item, "") for item in [market, sub_acc, coin_type])
-
-        if "By" in symbol:
-            symbol = change_last_letter(symbol, "U")
+        symbol = "".join(symbol_mappings.get(item, "") for item in [market, sub_acc])
+        symbol += "U"
 
         if alarm_type == "Risk":
             self.model_.set_data(symbol=symbol, asset_name=asset, risk_alarm=alarm)
@@ -253,4 +250,4 @@ class Controller():
     def ui_update(self):
         self.upload_withdrawable()
         self.upload_risk()
-        self.uiMainWindow_.label_infinity.setText(f"{datetime.datetime.now().strftime('%H:%M:%S')}")
+        self.uiMainWindow_.label_infinity.setText("Update: " + f"<span style='color: red;'>{datetime.datetime.now().strftime('%H:%M:%S')}</span>")

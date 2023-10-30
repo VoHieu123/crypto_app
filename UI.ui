@@ -211,7 +211,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,4,3,3">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,3,3,0,0,0,1">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,3,0,0,1,1">
         <property name="spacing">
          <number>3</number>
         </property>
@@ -259,20 +259,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_coinType">
-          <item>
-           <property name="text">
-            <string>USDM</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>COINM</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
          <widget class="QComboBox" name="comboBox_alarmType">
           <item>
            <property name="text">
@@ -289,13 +275,6 @@
             <string>Position</string>
            </property>
           </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_assetName">
-          <property name="placeholderText">
-           <string>Enter asset name. Default: &quot;USDT&quot;.</string>
-          </property>
          </widget>
         </item>
         <item>
@@ -321,11 +300,17 @@
         </item>
         <item>
          <widget class="QLabel" name="label_totalValue">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
           <property name="text">
-           <string>Total: 0</string>
+           <string>Total</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -344,7 +329,7 @@
            <number>1</number>
           </property>
           <property name="text">
-           <string/>
+           <string>Update</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -404,7 +389,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_41">
                <item>
-                <widget class="QLabel" name="label_15">
+                <widget class="QLabel" name="label_mainAccount">
                  <property name="text">
                   <string>Main account</string>
                  </property>
@@ -448,7 +433,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="label_binance">
                  <property name="text">
                   <string>Binance</string>
                  </property>
@@ -481,7 +466,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_9">
                <item>
-                <widget class="QLabel" name="label_7">
+                <widget class="QLabel" name="label_subAccount1">
                  <property name="text">
                   <string>Sub-account 1</string>
                  </property>
@@ -597,7 +582,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_32">
                <item>
-                <widget class="QLabel" name="label_31">
+                <widget class="QLabel" name="label_bybit">
                  <property name="text">
                   <string>Bybit</string>
                  </property>
@@ -735,7 +720,7 @@
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_19">
                <item>
-                <widget class="QLabel" name="label_19">
+                <widget class="QLabel" name="label_okx">
                  <property name="text">
                   <string>OKX</string>
                  </property>
