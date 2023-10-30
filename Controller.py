@@ -11,7 +11,7 @@ class Controller():
         self.labelDict = {}
         self.save_frequency_m = 10*60
         self.update_time = 0
-        self.alarm_error_duration = 60*20
+        self.alarm_error_duration = 60*25
         self.retrieve_frequency = 30
         self.current_time = 0
         self.identity_ = identity
@@ -47,7 +47,7 @@ class Controller():
                         # print(e)
                         pass
 
-        label_const_list = [f"label_{name}" for name in ["binance", "okx", "bybit", "mainAccount", "subAccount1"]]
+        label_const_list = [f"label_{name}" for name in ["totalValue", "infinity", "binance", "okx", "bybit", "mainAccount", "subAccount1"]]
         for label in label_const_list:
             ui_label = getattr(self.uiMainWindow_, label)
             ui_label.setFont(font)
