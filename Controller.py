@@ -26,8 +26,7 @@ class Controller():
         self.uiMainWindow_.button_export.clicked.connect(self.export_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
-        subaccounts = ["M", "1", "2", "3"]
-        coinTypes = ["U", "C"]
+        subaccounts = ["M", "1"]
 
         self.labelDict = {}
 
@@ -36,16 +35,15 @@ class Controller():
 
         for market in markets:
             for subaccount in subaccounts:
-                for coin_type in coinTypes:
-                    label_key = f"{market}{subaccount}{coin_type}"
-                    label_name = f"label_{market}{subaccount}{coin_type}"
-                    try:
-                        ui_label = getattr(self.uiMainWindow_, label_name)
-                        ui_label.setFont(font)
-                        self.labelDict[label_key] = ui_label
-                    except Exception as e:
-                        # print(e)
-                        pass
+                label_key = f"{market}{subaccount}U"
+                label_name = f"label_{market}{subaccount}U"
+                try:
+                    ui_label = getattr(self.uiMainWindow_, label_name)
+                    ui_label.setFont(font)
+                    self.labelDict[label_key] = ui_label
+                except Exception as e:
+                    # print(e)
+                    pass
 
         label_const_list = [f"label_{name}" for name in ["totalValue", "infinity", "binance", "okx", "bybit", "mainAccount", "subAccount1"]]
         for label in label_const_list:
