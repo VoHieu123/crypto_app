@@ -10,7 +10,6 @@ class Controller():
         self.labelDict = {}
         self.save_frequency_m = 10*60
         self.retrieve_frequency = 30
-        self.keep_alive_frequency = 5000
         self.current_time = 0
         self.identity_ = identity
         self.communication_ = communication
