@@ -9,8 +9,9 @@ class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
         self.labelDict = {}
         self.save_frequency_m = 10*60
+        self.update_time = 0
+        self.alarm_error_duration = 60*20
         self.retrieve_frequency = 30
-        self.keep_alive_frequency = 5000
         self.current_time = 0
         self.identity_ = identity
         self.communication_ = communication
@@ -31,15 +32,14 @@ class Controller():
 
         for market in markets:
             for subaccount in subaccounts:
-                if market == "Bi" or market == "Ok":
-                    for coin_type in coinTypes:
-                        label_key = f"{market}{subaccount}{coin_type}"
-                        label_name = f"label_{market}{subaccount}{coin_type}"
+                for coin_type in coinTypes:
+                    label_key = f"{market}{subaccount}{coin_type}"
+                    label_name = f"label_{market}{subaccount}{coin_type}"
+                    try:
                         self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
-                else:
-                    label_key = f"{market}{subaccount}U"
-                    label_name = f"label_{market}{subaccount}U"
-                    self.labelDict[label_key] = getattr(self.uiMainWindow_, label_name)
+                    except Exception as e:
+                        # print(e)
+                        pass
 
         self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
         self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
@@ -144,6 +144,8 @@ class Controller():
                                      risk=risk, equity=equity, withdrawable=withdrawable,
                                      long_pos=long_pos, short_pos=short_pos, initial=initial, maintenance=maintenance)
 
+        self.update_time = time.time()
+
     def upload_withdrawable(self):
         marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
         accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
@@ -207,10 +209,7 @@ class Controller():
                 if dict["initial"] > 0:
                     returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                 if dict["risk"] > 0:
-                    if "Ok" in symbol:
-                        returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red") + " / " + fmt(dict["risk"], background_color=risk_background_color, font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue") + "<br>"
-                    else:
-                        returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", formatStr=".0%") + "<br>"
+                    returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", formatStr=".0%") + "<br>"
                 if dict["equity"] > 0:
                     returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                 if position != 0:
@@ -227,7 +226,7 @@ class Controller():
                 total_value += value
                 qtLabel.setText(stringText)
 
-        self.uiMainWindow_.label_totalValue.setText(f"Total: {round(total_value, 2)}")
+        self.uiMainWindow_.label_totalValue.setText(f"Total: {fmt(total_value, color='red')}")
 
     def data_loop(self):
         # Todo: Stop this when transferring
@@ -239,6 +238,10 @@ class Controller():
            self.model_.save_data()
 
         self.current_time = time.time()
+        if self.current_time - self.update_time > self.alarm_error_duration:
+            alarm.activate("Program can't connect with servers.", alarm=True)
+            print(self.current_time - self.update_time)
+            self.update_time += 15
 
     # These loops must not modify the Model objects
     def ui_update(self):
