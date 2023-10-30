@@ -31,7 +31,7 @@ class Controller():
         self.labelDict = {}
 
         font = QFont()
-        font.setPointSize(16)
+        font.setPointSize(13)
 
         for market in markets:
             for subaccount in subaccounts:
@@ -212,12 +212,15 @@ class Controller():
                     if dict["initial"] > 0:
                         returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                     if dict["risk"] > 0:
-                        returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", formatStr=".0%") + "<br>"
+                        if "Ok" in symbol:
+                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, font_size=18, background_color="white", color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%") + "<br>"
+                        else:
+                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%", font_size=18, background_color="white") + "<br>"
                     if dict["equity"] > 0:
-                        returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                        returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red", font_size=18, background_color="white") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                     if position != 0:
                         returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
-                        returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", formatStr=".0%") + " / " + fmt(position, background_color=position_background_color, formatStr=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", formatStr=".0%") + "<br>"
+                        returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format_number=".0%") + " / " + fmt(position, background_color=position_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format_number=".0%", font_size=18, background_color="white") + "<br>"
 
             return total_value, returnStr[:-4]
 
