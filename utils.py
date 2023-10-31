@@ -1,6 +1,7 @@
 import uuid
 from PyQt6.QtCore import pyqtSignal, QObject
 import win32api, datetime
+from time import time
 from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
@@ -15,18 +16,18 @@ def resynch():
         try:
             if client == binance_client:
                 print("Getting time from Binance")
-                time = int(client.get_server_time()["serverTime"])
-                print(f"Binance time: {time}")
+                server_time = client.get_server_time()["serverTime"]
+                print(f"Binance time: {int(server_time)}")
             elif client == bybit_client:
                 print("Getting time from Bybit")
-                time = int(client.get_server_time()["time"])
-                print(f"Bybit time: {time}")
+                server_time = client.get_server_time()["time"]
+                print(f"Bybit time: {int(server_time)}")
             elif client == okx_client:
                 print("Getting time from OKX")
-                time = int(client.get_system_time()["data"][0]["ts"])
-                print(f"OKX time: {time}")
-            print(f"Local time: {time.time()}")
-            return time // 1000
+                server_time = client.get_system_time()["data"][0]["ts"]
+                print(f"OKX time: {int(server_time)}")
+            print(f"Local time: {int(time()*1000)}")
+            return server_time
         except Exception as e:
             print(e)
             return None
@@ -34,14 +35,14 @@ def resynch():
     for client_name, client in clients.items():
         epoch_time = get_time(client)
         if epoch_time is not None:
-            utcTime = datetime.datetime.utcfromtimestamp(epoch_time)
+            utcTime = datetime.datetime.utcfromtimestamp((epoch_time // 1000))
             try:
-                win32api.SetSystemTime(utcTime.year, utcTime.month, 0, utcTime.day, utcTime.hour, utcTime.minute, utcTime.second, 0)
+                win32api.SetSystemTime(utcTime.year, utcTime.month, 0, utcTime.day, utcTime.hour, utcTime.minute, utcTime.second, epoch_time % 1000)
             except Exception as e:
                 print(e)
                 break
             localTime = datetime.datetime.fromtimestamp(epoch_time)
-            print("Time updated to: " + localTime.strftime("%Y-%m-%d %H:%M") + "from" + client_name)
+            print("Time updated to: " + localTime.strftime("%Y-%m-%d %H:%M") + " from " + client_name)
             return
 
     print("Could not update time")
@@ -122,3 +123,5 @@ def auto_format(text, color="black", background_color=None, format_number=None, 
         pass
 
     return text_format(text, color=color, background_color=background_color, font_weight=font_weight, font_size=font_size)
+
+resynch()
