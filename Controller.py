@@ -213,14 +213,14 @@ class Controller():
                         returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                     if dict["risk"] > 0:
                         if "Ok" in symbol:
-                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, font_size=18, background_color="white", color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%") + "<br>"
+                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, font_size=20, background_color="yellow", color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%") + "<br>"
                         else:
-                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%", font_size=18, background_color="white") + "<br>"
+                            returnStr += "Risk: " + fmt(dict["risk_alarm"].start, color="red", format_number=".0%") + " / " + fmt(dict["risk"], background_color=risk_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["risk_alarm"].end, color="blue", format_number=".0%", font_size=20, background_color="yellow") + "<br>"
                     if dict["equity"] > 0:
-                        returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red", font_size=18, background_color="white") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
+                        returnStr += "Asset: " + fmt(dict["equity_alarm"].start, color="red", font_size=20, background_color="yellow") + " / " + fmt(dict["equity"], background_color=equity_background_color, font_weight="bold") + " / " + fmt(dict["equity_alarm"].end, color="blue") + "<br>"
                     if position != 0:
                         returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
-                        returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format_number=".0%") + " / " + fmt(position, background_color=position_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format_number=".0%", font_size=18, background_color="white") + "<br>"
+                        returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format_number=".0%") + " / " + fmt(position, background_color=position_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format_number=".0%", font_size=20, background_color="yellow") + "<br>"
 
             return total_value, returnStr[:-4]
 
@@ -253,4 +253,4 @@ class Controller():
     def ui_update(self):
         self.upload_withdrawable()
         self.upload_risk()
-        self.uiMainWindow_.label_infinity.setText("Update: " + f"<span style='color: red;'>{datetime.datetime.now().strftime('%H:%M:%S')}</span>")
+        self.uiMainWindow_.label_infinity.setText(f"Total: {fmt(datetime.datetime.now().strftime('%H:%M:%S'), color='red')}")
