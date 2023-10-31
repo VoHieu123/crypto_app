@@ -1,6 +1,6 @@
 import uuid
 from PyQt6.QtCore import pyqtSignal, QObject
-import win32api, datetime, time
+import win32api, datetime
 from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
