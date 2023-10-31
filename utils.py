@@ -5,6 +5,7 @@ from time import time, sleep
 from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
+import computer_specific
 
 okx_client = PublicData.PublicAPI(debug=False)
 bybit_client = HTTP(testnet=False)
@@ -124,5 +125,6 @@ def auto_format(text, color="black", background_color=None, format_number=None, 
 
     return text_format(text, color=color, background_color=background_color, font_weight=font_weight, font_size=font_size)
 
-# while not resynch():
-#     sleep(1)
+if computer_specific.COMPUTER_NAME == "Evan":
+    while not resynch():
+        sleep(1)
