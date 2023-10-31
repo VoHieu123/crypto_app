@@ -1,7 +1,7 @@
 import uuid
 from PyQt6.QtCore import pyqtSignal, QObject
 import win32api, datetime
-from time import time
+from time import time, sleep
 from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
@@ -11,7 +11,7 @@ bybit_client = HTTP(testnet=False)
 binance_client = Client()
 clients = {"Binance": binance_client, "Bybit": bybit_client, "OKX": okx_client}
 
-def resynch():
+def resynch() -> bool:
     def get_time(client):
         try:
             if client == binance_client:
@@ -42,9 +42,10 @@ def resynch():
                 print(e)
                 break
             print("Time updated with " + client_name)
-            return
+            return True
 
     print("Could not update time")
+    return False
 
 class Communication(QObject):
     ui_signal = pyqtSignal()
@@ -123,4 +124,5 @@ def auto_format(text, color="black", background_color=None, format_number=None, 
 
     return text_format(text, color=color, background_color=background_color, font_weight=font_weight, font_size=font_size)
 
-resynch()
+while not resynch():
+    sleep(1)
