@@ -35,14 +35,13 @@ def resynch():
     for client_name, client in clients.items():
         epoch_time = get_time(client)
         if epoch_time is not None:
-            utcTime = datetime.datetime.utcfromtimestamp((epoch_time/1000))
+            utcTime = datetime.datetime.utcfromtimestamp(epoch_time // 1000)
             try:
                 win32api.SetSystemTime(utcTime.year, utcTime.month, 0, utcTime.day, utcTime.hour, utcTime.minute, utcTime.second, epoch_time % 1000)
             except Exception as e:
                 print(e)
                 break
-            localTime = datetime.datetime.fromtimestamp(epoch_time)
-            print("Time updated to: " + localTime.strftime("%Y-%m-%d %H:%M") + " from " + client_name)
+            print("Time updated with " + client_name)
             return
 
     print("Could not update time")
