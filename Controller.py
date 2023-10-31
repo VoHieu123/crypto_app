@@ -57,7 +57,6 @@ class Controller():
     def transfer_button_clicked(self):
         # Todo: What if error happens here?
         self.update_data()
-        self.upload_withdrawable()
         try:
             withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
         except:
@@ -69,7 +68,6 @@ class Controller():
         accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
         exchangeTo = self.uiMainWindow_.comboBox_exchangeTo.currentText()
         accountTo = self.uiMainWindow_.comboBox_accountTo.currentText()
-        coin = self.uiMainWindow_.comboBox_withdrawCoin.currentText()
 
         # Todo: Check if the withdrawal amount is enough
         # Then move to money to funding wallet
@@ -148,18 +146,6 @@ class Controller():
                                      long_pos=long_pos, short_pos=short_pos, initial=initial, maintenance=maintenance)
 
         self.update_time = time.time()
-
-    def upload_withdrawable(self):
-        marketFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
-        accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
-        targetSymbol = f"{marketFrom[:2]}{'M' if accountFrom == 'Main' else accountFrom[-1:]}U"
-
-        for dict in self.model_.get_data(symbol=targetSymbol):
-            if dict["name"] == "USDT":
-                self.uiMainWindow_.label_withdrawable.setText(f"{round(dict.get('withdrawable'), 1)}")
-                return
-
-        self.uiMainWindow_.label_withdrawable.setText("0")
 
     def upload_risk(self):
         def handle_frontend_data(list):
@@ -251,6 +237,5 @@ class Controller():
 
     # These loops must not modify the Model objects
     def ui_update(self):
-        self.upload_withdrawable()
         self.upload_risk()
         self.uiMainWindow_.label_infinity.setText(f"Total: {fmt(datetime.datetime.now().strftime('%H:%M:%S'), color='red')}")

@@ -24,7 +24,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_29" stretch="0,0,0,0,0,0,0,0,0,0,0,1,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_29" stretch="0,0,0,0,0,0,0,1,0">
         <property name="spacing">
          <number>10</number>
         </property>
@@ -64,16 +64,6 @@
           <item>
            <property name="text">
             <string>Sub1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sub2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sub3</string>
            </property>
           </item>
          </widget>
@@ -116,46 +106,6 @@
             <string>Sub1</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Sub2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sub3</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Coin:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboBox_withdrawCoin">
-          <item>
-           <property name="text">
-            <string>USDT</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_23">
-          <property name="text">
-           <string>Available:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_withdrawable">
-          <property name="text">
-           <string>0</string>
-          </property>
          </widget>
         </item>
         <item>

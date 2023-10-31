@@ -124,5 +124,5 @@ def auto_format(text, color="black", background_color=None, format_number=None, 
 
     return text_format(text, color=color, background_color=background_color, font_weight=font_weight, font_size=font_size)
 
-while not resynch():
-    sleep(1)
+# while not resynch():
+#     sleep(1)
