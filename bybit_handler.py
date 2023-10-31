@@ -84,7 +84,6 @@ class BybitHandler:
 
         long_pos, short_pos = self.get_open_position()
 
-        # Todo: Currently assuming USDT is the only currency
         if all(item is not None for item in [mmr, equity, withdrawable, long_pos, short_pos]):
             status_list[f"ByMU_USDT"] = {"risk": mmr, "equity": equity, "withdrawable": withdrawable,
                                          "long_pos": long_pos, "short_pos": short_pos,
