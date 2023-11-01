@@ -6,6 +6,7 @@ from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
 import computer_specific
+import alarm
 
 okx_client = PublicData.PublicAPI(debug=False)
 bybit_client = HTTP(testnet=False)
@@ -16,21 +17,18 @@ def resynch() -> bool:
     def get_time(client):
         try:
             if client == binance_client:
-                print("Getting time from Binance")
                 server_time = client.get_server_time()["serverTime"]
-                print(f"Binance time: {int(server_time)}")
+                alarm.activate(message=f"Binance time: {int(server_time)}", to=["Hieu"])
             elif client == bybit_client:
-                print("Getting time from Bybit")
                 server_time = client.get_server_time()["time"]
-                print(f"Bybit time: {int(server_time)}")
+                alarm.activate(message=f"Bybit time: {int(server_time)}", to=["Hieu"])
             elif client == okx_client:
-                print("Getting time from OKX")
                 server_time = client.get_system_time()["data"][0]["ts"]
-                print(f"OKX time: {int(server_time)}")
-            print(f"Local time: {int(time()*1000)}")
+                alarm.activate(message=f"OKX time: {int(server_time)}", to=["Hieu"])
+            alarm.activate(message=f"Local time: {int(time()*1000)}", to=["Hieu"])
             return server_time
         except Exception as e:
-            print(e)
+            alarm.activate(message=f"{e}", to=["Hieu"])
             return None
 
     for client_name, client in clients.items():
@@ -40,12 +38,12 @@ def resynch() -> bool:
             try:
                 win32api.SetSystemTime(utcTime.year, utcTime.month, 0, utcTime.day, utcTime.hour, utcTime.minute, utcTime.second, epoch_time % 1000)
             except Exception as e:
-                print(e)
+                alarm.activate(message=f"{e}", to=["Hieu"])
                 break
-            print("Time updated with " + client_name)
+            alarm.activate(message="Time updated with " + client_name, to=["Hieu"])
             return True
 
-    print("Could not update time")
+    alarm.activate(message="Could not update time", to=["Hieu"])
     return False
 
 class Communication(QObject):
