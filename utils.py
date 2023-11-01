@@ -18,14 +18,10 @@ def resynch() -> bool:
         try:
             if client == binance_client:
                 server_time = client.get_server_time()["serverTime"]
-                alarm.activate(message=f"Binance time: {int(server_time)}", to=["Hieu"])
             elif client == bybit_client:
                 server_time = client.get_server_time()["time"]
-                alarm.activate(message=f"Bybit time: {int(server_time)}", to=["Hieu"])
             elif client == okx_client:
                 server_time = client.get_system_time()["data"][0]["ts"]
-                alarm.activate(message=f"OKX time: {int(server_time)}", to=["Hieu"])
-            alarm.activate(message=f"Local time: {int(time()*1000)}", to=["Hieu"])
             return server_time
         except Exception as e:
             alarm.activate(message=f"{e}", to=["Hieu"])
