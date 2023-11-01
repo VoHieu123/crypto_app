@@ -53,9 +53,7 @@ class Controller():
         self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
         self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
 
-    # Todo: Update data everytime the combo boxes are clicked
     def transfer_button_clicked(self):
-        # Todo: What if error happens here?
         self.update_data()
         try:
             withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
@@ -92,14 +90,19 @@ class Controller():
         upper_alarm = self.uiMainWindow_.lineEdit_upperThreshold.text()
         self.uiMainWindow_.lineEdit_lowerThreshold.setText("")
         self.uiMainWindow_.lineEdit_upperThreshold.setText("")
-        try:
-            alarm = Range(-1 if lower_alarm == "" else float(lower_alarm),
-                          -1 if upper_alarm == "" else float(upper_alarm))
-        except:
-            return
         market = self.uiMainWindow_.comboBox_market.currentText()
         alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
         sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
+
+        try:
+            if alarm_type == "Risk" or alarm_type == "Position":
+                alarm = Range(-1 if lower_alarm == "" else float(lower_alarm)/100,
+                              -1 if upper_alarm == "" else float(upper_alarm)/100)
+            else:
+                alarm = Range(-1 if lower_alarm == "" else float(lower_alarm),
+                              -1 if upper_alarm == "" else float(upper_alarm))
+        except:
+            return
 
         symbol_mappings = {
             "Binance": "Bi",
