@@ -27,7 +27,7 @@ def resynch() -> bool:
             alarm.activate(message=f"{e}", to=["Hieu"])
             return None
 
-    for client_name, client in clients.items():
+    for _, client in clients.items():
         epoch_time = get_time(client)
         if epoch_time is not None:
             utcTime = datetime.datetime.utcfromtimestamp(epoch_time // 1000)
@@ -36,7 +36,6 @@ def resynch() -> bool:
             except Exception as e:
                 alarm.activate(message=f"{e}", to=["Hieu"])
                 break
-            alarm.activate(message="Time updated with " + client_name, to=["Hieu"])
             return True
 
     alarm.activate(message="Could not update time", to=["Hieu"])
