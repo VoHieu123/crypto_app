@@ -37,12 +37,28 @@ class OKXHandler:
         return im, mm
 
     def get_long_short(self, ccy="USDT", sub_account=None):
+        def future_symbol_mapping(input_string):
+            output_string = ''
+            found_first_number = False
+
+            for char in input_string:
+                if char.isdigit() and not found_first_number:
+                    output_string += '_'
+                    found_first_number = True
+
+                output_string += char
+
+            return output_string
+
         def handle_position(positions):
             long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
             for position in positions:
                 if "USDT" in position["instId"]:
                     coin = position["instId"].replace("-", "")
-                    coin = coin.replace("SWAP", "")
+                    if "SWAP" in coin:
+                        coin = coin.replace("SWAP", "")
+                    else:
+                        coin = future_symbol_mapping(coin)
                     price = self.model_.get_universal_mark_price(coin)
                     if position["pos"] > 0:
                         long_pos_usdm += position["notionalCcy"]*price

@@ -127,21 +127,18 @@ class Model(object):
                 "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
             }
 
-        self.universal_mark_prices = {}
+        self.universal_mark_prices = pd.DataFrame()
 
-    def set_universal_mark_prices(self, usdm, coinm=None):
-        self.universal_mark_prices["usdm"] = usdm
+    def set_universal_mark_prices(self, usdm):
+        self.universal_mark_prices = usdm
 
-    def get_universal_mark_price(self, coin, type="usdm"):
-        price = 0
-
-        if type == "usdm":
-            df = self.universal_mark_prices[type]
-            if coin in df['symbol'].values:
-                price = df[df['symbol'] == coin]['markPrice'].values[0]
-            else:
-                print("No")
-
+    def get_universal_mark_price(self, coin):
+        df = self.universal_mark_prices
+        if coin in df['symbol'].values:
+            price = df[df['symbol'] == coin]['markPrice'].values[0]
+        else:
+            print(f"No {coin}")
+            price = 0
 
         return price
 

@@ -110,9 +110,6 @@ class BinanceHandler:
         usdm = self.send_http_request(func=self.binance_client.futures_mark_price)
         usdm = pd.DataFrame(usdm)
         usdm = usdm[["markPrice", "symbol"]]
-        # coinm = self.send_http_request(func=self.binance_client.futures_coin_mark_price)
-        # coinm = pd.DataFrame(coinm)
-        # coinm = coinm[["markPrice", "symbol"]]
         return usdm
 
     def transfer_money(self, to, amount, subAccount=None):
