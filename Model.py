@@ -131,7 +131,6 @@ class Model(object):
 
     def set_universal_mark_prices(self, usdm, coinm=None):
         self.universal_mark_prices["usdm"] = usdm
-        # self.universal_mark_prices["coinm"] = coinm
 
     def get_universal_mark_price(self, coin, type="usdm"):
         price = 0
@@ -142,9 +141,7 @@ class Model(object):
                 price = df[df['symbol'] == coin]['markPrice'].values[0]
             else:
                 print("No")
-        # Todo: Later
-        # elif type == "coinm":
-        #     price = self.universal_mark_prices[type]
+
 
         return price
 

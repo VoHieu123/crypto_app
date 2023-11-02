@@ -70,7 +70,7 @@ class BybitHandler:
         for item in data["list"]:
             if item["accountType"] == "UNIFIED":
                 mmr = item["accountMMRate"]
-                equity = item["totalEquity"]
+                equity = item["totalEquity"] if item["totalEquity"] > 1 else 0
                 im = item["totalInitialMargin"]
                 mm = item["totalMaintenanceMargin"]
                 break
@@ -80,7 +80,7 @@ class BybitHandler:
                                       accountType="UNIFIED", coin="USDT",
                                       withTransferSafeAmount=1)
 
-        withdrawable = data["balance"]["transferSafeAmount"]
+        withdrawable = data["balance"]["transferSafeAmount"] if data["balance"]["transferSafeAmount"] > 1 else 0
 
         long_pos, short_pos = self.get_open_position()
 

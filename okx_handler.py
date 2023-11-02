@@ -57,9 +57,9 @@ class OKXHandler:
             return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
         if sub_account in self.subaccount_dict:
-            positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk, instType="SWAP")
+            positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk)
         else:
-            positions = self.send_http_request(func=self.okx_account_api.get_position_risk, instType="SWAP")
+            positions = self.send_http_request(func=self.okx_account_api.get_position_risk)
 
         return handle_position(positions[0]["posData"])
 

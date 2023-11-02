@@ -197,7 +197,8 @@ class Controller():
                                 position_background_color = "yellow"
                                 alarm.activate(message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
 
-                    returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
+                    if dict["withdrawable"] > 0:
+                        returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
                     if dict["initial"] > 0:
                         returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                     if dict["risk"] > 0:
