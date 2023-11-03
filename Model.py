@@ -134,7 +134,9 @@ class Model(object):
 
     def get_universal_mark_price(self, coin):
         df = self.universal_mark_prices
-        if coin in df['symbol'].values:
+        if coin == "PEPEUSDT":
+            price = (df[df['symbol'] == "1000PEPEUSDT"]['markPrice'].values[0])/1000
+        elif coin in df['symbol'].values:
             price = df[df['symbol'] == coin]['markPrice'].values[0]
         else:
             print(f"No {coin}")
