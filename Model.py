@@ -112,12 +112,19 @@ class Model(object):
         self.account_history = pd.DataFrame()
         self.identity = identity
         if identity == "TA":
-            self.pickle_path = cs.PICKLE_PATH[:-4] + "_ta" + ".pkl"
+            self.settings_path = cs.SETTINGS_PATH[:-4] + "_ta" + ".pkl"
+            self.data_path = cs.DATA_PATH[:-4] + "_ta" + ".pkl"
         elif identity == "ST":
-            self.pickle_path = cs.PICKLE_PATH[:-4] + "_st" + ".pkl"
-        if os.path.exists(self.pickle_path):
-            with open(self.pickle_path, "rb") as pkl_file:
-                # Todo: Update problem
+            self.settings_path = cs.SETTINGS_PATH[:-4] + "_st" + ".pkl"
+            self.data_path = cs.DATA_PATH[:-4] + "_st" + ".pkl"
+
+        if os.path.exists(self.data_path):
+            with open(self.data_path, "rb") as pkl_file:
+                self.account_history = pickle.load(pkl_file)
+
+        if os.path.exists(self.settings_path):
+            with open(self.settings_path, "rb") as pkl_file:
+                # Todo: Data integrity
                 # settings = pickle.load(pkl_file)
                 self.risk_data = pickle.load(pkl_file)
         else:
@@ -153,8 +160,11 @@ class Model(object):
             for asset in list:
                 data[symbol].append(asset.get_settings_copy())
 
-        with open(self.pickle_path, "wb") as pkl_file:
+        with open(self.settings_path, "wb") as pkl_file:
             pickle.dump(data, pkl_file)
+
+        with open(self.data_path, "wb") as pkl_file:
+            pickle.dump(self.account_history, pkl_file)
 
     def save_data(self):
         current_data = pd.DataFrame()
