@@ -195,7 +195,7 @@ class Controller():
                         if position != 0:
                             if dict["position_alarm"].out_of_range(position):
                                 position_background_color = "yellow"
-                                alarm.activate(message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
+                                alarm.activate(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
 
                     if dict["withdrawable"] > 0:
                         returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
