@@ -14,7 +14,7 @@
    <string>Crypto Alarm</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -159,9 +159,58 @@
      </spacer>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QPushButton" name="button_export">
+        <property name="text">
+         <string>Export</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_totalValue">
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="text">
+         <string>Total</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_infinity">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="text">
+         <string>Update</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,4,3,3">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,3,3,0,0,1,1">
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,3,3,0,0">
         <property name="spacing">
          <number>3</number>
         </property>
@@ -239,47 +288,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="button_export">
+         <widget class="QPushButton" name="button_positionsPnL">
           <property name="text">
-           <string>Export</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_totalValue">
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="text">
-           <string>Total</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_infinity">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="lineWidth">
-           <number>1</number>
-          </property>
-          <property name="text">
-           <string>Update</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <string>PnLs</string>
           </property>
          </widget>
         </item>
@@ -302,7 +313,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>229</height>
+           <height>219</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -470,7 +481,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>172</height>
+           <height>164</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_40">
@@ -586,7 +597,7 @@
            <x>0</x>
            <y>0</y>
            <width>917</width>
-           <height>172</height>
+           <height>164</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_27">

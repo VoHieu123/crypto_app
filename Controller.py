@@ -24,6 +24,7 @@ class Controller():
         self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
         self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
         self.uiMainWindow_.button_export.clicked.connect(self.export_button_clicked)
+        self.uiMainWindow_.button_positionsPnL.clicked.connect(self.positions_pnl_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1"]
@@ -42,7 +43,7 @@ class Controller():
                     ui_label.setFont(font)
                     self.labelDict[label_key] = ui_label
                 except Exception as e:
-                    # print(e)
+                    print(e)
                     pass
 
         label_const_list = [f"label_{name}" for name in ["totalValue", "infinity", "binance", "okx", "bybit", "mainAccount", "subAccount1"]]
@@ -52,6 +53,14 @@ class Controller():
 
         self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
         self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
+
+    def positions_pnl_button_clicked(self):
+        market = self.uiMainWindow_.comboBox_market.currentText()
+        sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
+        if market == "OKX":
+            self.OKXHandler_.get_positions_pnl(None if sub_acc == "Main" else int(sub_acc[-1]))
+        elif market == "Binance":
+            self.BinanceHandler_.get_positions_pnl(None if sub_acc == "Main" else int(sub_acc[-1]))
 
     def transfer_button_clicked(self):
         self.update_data()

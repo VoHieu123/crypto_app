@@ -1,5 +1,7 @@
 from okx import SubAccount, Account
 import time, const, utils
+import pandas as pd
+import computer_specific
 
 class OKXHandler:
     def __init__(self, model, apiKey, secretKey, password):
@@ -36,7 +38,24 @@ class OKXHandler:
                 mm += margin["mmr"]
         return im, mm
 
-    def get_long_short(self, ccy="USDT", sub_account=None):
+    def get_positions_pnl(self, sub_account_index=None):
+        if sub_account_index:
+            for i, sub_account in enumerate(self.subaccount_dict):
+                if i + 1 == sub_account_index:
+                    positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_positions)
+        else:
+            positions = self.send_http_request(func=self.okx_account_api.get_positions)
+
+        positions = pd.DataFrame(positions)
+        if not positions.empty:
+            positions = positions[["instId", "uplLastPx"]]
+            positions.sort_values(by='instId')
+            if sub_account_index:
+                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_okx_sub{sub_account_index}_pnls.xlsx", index=False)
+            else:
+                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_okx_main_pnls.xlsx", index=False)
+
+    def get_long_short(self, sub_account=None):
         def future_symbol_mapping(input_string):
             output_string = ''
             found_first_number = False
@@ -50,34 +69,28 @@ class OKXHandler:
 
             return output_string
 
-        def handle_position(positions):
-            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
-            for position in positions:
-                if "USDT" in position["instId"]:
-                    coin = position["instId"].replace("-", "")
-                    if "SWAP" in coin:
-                        coin = coin.replace("SWAP", "")
-                    else:
-                        coin = future_symbol_mapping(coin)
-                    price = self.model_.get_universal_mark_price(coin)
-                    if position["pos"] > 0:
-                        long_pos_usdm += position["notionalCcy"]*price
-                    elif position["pos"] < 0:
-                        short_pos_usdm += position["notionalCcy"]*price
-                # else:
-                #     if position["pos"] > 0:
-                #         long_pos_coinm += position["notionalUsd"]
-                #     else:
-                #         short_pos_coinm += position["notionalUsd"]
-
-            return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
-
         if sub_account in self.subaccount_dict:
             positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_position_risk)
         else:
             positions = self.send_http_request(func=self.okx_account_api.get_position_risk)
 
-        return handle_position(positions[0]["posData"])
+        positions = positions[0]["posData"]
+
+        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
+        for position in positions:
+            if "USDT" in position["instId"]:
+                coin = position["instId"].replace("-", "")
+                if "SWAP" in coin:
+                    coin = coin.replace("SWAP", "")
+                else:
+                    coin = future_symbol_mapping(coin)
+                price = self.model_.get_universal_mark_price(coin)
+                if position["pos"] > 0:
+                    long_pos_usdm += position["notionalCcy"]*price
+                elif position["pos"] < 0:
+                    short_pos_usdm += position["notionalCcy"]*price
+
+        return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
 
     @staticmethod
     def send_http_request(func, **kwargs):
@@ -93,7 +106,7 @@ class OKXHandler:
             except Exception as error:
                 utils.resynch()
                 if retries_count < const.MAX_RETRIES:
-                    # print(f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
+                    print(f"OKX error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
                     raise Exception(f"Error: {error}.")

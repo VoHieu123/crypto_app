@@ -1,6 +1,7 @@
 from binance import Client
 import time, const, utils
 import pandas as pd
+import computer_specific
 
 class BinanceHandler:
     def __init__(self, model, apiKey, secretKey):
@@ -27,19 +28,25 @@ class BinanceHandler:
 
         return long_pos, short_pos
 
-    def get_sub_coinm_open_positions(self, sub_account):
-        long_pos, short_pos = 0, 0
-        coin = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=2)
-        coin = pd.DataFrame(coin["deliveryPositionRiskVOS"])
-        coin = coin[coin["positionAmount"] != 0]
-        if not coin.empty:
-            coin = coin[["positionAmount", "markPrice"]]
-            coin_long = coin[coin["positionAmount"] > 0]
-            coin_short = coin[coin["positionAmount"] < 0]
-            long_pos = (coin_long["positionAmount"]*coin_long["markPrice"]).sum()
-            short_pos = (coin_short["positionAmount"]*coin_short["markPrice"]).sum()
+    def get_positions_pnl(self, sub_account_index=None):
+        if sub_account_index:
+            for i, sub_account in enumerate(self.subaccount_list):
+                if i + 1 == sub_account_index:
+                    positions = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=1)
+                    positions = pd.DataFrame(positions["futurePositionRiskVOS"])
+                    positions = positions[positions["positionAmount"] != 0]
+        else:
+            positions = self.send_http_request(func=self.binance_client.futures_account)
+            positions = pd.DataFrame(positions["positions"])
+            positions = positions[positions["positionAmt"] != 0]
 
-        return long_pos, short_pos
+        if not positions.empty:
+            positions = positions[["symbol", "unrealizedProfit"]]
+            positions.sort_values(by='symbol')
+            if sub_account_index:
+                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_bin_sub{sub_account_index}_pnls.xlsx", index=False)
+            else:
+                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_bin_main_pnls.xlsx", index=False)
 
     @staticmethod
     def send_http_request(func, **kwargs):
@@ -51,7 +58,7 @@ class BinanceHandler:
             except Exception as error:
                 utils.resynch()
                 if retries_count < const.MAX_RETRIES:
-                    # print(f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
+                    print(f"Binance error in {func.__name__}: {error}. Retries number: {retries_count}.")
                     time.sleep(const.SLEEP_TIME)
                 else:
                     raise Exception(f"Error: {error}.")
@@ -70,18 +77,6 @@ class BinanceHandler:
                                                          "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
                                                          "long_pos": long_pos, "short_pos": short_pos, "initial": asset["initialMargin"], "maintenance": asset["maintMargin"]}
 
-        mainAccountData = self.send_http_request(func=self.binance_client.futures_coin_account)
-        long_pos, short_pos = 0, 0
-        coin = pd.DataFrame(mainAccountData["positions"])
-        long_pos = coin[coin["positionAmt"] > 0]["notionalValue"].sum()
-        short_pos = coin[coin["positionAmt"] < 0]["notionalValue"].sum()
-        for asset in mainAccountData["assets"]:
-            if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
-                status_list[f"BiMC_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
-                                                         "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
-                                                         "long_pos": long_pos, "short_pos": short_pos, "initial": asset["initialMargin"],
-                                                         "maintenance": asset["maintMargin"]}
-
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
@@ -94,15 +89,6 @@ class BinanceHandler:
                                                                  "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],
                                                                  "long_pos": long_pos, "short_pos": short_pos, "initial": usd["initialMargin"],
                                                                  "maintenance": usd["maintenanceMargin"]}
-
-            long_pos, short_pos = self.get_sub_coinm_open_positions(sub_account)
-            coinm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=2)
-            for coin in coinm["deliveryAccountResp"]["assets"]:
-                if coin["maintenanceMargin"] != 0 or coin["maxWithdrawAmount"] != 0:
-                    status_list[f"Bi{i + 1}C_{coin['asset']}"] = {"risk": (coin["maintenanceMargin"]/coin["marginBalance"]) if coin["marginBalance"] != 0 else 0,
-                                                                 "equity": coin["marginBalance"], "withdrawable": coin["maxWithdrawAmount"],
-                                                                 "long_pos": long_pos, "short_pos": short_pos, "initial": coin["initialMargin"],
-                                                                 "maintenance": coin["maintenanceMargin"]}
 
         return status_list
 
@@ -127,6 +113,3 @@ class BinanceHandler:
         # elif to == "OKX":
         #     pass
         pass
-
-# handler = BinanceHandler(apiKey="Yw5nx7bXvx9Wz9w9uIt1v93QD5NWw18Hu19m6WW6qRbca7VVxgdOMJkN0UId7Ixn", secretKey="4mwZ8eVpMBfOn2nw69BRqsdNfdCMauPJnUvCfIEZwIKKe89cAxcO48CR31pdicqy")
-# handler.get_universal_mark_prices()
