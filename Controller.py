@@ -161,6 +161,7 @@ class Controller():
 
     def upload_risk(self):
         def handle_frontend_data(list):
+            save_data_flag = False
             total_value = 0
             def calculate_position_risk(long_pos, short_pos):
                     if long_pos == 0 or short_pos == 0:
@@ -194,15 +195,18 @@ class Controller():
                             send_symbol += "Main "
 
                         if dict["risk_alarm"].out_of_range(dict["risk"]):
+                            save_data_flag = True
                             risk_background_color = "yellow"
                             alarm.activate(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
 
                         if dict["equity_alarm"].out_of_range(dict["equity"]):
+                            save_data_flag = True
                             equity_background_color = "yellow"
                             alarm.activate(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
 
                         if position != 0:
                             if dict["position_alarm"].out_of_range(position):
+                                save_data_flag = True
                                 position_background_color = "yellow"
                                 alarm.activate(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
 
@@ -221,16 +225,21 @@ class Controller():
                         returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
                         returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format_number=".0%") + " / " + fmt(position, background_color=position_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format_number=".0%", font_size=20, background_color="yellow") + "<br>"
 
-            return total_value, returnStr[:-4]
+            return save_data_flag, total_value, returnStr[:-4]
 
         total_value = 0
+        should_save_data_flag = False
         for symbol, qtLabel in self.labelDict.items():
             symbol_list = self.model_.get_data(symbol=symbol)
             if symbol_list:
-                value, stringText = handle_frontend_data(symbol_list)
+                should_save_data, value, stringText = handle_frontend_data(symbol_list)
+                if should_save_data:
+                    should_save_data_flag = True
                 total_value += value
                 qtLabel.setText(stringText)
 
+        if should_save_data_flag:
+            self.model_.save_data()
         self.uiMainWindow_.label_totalValue.setText(f"Total: {fmt(total_value, color='red')}")
 
     def data_loop(self):
