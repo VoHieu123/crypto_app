@@ -1,7 +1,6 @@
 from binance import Client
 import time, const, utils
 import pandas as pd
-import computer_specific
 
 class BinanceHandler:
     def __init__(self, model, apiKey, secretKey):
@@ -29,24 +28,28 @@ class BinanceHandler:
         return long_pos, short_pos
 
     def get_positions_pnl(self, sub_account_index=None):
+        pnls = pd.DataFrame()
         if sub_account_index:
             for i, sub_account in enumerate(self.subaccount_list):
                 if i + 1 == sub_account_index:
-                    positions = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=1)
-                    positions = pd.DataFrame(positions["futurePositionRiskVOS"])
-                    positions = positions[positions["positionAmount"] != 0]
+                    pnls = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=1)
+                    pnls = pd.DataFrame(pnls["futurePositionRiskVOS"])
+                    pnls = pnls[pnls["positionAmount"] != 0]
+                    break
         else:
-            positions = self.send_http_request(func=self.binance_client.futures_account)
-            positions = pd.DataFrame(positions["positions"])
-            positions = positions[positions["positionAmt"] != 0]
+            pnls = self.send_http_request(func=self.binance_client.futures_account)
+            pnls = pd.DataFrame(pnls["positions"])
+            pnls = pnls[pnls["positionAmt"] != 0]
 
-        if not positions.empty:
-            positions = positions[["symbol", "unrealizedProfit"]]
-            positions.sort_values(by='symbol')
-            if sub_account_index:
-                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_bin_sub{sub_account_index}_pnls.xlsx", index=False)
-            else:
-                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_bin_main_pnls.xlsx", index=False)
+        if not pnls.empty:
+            pnls = pnls[["symbol", "unrealizedProfit"]]
+            pnls.sort_values(by='symbol', inplace=True, ignore_index=True, ascending=True)
+            pnls.rename(columns = {"unrealizedProfit" : "uPnLs_" + (f"sub{sub_account_index}" if sub_account_index else "main")}, inplace = True)
+            pnls.rename(columns = {"symbol" : "Binance_" + (f"sub{sub_account_index}" if sub_account_index else "main")}, inplace = True)
+        else:
+            pnls = pd.DataFrame()
+
+        return pnls
 
     @staticmethod
     def send_http_request(func, **kwargs):

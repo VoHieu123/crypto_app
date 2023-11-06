@@ -5,6 +5,8 @@ import time, alarm
 from utils import Communication
 from PyQt6.QtGui import QFont
 import datetime
+import computer_specific
+import pandas as pd
 
 class Controller():
     def __init__ (self, identity, uiMainWindow, model, communication: Communication, binanceHandler, okxHandler, bybitHandler):
@@ -55,12 +57,14 @@ class Controller():
         self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
 
     def positions_pnl_button_clicked(self):
-        market = self.uiMainWindow_.comboBox_market.currentText()
-        sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
-        if market == "OKX":
-            self.OKXHandler_.get_positions_pnl(None if sub_acc == "Main" else int(sub_acc[-1]))
-        elif market == "Binance":
-            self.BinanceHandler_.get_positions_pnl(None if sub_acc == "Main" else int(sub_acc[-1]))
+        data = pd.DataFrame()
+        pnls_1 = self.OKXHandler_.get_positions_pnl()
+        pnls_2 = self.OKXHandler_.get_positions_pnl(1)
+        pnls_3 = self.BinanceHandler_.get_positions_pnl()
+        pnls_4 = self.BinanceHandler_.get_positions_pnl(1)
+        data = pd.concat([data, pnls_1, pnls_2, pnls_3, pnls_4], axis=1)
+
+        data.to_excel(f"{computer_specific.PNL_PATH}pnls_{self.model_.identity.lower()}.xlsx")
 
     def transfer_button_clicked(self):
         self.update_data()

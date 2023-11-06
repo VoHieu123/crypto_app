@@ -1,7 +1,6 @@
 from okx import SubAccount, Account
 import time, const, utils
 import pandas as pd
-import computer_specific
 
 class OKXHandler:
     def __init__(self, model, apiKey, secretKey, password):
@@ -39,21 +38,26 @@ class OKXHandler:
         return im, mm
 
     def get_positions_pnl(self, sub_account_index=None):
+        pnls = pd.DataFrame()
         if sub_account_index:
             for i, sub_account in enumerate(self.subaccount_dict):
                 if i + 1 == sub_account_index:
-                    positions = self.send_http_request(func=self.subaccount_dict[sub_account].get_positions)
+                    pnls = self.send_http_request(func=self.subaccount_dict[sub_account].get_positions)
+                    pnls = pd.DataFrame(pnls)
+                    break
         else:
-            positions = self.send_http_request(func=self.okx_account_api.get_positions)
+            pnls = self.send_http_request(func=self.okx_account_api.get_positions)
+            pnls = pd.DataFrame(pnls)
 
-        positions = pd.DataFrame(positions)
-        if not positions.empty:
-            positions = positions[["instId", "uplLastPx"]]
-            positions.sort_values(by='instId')
-            if sub_account_index:
-                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_okx_sub{sub_account_index}_pnls.xlsx", index=False)
-            else:
-                positions.to_excel(f"{computer_specific.PNL_PATH}{self.model_.identity.lower()}_okx_main_pnls.xlsx", index=False)
+        if not pnls.empty:
+            pnls = pnls[["instId", "uplLastPx"]]
+            pnls.sort_values(by='instId', inplace=True, ignore_index=True, ascending=True)
+            pnls.rename(columns = {"uplLastPx" : "uPnLs_" + (f"sub{sub_account_index}" if sub_account_index else "main")}, inplace = True)
+            pnls.rename(columns = {"instId" : "OKX_" + (f"sub{sub_account_index}" if sub_account_index else "main")}, inplace = True)
+        else:
+            pnls = pd.DataFrame()
+
+        return pnls
 
     def get_long_short(self, sub_account=None):
         def future_symbol_mapping(input_string):
