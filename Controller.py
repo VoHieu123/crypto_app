@@ -23,10 +23,10 @@ class Controller():
         self.OKXHandler_ = okxHandler
         self.uiMainWindow_ = uiMainWindow
         self.model_ = model
-        self.uiMainWindow_.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
-        self.uiMainWindow_.button_transfer.clicked.connect(self.transfer_button_clicked)
-        self.uiMainWindow_.button_export.clicked.connect(self.export_button_clicked)
-        self.uiMainWindow_.button_positionsPnL.clicked.connect(self.positions_pnl_button_clicked)
+        self.uiMainWindow_.ui.button_changeThreshold.clicked.connect(self.change_threshold_button_clicked)
+        self.uiMainWindow_.ui.button_transfer.clicked.connect(self.transfer_button_clicked)
+        self.uiMainWindow_.ui.button_export.clicked.connect(self.export_button_clicked)
+        self.uiMainWindow_.ui.button_positionsPnL.clicked.connect(self.positions_pnl_button_clicked)
 
         markets = ["Bi", "Ok", "By"]
         subaccounts = ["M", "1"]
@@ -41,7 +41,7 @@ class Controller():
                 label_key = f"{market}{subaccount}U"
                 label_name = f"label_{market}{subaccount}U"
                 try:
-                    ui_label = getattr(self.uiMainWindow_, label_name)
+                    ui_label = getattr(self.uiMainWindow_.ui, label_name)
                     ui_label.setFont(font)
                     self.labelDict[label_key] = ui_label
                 except Exception as e:
@@ -50,11 +50,11 @@ class Controller():
 
         label_const_list = [f"label_{name}" for name in ["totalValue", "infinity", "binance", "okx", "bybit", "mainAccount", "subAccount1"]]
         for label in label_const_list:
-            ui_label = getattr(self.uiMainWindow_, label)
+            ui_label = getattr(self.uiMainWindow_.ui, label)
             ui_label.setFont(font)
 
-        self.uiMainWindow_.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
-        self.uiMainWindow_.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
+        self.uiMainWindow_.ui.label_infinity.setStyleSheet("QLabel { border: 1px solid black;}")
+        self.uiMainWindow_.ui.label_totalValue.setStyleSheet("QLabel { border: 1px solid black;}")
 
     def positions_pnl_button_clicked(self):
         data = pd.DataFrame()
@@ -69,16 +69,16 @@ class Controller():
     def transfer_button_clicked(self):
         self.update_data()
         try:
-            withdrawAmount = float(self.uiMainWindow_.lineEdit_withdrawAmount.text())
+            withdrawAmount = float(self.uiMainWindow_.ui.lineEdit_withdrawAmount.text())
         except:
             return
         moduleDict = {"Binance": self.BinanceHandler_,
                       "Bybit": self.BybitHandler_,
                       "Okx": self.OKXHandler_}
-        exchangeFrom = self.uiMainWindow_.comboBox_exchangeFrom.currentText()
-        accountFrom = self.uiMainWindow_.comboBox_accountFrom.currentText()
-        exchangeTo = self.uiMainWindow_.comboBox_exchangeTo.currentText()
-        accountTo = self.uiMainWindow_.comboBox_accountTo.currentText()
+        exchangeFrom = self.uiMainWindow_.ui.comboBox_exchangeFrom.currentText()
+        accountFrom = self.uiMainWindow_.ui.comboBox_accountFrom.currentText()
+        exchangeTo = self.uiMainWindow_.ui.comboBox_exchangeTo.currentText()
+        accountTo = self.uiMainWindow_.ui.comboBox_accountTo.currentText()
 
         # Todo: Check if the withdrawal amount is enough
         # Then move to money to funding wallet
@@ -99,13 +99,13 @@ class Controller():
         self.model_.export_data()
 
     def change_threshold_button_clicked(self):
-        lower_alarm = self.uiMainWindow_.lineEdit_lowerThreshold.text()
-        upper_alarm = self.uiMainWindow_.lineEdit_upperThreshold.text()
-        self.uiMainWindow_.lineEdit_lowerThreshold.setText("")
-        self.uiMainWindow_.lineEdit_upperThreshold.setText("")
-        market = self.uiMainWindow_.comboBox_market.currentText()
-        alarm_type = self.uiMainWindow_.comboBox_alarmType.currentText()
-        sub_acc = self.uiMainWindow_.comboBox_subAcc.currentText()
+        lower_alarm = self.uiMainWindow_.ui.lineEdit_lowerThreshold.text()
+        upper_alarm = self.uiMainWindow_.ui.lineEdit_upperThreshold.text()
+        self.uiMainWindow_.ui.lineEdit_lowerThreshold.setText("")
+        self.uiMainWindow_.ui.lineEdit_upperThreshold.setText("")
+        market = self.uiMainWindow_.ui.comboBox_market.currentText()
+        alarm_type = self.uiMainWindow_.ui.comboBox_alarmType.currentText()
+        sub_acc = self.uiMainWindow_.ui.comboBox_subAcc.currentText()
 
         try:
             if alarm_type == "Risk" or alarm_type == "Position":
@@ -244,7 +244,7 @@ class Controller():
 
         if should_save_data_flag:
             self.model_.save_data()
-        self.uiMainWindow_.label_totalValue.setText(f"Total: {fmt(total_value, color='red')}")
+        self.uiMainWindow_.ui.label_totalValue.setText(f"Total: {fmt(total_value, color='red')}")
 
     def data_loop(self):
         # Todo: Stop this when transferring
@@ -264,4 +264,4 @@ class Controller():
     # These loops must not modify the Model objects
     def ui_update(self):
         self.upload_risk()
-        self.uiMainWindow_.label_infinity.setText(f"Total: {fmt(datetime.datetime.now().strftime('%H:%M:%S'), color='red')}")
+        self.uiMainWindow_.ui.label_infinity.setText(f"Total: {fmt(datetime.datetime.now().strftime('%H:%M:%S'), color='red')}")
