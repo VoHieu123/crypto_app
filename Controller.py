@@ -132,7 +132,7 @@ class Controller():
 
         if alarm_type == "Risk":
             self.model_.set_data(symbol=symbol, asset_name="USDT", risk_alarm=alarm)
-        elif alarm_type == "Equity":
+        elif alarm_type == "Asset":
             self.model_.set_data(symbol=symbol, asset_name="USDT", equity_alarm=alarm)
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name="USDT", position_alarm=alarm)
