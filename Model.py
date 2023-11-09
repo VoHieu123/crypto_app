@@ -5,24 +5,29 @@ import computer_specific as cs
 import pandas as pd
 import const, openpyxl, datetime
 
-BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
-OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
+BIN_DEFAULT_RISK_ALARM = Range(0.0, 0.5)
+OKX_DEFAULT_RISK_ALARM = Range(0.0, 12.0)
 BYBIT_DEFAULT_RISK_ALARM = Range(0.0, 0.5)
 
-BIN_DEFAULT_EQUITY_ALARM = [Range(2000, 15000), Range(100, 1000)]
-OKX_DEFAULT_EQUITY_ALARM = [Range(2000, 15000), Range(100, 1000)]
+BIN_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
+OKX_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
 BYBIT_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
 
-BIN_DEFAULT_POSITION_ALARM = [Range(0.00, 0.2), Range(0.00, 0.2)]
-OKX_DEFAULT_POSITION_ALARM = [Range(0.00, 0.2), Range(0.00, 0.2)]
+BIN_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
+OKX_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
 BYBIT_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
 
+BIN_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+OKX_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+BYBIT_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+
 class Asset:
-    def __init__(self, symbol, asset_name, pnls=-1,
+    def __init__(self, symbol, asset_name, pnls=-1, size_alarm=Range(-1, -1),
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
                  withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
                  initial=-1, maintenance=-1):
 
+        self.size_alarm = size_alarm
         self.pnls = pnls
         self.name = asset_name
         self.risk = risk
@@ -37,27 +42,35 @@ class Asset:
         self.initial = initial
         self.maintenance = maintenance
 
+        if size_alarm == Range(-1, -1):
+            if "Bi" in symbol:
+                self.size_alarm = BIN_DEFAULT_SIZE_ALARM
+            elif "Ok" in symbol:
+                self.size_alarm = OKX_DEFAULT_SIZE_ALARM
+            elif "By" in symbol:
+                self.size_alarm = BYBIT_DEFAULT_SIZE_ALARM
+
         if position_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.position_alarm = BIN_DEFAULT_POSITION_ALARM[0] if "U" in symbol else BIN_DEFAULT_POSITION_ALARM[1]
+                self.position_alarm = BIN_DEFAULT_POSITION_ALARM
             elif "Ok" in symbol:
-                self.position_alarm = OKX_DEFAULT_POSITION_ALARM[0] if "U" in symbol else OKX_DEFAULT_POSITION_ALARM[1]
+                self.position_alarm = OKX_DEFAULT_POSITION_ALARM
             elif "By" in symbol:
                 self.position_alarm = BYBIT_DEFAULT_POSITION_ALARM
 
         if equity_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.equity_alarm = BIN_DEFAULT_EQUITY_ALARM[0] if "U" in symbol else BIN_DEFAULT_EQUITY_ALARM[1]
+                self.equity_alarm = BIN_DEFAULT_EQUITY_ALARM
             elif "Ok" in symbol:
-                self.equity_alarm = OKX_DEFAULT_EQUITY_ALARM[0] if "U" in symbol else OKX_DEFAULT_EQUITY_ALARM[1]
+                self.equity_alarm = OKX_DEFAULT_EQUITY_ALARM
             elif "By" in symbol:
                 self.equity_alarm = BYBIT_DEFAULT_EQUITY_ALARM
 
         if risk_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.risk_alarm = BIN_DEFAULT_RISK_ALARM[0] if "U" in symbol else BIN_DEFAULT_RISK_ALARM[1]
+                self.risk_alarm = BIN_DEFAULT_RISK_ALARM
             elif "Ok" in symbol:
-                self.risk_alarm = OKX_DEFAULT_RISK_ALARM[0] if "U" in symbol else OKX_DEFAULT_RISK_ALARM[1]
+                self.risk_alarm = OKX_DEFAULT_RISK_ALARM
             elif "By" in symbol:
                 self.risk_alarm = BYBIT_DEFAULT_RISK_ALARM
 
@@ -75,6 +88,7 @@ class Asset:
     def get_settings_copy(self):
         return Asset(symbol=self.symbol, asset_name=self.name,
                      risk_alarm=self.risk_alarm,
+                     size_alarm=self.size_alarm,
                      equity_alarm=self.equity_alarm,
                      position_alarm=self.position_alarm)
 
@@ -94,6 +108,11 @@ class Asset:
         self.maintenance = maintenance if maintenance != -1 else self.maintenance
     def set_equity(self, equity):
         self.equity = equity if equity != -1 else self.equity
+    def set_size_alarm(self, size_alarm: Range):
+        if size_alarm.start != -1:
+            self.size_alarm.start = size_alarm.start
+        if size_alarm.end != -1:
+            self.size_alarm.end = size_alarm.end
     def set_risk_alarm(self, risk_alarm: Range):
         if risk_alarm.start != -1:
             self.risk_alarm.start = risk_alarm.start
@@ -127,8 +146,6 @@ class Model(object):
 
         if os.path.exists(self.settings_path):
             with open(self.settings_path, "rb") as pkl_file:
-                # Todo: Data integrity
-                # settings = pickle.load(pkl_file)
                 self.data = pickle.load(pkl_file)
         else:
             self.data = {
@@ -205,7 +222,6 @@ class Model(object):
         current_data.insert(0, "TIME", pd.Timestamp.now())
         current_data['TAB'] = ""
         self.account_history = pd.concat([self.account_history, current_data])
-        
 
     def export_data(self):
         # Todo: Check data integrity
@@ -256,7 +272,7 @@ class Model(object):
             pass
 
 
-    def set_data(self, symbol, asset_name, pnls=-1,
+    def set_data(self, symbol, asset_name, pnls=-1, size_alarm=Range(-1, -1),
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
                  withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
                  initial=-1, maintenance=-1) -> bool:
@@ -265,6 +281,7 @@ class Model(object):
                 if asset.name == asset_name:
                     asset.set_free(pnls)
                     asset.set_risk(risk)
+                    asset.set_size_alarm(size_alarm)
                     asset.set_risk_alarm(risk_alarm)
                     asset.set_equity(equity)
                     asset.set_equity_alarm(equity_alarm)
@@ -278,7 +295,7 @@ class Model(object):
 
             if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos, maintenance, initial]):
                 new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, risk_alarm=risk_alarm, pnls=pnls,
-                                  equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
+                                  equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable, size_alarm=size_alarm,
                                   long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm,
                                   initial=initial, maintenance=maintenance)
                 self.data[symbol].append(new_asset)
@@ -292,7 +309,7 @@ class Model(object):
             for asset in self.data[symbol]:
                 if asset.is_valid_instance():
                     attribute_names = ["name", "risk", "equity", "withdrawable", "pnls",
-                                       "risk_alarm", "equity_alarm", "position_alarm",
+                                       "risk_alarm", "equity_alarm", "position_alarm", "size_alarm",
                                        "long_pos", "short_pos", "initial", "maintenance"]
 
                     returnDict.append({key: getattr(asset, key) for key in attribute_names})

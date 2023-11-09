@@ -256,12 +256,17 @@
           </item>
           <item>
            <property name="text">
-            <string>Equity</string>
+            <string>Asset</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>Position</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Size</string>
            </property>
           </item>
          </widget>

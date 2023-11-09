@@ -136,6 +136,8 @@ class Controller():
             self.model_.set_data(symbol=symbol, asset_name="USDT", equity_alarm=alarm)
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name="USDT", position_alarm=alarm)
+        elif alarm_type == "Size":
+            self.model_.set_data(symbol=symbol, asset_name="USDT", size_alarm=alarm)
         self.upload_risk()
 
     def update_data(self):
@@ -182,6 +184,7 @@ class Controller():
                     position_background_color = None
                     risk_background_color = None
                     equity_background_color = None
+                    size_background_color = None
 
                     position = calculate_position_risk(dict["long_pos"], dict["short_pos"])
 
@@ -214,6 +217,10 @@ class Controller():
                                 save_data_flag = True
                                 position_background_color = "yellow"
                                 alarm.activate(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
+                            if dict["size_alarm"].out_of_range((dict["long_pos"] - dict["short_pos"])/2):
+                                save_data_flag = True
+                                size_background_color = "yellow"
+                                alarm.activate(risk_sound=False, message=f"{send_symbol}size alarm {dict['name']}: {(dict['long_pos'] - dict['short_pos'])/2}", alarm=True)
 
                     if dict["withdrawable"] > 0:
                         returnStr += "Free: " + fmt(dict["pnls"]) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
@@ -229,6 +236,7 @@ class Controller():
                     if position != 0:
                         returnStr += "Position: " + fmt(dict["long_pos"]) + " / " + fmt(dict["short_pos"], color="red") + "<br>"
                         returnStr += "Rate: " + fmt(dict["position_alarm"].start, color="red", format_number=".0%") + " / " + fmt(position, background_color=position_background_color, format_number=".2%", font_weight="bold") + " / " + fmt(dict["position_alarm"].end, color="blue", format_number=".0%", font_size=20, background_color="yellow") + "<br>"
+                        returnStr += "Size: " + fmt(dict["size_alarm"].start, color="red") + " / " + fmt((dict["long_pos"] - dict["short_pos"])/2, background_color=size_background_color) + " / " + fmt(dict["size_alarm"].end, color="blue") + "<br>"
 
             return save_data_flag, total_value, returnStr[:-4]
 
