@@ -5,24 +5,30 @@ import computer_specific as cs
 import pandas as pd
 import const, openpyxl, datetime
 
-BIN_DEFAULT_RISK_ALARM = [Range(0.0, 0.5), Range(0.0, 0.6)]
-OKX_DEFAULT_RISK_ALARM = [Range(0.0, 12.0), Range(0.0, 12.0)]
+BIN_DEFAULT_RISK_ALARM = Range(0.0, 0.5)
+OKX_DEFAULT_RISK_ALARM = Range(0.0, 12.0)
 BYBIT_DEFAULT_RISK_ALARM = Range(0.0, 0.5)
 
-BIN_DEFAULT_EQUITY_ALARM = [Range(2000, 15000), Range(100, 1000)]
-OKX_DEFAULT_EQUITY_ALARM = [Range(2000, 15000), Range(100, 1000)]
+BIN_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
+OKX_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
 BYBIT_DEFAULT_EQUITY_ALARM = Range(2000, 15000)
 
-BIN_DEFAULT_POSITION_ALARM = [Range(0.00, 0.2), Range(0.00, 0.2)]
-OKX_DEFAULT_POSITION_ALARM = [Range(0.00, 0.2), Range(0.00, 0.2)]
+BIN_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
+OKX_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
 BYBIT_DEFAULT_POSITION_ALARM = Range(0.00, 0.2)
 
+BIN_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+OKX_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+BYBIT_DEFAULT_SIZE_ALARM = Range(0.00, 5000)
+
 class Asset:
-    def __init__(self, symbol, asset_name,
+    def __init__(self, symbol, asset_name, pnls=-1, size_alarm=Range(-1, -1),
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
                  withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
                  initial=-1, maintenance=-1):
 
+        self.size_alarm = size_alarm
+        self.pnls = pnls
         self.name = asset_name
         self.risk = risk
         self.equity = equity
@@ -36,27 +42,35 @@ class Asset:
         self.initial = initial
         self.maintenance = maintenance
 
+        if size_alarm == Range(-1, -1):
+            if "Bi" in symbol:
+                self.size_alarm = BIN_DEFAULT_SIZE_ALARM
+            elif "Ok" in symbol:
+                self.size_alarm = OKX_DEFAULT_SIZE_ALARM
+            elif "By" in symbol:
+                self.size_alarm = BYBIT_DEFAULT_SIZE_ALARM
+
         if position_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.position_alarm = BIN_DEFAULT_POSITION_ALARM[0] if "U" in symbol else BIN_DEFAULT_POSITION_ALARM[1]
+                self.position_alarm = BIN_DEFAULT_POSITION_ALARM
             elif "Ok" in symbol:
-                self.position_alarm = OKX_DEFAULT_POSITION_ALARM[0] if "U" in symbol else OKX_DEFAULT_POSITION_ALARM[1]
+                self.position_alarm = OKX_DEFAULT_POSITION_ALARM
             elif "By" in symbol:
                 self.position_alarm = BYBIT_DEFAULT_POSITION_ALARM
 
         if equity_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.equity_alarm = BIN_DEFAULT_EQUITY_ALARM[0] if "U" in symbol else BIN_DEFAULT_EQUITY_ALARM[1]
+                self.equity_alarm = BIN_DEFAULT_EQUITY_ALARM
             elif "Ok" in symbol:
-                self.equity_alarm = OKX_DEFAULT_EQUITY_ALARM[0] if "U" in symbol else OKX_DEFAULT_EQUITY_ALARM[1]
+                self.equity_alarm = OKX_DEFAULT_EQUITY_ALARM
             elif "By" in symbol:
                 self.equity_alarm = BYBIT_DEFAULT_EQUITY_ALARM
 
         if risk_alarm == Range(-1, -1):
             if "Bi" in symbol:
-                self.risk_alarm = BIN_DEFAULT_RISK_ALARM[0] if "U" in symbol else BIN_DEFAULT_RISK_ALARM[1]
+                self.risk_alarm = BIN_DEFAULT_RISK_ALARM
             elif "Ok" in symbol:
-                self.risk_alarm = OKX_DEFAULT_RISK_ALARM[0] if "U" in symbol else OKX_DEFAULT_RISK_ALARM[1]
+                self.risk_alarm = OKX_DEFAULT_RISK_ALARM
             elif "By" in symbol:
                 self.risk_alarm = BYBIT_DEFAULT_RISK_ALARM
 
@@ -68,15 +82,18 @@ class Asset:
 
     def get_data_copy(self):
         return Asset(symbol=self.symbol, asset_name=self.name, risk=self.risk, equity=self.equity,
-                     withdrawable=self.withdrawable, long_pos=self.long_pos,
+                     withdrawable=self.withdrawable, long_pos=self.long_pos, pnls=self.pnls,
                      short_pos=self.short_pos, initial=self.initial, maintenance=self.maintenance)
 
     def get_settings_copy(self):
         return Asset(symbol=self.symbol, asset_name=self.name,
                      risk_alarm=self.risk_alarm,
+                     size_alarm=self.size_alarm,
                      equity_alarm=self.equity_alarm,
                      position_alarm=self.position_alarm)
 
+    def set_free(self, pnls):
+        self.pnls = pnls if pnls!= -1 else self.pnls
     def set_withdrawable(self, withdrawable):
         self.withdrawable = withdrawable if withdrawable != -1 else self.withdrawable
     def set_long_pos(self, long_pos):
@@ -91,6 +108,11 @@ class Asset:
         self.maintenance = maintenance if maintenance != -1 else self.maintenance
     def set_equity(self, equity):
         self.equity = equity if equity != -1 else self.equity
+    def set_size_alarm(self, size_alarm: Range):
+        if size_alarm.start != -1:
+            self.size_alarm.start = size_alarm.start
+        if size_alarm.end != -1:
+            self.size_alarm.end = size_alarm.end
     def set_risk_alarm(self, risk_alarm: Range):
         if risk_alarm.start != -1:
             self.risk_alarm.start = risk_alarm.start
@@ -124,11 +146,9 @@ class Model(object):
 
         if os.path.exists(self.settings_path):
             with open(self.settings_path, "rb") as pkl_file:
-                # Todo: Data integrity
-                # settings = pickle.load(pkl_file)
-                self.risk_data = pickle.load(pkl_file)
+                self.data = pickle.load(pkl_file)
         else:
-            self.risk_data = {
+            self.data = {
                 "BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],
                 "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
                 "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
@@ -156,7 +176,7 @@ class Model(object):
                 "OkMU": [], "Ok1U": [], "Ok2U": [], "Ok3U": [], "Ok1C": [], "OkMC": [], "Ok2C": [], "Ok3C": [],
                 "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []}
 
-        for symbol, list in self.risk_data.items():
+        for symbol, list in self.data.items():
             for asset in list:
                 data[symbol].append(asset.get_settings_copy())
 
@@ -168,9 +188,9 @@ class Model(object):
 
     def save_data(self):
         current_data = pd.DataFrame()
-        for assets in self.risk_data.values():
+        for assets in self.data.values():
             for asset in assets:
-                attribute_names = ["symbol", "name", "risk", "equity", "withdrawable",
+                attribute_names = ["symbol", "name", "risk", "equity", "withdrawable", "pnls",
                                    "long_pos", "short_pos", "initial", "maintenance"]
                 data = {key: getattr(asset.get_data_copy(), key) for key in attribute_names}
                 if any(value  == -1 for value in data.values()):
@@ -181,13 +201,13 @@ class Model(object):
                 if name == "USDT":
                     data = pd.DataFrame([data])
                     data.drop(["name", "symbol"], axis=1, inplace=True)
-                    data.rename(columns={"risk": "Risk", "equity": "Asset",
+                    data.rename(columns={"risk": "Risk", "equity": "Asset", "pnls": "PnLs",
                                          "withdrawable": "Free", "long_pos": "Long",
                                          "short_pos": "Short", "initial": "IM", "maintenance": "MM"}, inplace=True)
                     data = data.add_prefix(f"{symbol}_")
                     current_data = pd.concat([current_data, data], axis=1)
 
-        data_type = ["Risk", "Asset", "Free", "Long", "Short", "IM", "MM"]
+        data_type = ["Risk", "Asset", "PnLs", "Free", "Long", "Short", "IM", "MM"]
 
         for type in data_type:
             cols = [col for col in current_data.columns if col.endswith(type)]
@@ -248,18 +268,20 @@ class Model(object):
             workbook.save(name)
             workbook.close()
         except Exception as e:
-            print(e)
+            print(f"Model error: {e}")
             pass
 
 
-    def set_data(self, symbol, asset_name,
+    def set_data(self, symbol, asset_name, pnls=-1, size_alarm=Range(-1, -1),
                  risk=-1, risk_alarm=Range(-1, -1), equity=-1, equity_alarm=Range(-1, -1),
                  withdrawable=-1, long_pos=-1, short_pos=-1, position_alarm=Range(-1, -1),
                  initial=-1, maintenance=-1) -> bool:
-        if symbol in self.risk_data:
-            for asset in self.risk_data[symbol]:
+        if symbol in self.data:
+            for asset in self.data[symbol]:
                 if asset.name == asset_name:
+                    asset.set_free(pnls)
                     asset.set_risk(risk)
+                    asset.set_size_alarm(size_alarm)
                     asset.set_risk_alarm(risk_alarm)
                     asset.set_equity(equity)
                     asset.set_equity_alarm(equity_alarm)
@@ -272,22 +294,22 @@ class Model(object):
                     return True
 
             if all(attr != -1 for attr in [risk, equity, withdrawable, long_pos, short_pos, maintenance, initial]):
-                new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, risk_alarm=risk_alarm,
-                                  equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable,
+                new_asset = Asset(symbol=symbol, asset_name=asset_name, risk=risk, risk_alarm=risk_alarm, pnls=pnls,
+                                  equity=equity, equity_alarm=equity_alarm, withdrawable=withdrawable, size_alarm=size_alarm,
                                   long_pos=long_pos, short_pos=short_pos, position_alarm=position_alarm,
                                   initial=initial, maintenance=maintenance)
-                self.risk_data[symbol].append(new_asset)
+                self.data[symbol].append(new_asset)
                 return True
 
         return False
 
     def get_data(self, symbol):
         returnDict = []
-        if symbol in self.risk_data:
-            for asset in self.risk_data[symbol]:
+        if symbol in self.data:
+            for asset in self.data[symbol]:
                 if asset.is_valid_instance():
-                    attribute_names = ["name", "risk", "equity", "withdrawable",
-                                       "risk_alarm", "equity_alarm", "position_alarm",
+                    attribute_names = ["name", "risk", "equity", "withdrawable", "pnls",
+                                       "risk_alarm", "equity_alarm", "position_alarm", "size_alarm",
                                        "long_pos", "short_pos", "initial", "maintenance"]
 
                     returnDict.append({key: getattr(asset, key) for key in attribute_names})

@@ -80,7 +80,7 @@ class OKXHandler:
 
         positions = positions[0]["posData"]
 
-        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = 0, 0, 0, 0
+        long_pos_usdm, short_pos_usdm = 0, 0
         for position in positions:
             if "USDT" in position["instId"]:
                 coin = position["instId"].replace("-", "")
@@ -94,7 +94,7 @@ class OKXHandler:
                 elif position["pos"] < 0:
                     short_pos_usdm += position["notionalCcy"]*price
 
-        return long_pos_usdm, short_pos_usdm*(-1), long_pos_coinm, short_pos_coinm*(-1)
+        return long_pos_usdm, short_pos_usdm*(-1)
 
     @staticmethod
     def send_http_request(func, **kwargs):
@@ -117,36 +117,29 @@ class OKXHandler:
 
     def get_account_status(self) -> {}:
         status_list = {}
-        usd_margin_list = ["USDT", "USDC"]
-
-        long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short()
 
         account_data = self.send_http_request(func=self.okx_account_api.get_account_balance)
         for asset in account_data[0]["details"]:
-            if asset['ccy'] in usd_margin_list:
+            if asset['ccy'] == "USDT":
+                long_pos_usdm, short_pos_usdm = self.get_long_short()
+                pnls = self.get_positions_pnl()
+                pnls = pnls["uPnLs_main"].sum() if not pnls.empty else 0
                 im, mm = self.get_margins(asset['ccy'])
-                status_list[f"OkMU_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
+                status_list[f"OkMU_USDT"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
                                                        "long_pos": long_pos_usdm, "short_pos": short_pos_usdm,
-                                                       "initial": im, "maintenance": mm}
-            else:
-                status_list[f"OkMC_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"], "withdrawable": asset["availBal"],
-                                                       "long_pos": long_pos_coinm, "short_pos": short_pos_coinm,
-                                                       "initial": 0, "maintenance": 0}
+                                                       "initial": im, "maintenance": mm, "pnls": pnls}
 
         for i, sub_acct in enumerate(self.subaccount_dict):
             sub_data = self.send_http_request(func=self.okx_subaccount_api.get_account_balance, subAcct=sub_acct)
-            long_pos_usdm, short_pos_usdm, long_pos_coinm, short_pos_coinm = self.get_long_short(sub_account=sub_acct)
             for asset in sub_data[0]["details"]:
-                im, mm = self.get_margins(ccy=asset['ccy'], sub_account=sub_acct)
-                if asset['ccy'] in usd_margin_list:
-                    status_list[f"Ok{i + 1}U_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"],
+                if asset['ccy'] == "USDT":
+                    long_pos_usdm, short_pos_usdm = self.get_long_short(sub_account=sub_acct)
+                    im, mm = self.get_margins(ccy="USDT", sub_account=sub_acct)
+                    pnls = self.get_positions_pnl(sub_account_index=i + 1)
+                    pnls = pnls[f"uPnLs_sub{i + 1}"].sum() if not pnls.empty else 0
+                    status_list[f"Ok{i + 1}U_USDT"] = {"risk": asset["mgnRatio"], "equity": asset["eq"],
                                                                  "withdrawable": asset["availBal"],
                                                                  "long_pos": long_pos_usdm, "short_pos": short_pos_usdm,
-                                                                 "initial": im, "maintenance": mm}
-                else:
-                    status_list[f"Ok{i + 1}C_{asset['ccy']}"] = {"risk": asset["mgnRatio"], "equity": asset["eq"],
-                                                                 "withdrawable": asset["availBal"],
-                                                                 "long_pos": long_pos_coinm, "short_pos": short_pos_coinm,
-                                                                 "initial": im, "maintenance": mm}
+                                                                 "initial": im, "maintenance": mm, "pnls": pnls}
 
         return status_list

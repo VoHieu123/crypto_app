@@ -12,6 +12,8 @@ import alarm
 class MyWindow(QMainWindow):
     def __init__(self, communication: Communication):
         super().__init__()
+        self.ui = Ui_MainWindow.Ui_MainWindow()
+        self.ui.setupUi(self)
         self.communication_ = communication
         self.communication_.ui_signal.connect(self.update_ui)
         self.controller_ = None
@@ -29,11 +31,12 @@ class MyWindow(QMainWindow):
 
 def data_task(controller, window: MyWindow):
     while not window.exit_flag:
-        try:
-            controller.data_loop()
-        except Exception as e:
-            print(f"Error: {e}")
-            alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
+        controller.data_loop()
+        # try:
+        #     controller.data_loop()
+        # except Exception as e:
+        #     print(f"Error: {e}")
+        #     alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
@@ -69,9 +72,7 @@ def main():
     app = QApplication(sys.argv)
     communication = Communication()
     MainWindow = MyWindow(communication)
-    ui = Ui_MainWindow.Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    controller = Controller.Controller(identity, ui, model, communication, binanceHandler=BinanceHandler,
+    controller = Controller.Controller(identity, MainWindow, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
     MainWindow.setWindowTitle("Steve" if choice == 2 else "Tuan Anh")
