@@ -45,7 +45,7 @@ class Controller():
                     ui_label.setFont(font)
                     self.labelDict[label_key] = ui_label
                 except Exception as e:
-                    print(e)
+                    print(f"Controller error: {e}")
                     pass
 
         label_const_list = [f"label_{name}" for name in ["totalValue", "infinity", "binance", "okx", "bybit", "mainAccount", "subAccount1"]]
@@ -157,7 +157,8 @@ class Controller():
                 risk, equity, withdrawable = value.get("risk"), value.get("equity"), value.get("withdrawable")
                 long_pos, short_pos = value.get("long_pos"), value.get("short_pos")
                 initial, maintenance = value.get("initial"), value.get("maintenance")
-                self.model_.set_data(symbol=symbol, asset_name=asset_name,
+                pnls = value.get("pnls")
+                self.model_.set_data(symbol=symbol, asset_name=asset_name, pnls=pnls,
                                      risk=risk, equity=equity, withdrawable=withdrawable,
                                      long_pos=long_pos, short_pos=short_pos, initial=initial, maintenance=maintenance)
 
@@ -215,7 +216,7 @@ class Controller():
                                 alarm.activate(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
 
                     if dict["withdrawable"] > 0:
-                        returnStr += "Free: " + fmt(0) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
+                        returnStr += "Free: " + fmt(dict["pnls"]) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
                     if dict["initial"] > 0:
                         returnStr += "Margin: " + fmt(dict["initial"]) + " / " + fmt(dict["maintenance"], color="red") + "<br>"
                     if dict["risk"] > 0:
@@ -258,6 +259,7 @@ class Controller():
         self.current_time = time.time()
         if self.current_time - self.update_time > self.alarm_error_duration:
             alarm.activate("Program can't connect with servers.", alarm=True)
+            print("Program can't connect with servers.")
             print(self.current_time - self.update_time)
             self.update_time += 15
 

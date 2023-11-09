@@ -69,29 +69,30 @@ class BinanceHandler:
     def get_account_status(self) -> {}:
         status_list = {}
         mainAccountData = self.send_http_request(func=self.binance_client.futures_account)
-        long_pos, short_pos = 0, 0
         usd = pd.DataFrame(mainAccountData["positions"])
         long_pos = usd[usd["positionAmt"] > 0]["notional"].sum()
         short_pos = usd[usd["positionAmt"] < 0]["notional"].sum()
 
         for asset in mainAccountData["assets"]:
-            if asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0:
-                status_list[f"BiMU_{asset['asset']}"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
-                                                         "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"],
+            if (asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0) and asset['asset'] == "USDT":
+                pnls = self.get_positions_pnl()
+                pnls = pnls["uPnLs_main"].sum() if not pnls.empty else 0
+                status_list[f"BiMU_USDT"] = {"risk": (asset["maintMargin"]/asset["marginBalance"]) if asset["marginBalance"] != 0 else 0,
+                                                         "equity": asset["marginBalance"], "withdrawable": asset["maxWithdrawAmount"], "pnls": pnls,
                                                          "long_pos": long_pos, "short_pos": short_pos, "initial": asset["initialMargin"], "maintenance": asset["maintMargin"]}
 
         for i, sub_account in enumerate(self.subaccount_list):
             usdm = self.send_http_request(func=self.binance_client.get_subaccount_futures_details, email=sub_account, futuresType=1)
             for usd in usdm["futureAccountResp"]["assets"]:
                 if usd["asset"] == "USDT":
+                    pnls = self.get_positions_pnl(sub_account_index=i + 1)
+                    pnls = pnls[f"uPnLs_sub{i + 1}"].sum() if not pnls.empty else 0
                     long_pos, short_pos = self.get_sub_usdm_open_positions(sub_account)
-                else:
-                    long_pos, short_pos = 0, 0
-                if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
-                    status_list[f"Bi{i + 1}U_{usd['asset']}"] = {"risk": (usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
-                                                                 "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],
-                                                                 "long_pos": long_pos, "short_pos": short_pos, "initial": usd["initialMargin"],
-                                                                 "maintenance": usd["maintenanceMargin"]}
+                    if usd["maintenanceMargin"] != 0 or usd["maxWithdrawAmount"] != 0:
+                        status_list[f"Bi{i + 1}U_USDT"] = {"risk": (usd["maintenanceMargin"]/usd["marginBalance"]) if usd["marginBalance"] != 0 else 0,
+                                                                    "equity": usd["marginBalance"], "withdrawable": usd["maxWithdrawAmount"],
+                                                                    "long_pos": long_pos, "short_pos": short_pos, "initial": usd["initialMargin"],
+                                                                    "maintenance": usd["maintenanceMargin"], "pnls": pnls}
 
         return status_list
 

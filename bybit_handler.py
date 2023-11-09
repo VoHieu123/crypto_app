@@ -84,7 +84,7 @@ class BybitHandler:
 
         long_pos, short_pos = self.get_open_position()
 
-        if all(item is not None for item in [mmr, equity, withdrawable, long_pos, short_pos]):
+        if all(item is not None for item in [mmr, equity, withdrawable, long_pos, short_pos]) and equity > 0 and im > 0:
             status_list[f"ByMU_USDT"] = {"risk": mmr, "equity": equity, "withdrawable": withdrawable,
                                          "long_pos": long_pos, "short_pos": short_pos,
                                          "initial": im, "maintenance": mm}
