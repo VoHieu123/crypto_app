@@ -154,22 +154,23 @@ class Model(object):
                 "ByMU": [], "By1U": [], "By2U": [], "By3U": [], "By1C": [], "ByMC": [], "By2C": [], "By3C": []
             }
 
-        self.universal_mark_prices = pd.DataFrame()
+        self.universal_mark_prices = {}
 
-    def set_universal_mark_prices(self, usdm):
-        self.universal_mark_prices = usdm
+    def set_universal_mark_prices(self, usdm, market: str):
+        self.universal_mark_prices[market] = usdm
 
     def get_universal_mark_price(self, coin):
-        df = self.universal_mark_prices
-        if coin == "PEPEUSDT":
-            price = (df[df['symbol'] == "1000PEPEUSDT"]['markPrice'].values[0])/1000
-        elif coin in df['symbol'].values:
-            price = df[df['symbol'] == coin]['markPrice'].values[0]
-        else:
-            print(f"No {coin}")
-            price = 0
+        self.universal_mark_prices["OKX"].to_csv("test1.csv")
+        self.universal_mark_prices["Binance"].to_csv("test2.csv")
+        coin = "1000PEPEUSDT" if coin == "PEPEUSDT" else coin
+        price = 0
+        for df in self.universal_mark_prices.values():
+            if coin in df['symbol'].values:
+                price += df[df['symbol'] == coin]['markPrice'].values[0]
+            else:
+                print(f"No {coin}")
 
-        return price
+        return price/len(self.universal_mark_prices)
 
     def __del__(self):
         data = {"BiMU": [], "Bi1U": [], "Bi2U": [], "Bi3U": [], "BiMC": [], "Bi1C": [], "Bi2C": [], "Bi3C": [],

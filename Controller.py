@@ -148,7 +148,8 @@ class Controller():
             "Bybit": self.BybitHandler_
         }
 
-        self.model_.set_universal_mark_prices(self.BinanceHandler_.get_universal_mark_prices())
+        self.model_.set_universal_mark_prices(self.BinanceHandler_.get_universal_mark_prices(), "Binance")
+        self.model_.set_universal_mark_prices(self.OKXHandler_.get_universal_mark_prices(), "OKX")
 
         # Iterate through the handlers and set data in the model
         for handler in handlers.values():

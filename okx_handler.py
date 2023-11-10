@@ -1,4 +1,4 @@
-from okx import SubAccount, Account
+from okx import SubAccount, Account, PublicData
 import time, const, utils
 import pandas as pd
 
@@ -7,6 +7,7 @@ class OKXHandler:
         self.model_ = model
         self.okx_subaccount_api = SubAccount.SubAccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
         self.okx_account_api = Account.AccountAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
+        self.okx_public_api = PublicData.PublicAPI(api_key=apiKey, api_secret_key=secretKey, passphrase=password, flag="0", debug=False)
 
         self.subaccount_dict = {}
         subaccount_list = []
@@ -24,6 +25,16 @@ class OKXHandler:
                                                 passphrase=password, flag="0", debug=False)
             except:
                 pass
+
+    def get_universal_mark_prices(self):
+        usdm = self.send_http_request(func=self.okx_public_api.get_mark_price, instType="SWAP")
+        usdm = pd.DataFrame(usdm)
+        usdm = usdm[["instId", "markPx"]]
+        usdm["instId"] = usdm["instId"].apply(self.symbol_mapping)
+        usdm.rename(columns={"markPx": "markPrice", "instId": "symbol"}, inplace=True)
+        usdm.loc[usdm["symbol"] == "PEPEUSDT", "symbol"] = "1000PEPEUSDT"
+        usdm.loc[usdm["symbol"] == "1000PEPEUSDT", "markPrice"] *= 1000
+        return usdm
 
     def get_margins(self, ccy="USDT", sub_account=None):
         im, mm = 0, 0
@@ -59,6 +70,12 @@ class OKXHandler:
 
         return pnls
 
+    @staticmethod
+    def symbol_mapping(input_string: str):
+        input_string = input_string.replace("SWAP", "")
+        input_string = input_string.replace("-", "")
+        return input_string
+
     def get_long_short(self, sub_account=None):
         def future_symbol_mapping(input_string):
             output_string = ''
@@ -90,9 +107,9 @@ class OKXHandler:
                     coin = future_symbol_mapping(coin)
                 price = self.model_.get_universal_mark_price(coin)
                 if position["pos"] > 0:
-                    long_pos_usdm += position["notionalCcy"]*price
+                    long_pos_usdm += position["notionalCcy"]*price if coin != "PEPEUSDT" else position["notionalCcy"]*price/1000
                 elif position["pos"] < 0:
-                    short_pos_usdm += position["notionalCcy"]*price
+                    short_pos_usdm += position["notionalCcy"]*price if coin != "PEPEUSDT" else position["notionalCcy"]*price/1000
 
         return long_pos_usdm, short_pos_usdm*(-1)
 
