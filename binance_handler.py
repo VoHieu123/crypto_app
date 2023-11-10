@@ -69,9 +69,14 @@ class BinanceHandler:
     def get_account_status(self) -> {}:
         status_list = {}
         mainAccountData = self.send_http_request(func=self.binance_client.futures_account)
-        usd = pd.DataFrame(mainAccountData["positions"])
-        long_pos = usd[usd["positionAmt"] > 0]["notional"].sum()
-        short_pos = usd[usd["positionAmt"] < 0]["notional"].sum()
+        long_pos, short_pos = 0, 0
+        for position in mainAccountData["positions"]:
+            if "USDT" in position["symbol"] and position["positionAmt"] != 0:
+                price = self.model_.get_universal_mark_price(position["symbol"])
+                if position["positionAmt"] > 0:
+                    long_pos += position["positionAmt"]*price
+                elif position["positionAmt"] < 0:
+                    short_pos += position["positionAmt"]*price
 
         for asset in mainAccountData["assets"]:
             if (asset["maintMargin"] != 0 or asset["maxWithdrawAmount"] != 0) and asset['asset'] == "USDT":
