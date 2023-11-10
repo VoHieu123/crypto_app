@@ -16,14 +16,13 @@ class BinanceHandler:
     def get_sub_usdm_open_positions(self, sub_account):
         long_pos, short_pos = 0, 0
         usd = self.send_http_request(func=self.binance_client.get_subaccount_futures_positionrisk, email=sub_account, futuresType=1)
-        usd = pd.DataFrame(usd["futurePositionRiskVOS"])
-        usd = usd[usd["positionAmount"] != 0]
-        if not usd.empty:
-            usd = usd[["positionAmount", "markPrice"]]
-            usd_long = usd[usd["positionAmount"] > 0]
-            usd_short = usd[usd["positionAmount"] < 0]
-            long_pos = (usd_long["positionAmount"]*usd_long["markPrice"]).sum()
-            short_pos = (usd_short["positionAmount"]*usd_short["markPrice"]).sum()
+        for position in usd["futurePositionRiskVOS"]:
+            if "USDT" in position["symbol"] and position["positionAmount"] != 0:
+                price = self.model_.get_universal_mark_price(position["symbol"])
+                if position["positionAmount"] > 0:
+                    long_pos += position["positionAmount"]*price
+                elif position["positionAmount"] < 0:
+                    short_pos += position["positionAmount"]*price
 
         return long_pos, short_pos
 
