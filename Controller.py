@@ -64,7 +64,7 @@ class Controller():
         pnls_4 = self.BinanceHandler_.get_positions_pnl(1)
         data = pd.concat([data, pnls_1, pnls_2, pnls_3, pnls_4], axis=1)
 
-        data.to_excel(f"{computer_specific.PNL_PATH}pnls_{self.model_.identity.lower()}.xlsx")
+        data.to_excel(f"{computer_specific.PNL_PATH}pnls_{self.model_.identity.lower()}.xlsx", index=False)
 
     def transfer_button_clicked(self):
         self.update_data()
@@ -132,7 +132,7 @@ class Controller():
 
         if alarm_type == "Risk":
             self.model_.set_data(symbol=symbol, asset_name="USDT", risk_alarm=alarm)
-        elif alarm_type == "Equity":
+        elif alarm_type == "Asset":
             self.model_.set_data(symbol=symbol, asset_name="USDT", equity_alarm=alarm)
         elif alarm_type == "Position":
             self.model_.set_data(symbol=symbol, asset_name="USDT", position_alarm=alarm)
