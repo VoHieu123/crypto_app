@@ -30,7 +30,7 @@ class OKXHandler:
         usdm = self.send_http_request(func=self.okx_public_api.get_mark_price, instType="SWAP")
         usdm = pd.DataFrame(usdm)
         usdm = usdm[["instId", "markPx"]]
-        usdm["instId"] = usdm["instId"].apply(self.symbol_mapping)
+        usdm["instId"] = usdm["instId"].apply(lambda x: x.replace("SWAP", "").replace("-", ""))
         usdm.rename(columns={"markPx": "markPrice", "instId": "symbol"}, inplace=True)
         usdm.loc[usdm["symbol"] == "PEPEUSDT", "symbol"] = "1000PEPEUSDT"
         usdm.loc[usdm["symbol"] == "1000PEPEUSDT", "markPrice"] *= 1000
@@ -69,12 +69,6 @@ class OKXHandler:
             pnls = pd.DataFrame()
 
         return pnls
-
-    @staticmethod
-    def symbol_mapping(input_string: str):
-        input_string = input_string.replace("SWAP", "")
-        input_string = input_string.replace("-", "")
-        return input_string
 
     def get_long_short(self, sub_account=None):
         def future_symbol_mapping(input_string):
