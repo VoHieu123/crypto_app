@@ -224,7 +224,7 @@ class Model(object):
 
     def export_data(self):
         # Todo: Check data integrity
-        name = f"{cs.DESKTOP_PATH}{self.identity.lower()}_data_{datetime.datetime.now().strftime('%H_%M')}{const.OUTPUT_DATA_EXT}"
+        name = f"{cs.DESKTOP_PATH}{self.identity.lower()}_data_{datetime.datetime.now().strftime('%H_%M')}.xlsx"
         try:
             self.account_history.to_excel(name, index=False)
             workbook = openpyxl.load_workbook(name)

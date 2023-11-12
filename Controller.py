@@ -1,11 +1,8 @@
 from utils import auto_format as fmt
 from utils import substring_after, substring_before
-from utils import Range
-import time, alarm
-from utils import Communication
+from utils import Range, Communication, alarm
 from PyQt6.QtGui import QFont
-import datetime
-import computer_specific
+import datetime, time, computer_specific
 import pandas as pd
 
 class Controller():
@@ -206,22 +203,22 @@ class Controller():
                         if dict["risk_alarm"].out_of_range(dict["risk"]):
                             save_data_flag = True
                             risk_background_color = "yellow"
-                            alarm.activate(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
+                            alarm(message=f"{send_symbol}risk alarm {dict['name']}: {dict['risk']}", alarm=True)
 
                         if dict["equity_alarm"].out_of_range(dict["equity"]):
                             save_data_flag = True
                             equity_background_color = "yellow"
-                            alarm.activate(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
+                            alarm(message=f" {send_symbol}equity alarm {dict['name']}: {dict['equity']}", alarm=True)
 
                         if position != 0:
                             if dict["position_alarm"].out_of_range(position):
                                 save_data_flag = True
                                 position_background_color = "yellow"
-                                alarm.activate(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
+                                alarm(risk_sound=False, message=f"{send_symbol}position alarm {dict['name']}: {position}", alarm=True)
                             if dict["size_alarm"].out_of_range((dict["long_pos"] - dict["short_pos"])/2):
                                 save_data_flag = True
                                 size_background_color = "yellow"
-                                alarm.activate(risk_sound=False, message=f"{send_symbol}size alarm {dict['name']}: {(dict['long_pos'] - dict['short_pos'])/2}", alarm=True)
+                                alarm(risk_sound=False, message=f"{send_symbol}size alarm {dict['name']}: {(dict['long_pos'] - dict['short_pos'])/2}", alarm=True)
 
                     if dict["withdrawable"] > 0:
                         returnStr += "Free: " + fmt(dict["pnls"]) + " / " + fmt(dict["withdrawable"], color="blue") + "<br>"
@@ -267,7 +264,7 @@ class Controller():
 
         self.current_time = time.time()
         if self.current_time - self.update_time > self.alarm_error_duration:
-            alarm.activate("Program can't connect with servers.", alarm=True)
+            alarm("Program can't connect with servers.", alarm=True)
             print("Program can't connect with servers.")
             print(self.current_time - self.update_time)
             self.update_time += 15

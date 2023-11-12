@@ -3,9 +3,10 @@ from PyQt6.QtWidgets import QApplication, QMainWindow
 import main_window
 import controller as ctrller
 import model as mdl
-import threading, alarm, const
+import threading, const
 import binance_handler, bybit_handler, okx_handler
 from utils import Communication
+from utils import alarm
 
 class MyWindow(QMainWindow):
     def __init__(self, communication: Communication):
@@ -33,7 +34,7 @@ def data_task(controller, window: MyWindow):
             controller.data_loop()
         except Exception as e:
             print(f"Error: {e}")
-            alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
+            alarm(message=f"Program runs again because of error: {e}", to=["Hieu"])
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))

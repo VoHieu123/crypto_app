@@ -6,7 +6,17 @@ from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
 import computer_specific
-import alarm
+import pygame.mixer
+import threading
+import computer_specific
+from telegram import Bot
+
+pygame.mixer.init()
+risk_sound_wav = pygame.mixer.Sound(computer_specific.RISK_SOUND_PATH)
+position_sound = pygame.mixer.Sound(computer_specific.POSITION_SOUND_PATH)
+bot = Bot(token=computer_specific.BOT)
+user_ids = {"Hieu": "6228170215", "Evan": "1531898366"}
+timer_lock = True
 
 okx_client = PublicData.PublicAPI(debug=False)
 bybit_client = HTTP(testnet=False)
@@ -117,6 +127,32 @@ def auto_format(text, color="black", background_color=None, format_number=None, 
         pass
 
     return text_format(text, color=color, background_color=background_color, font_weight=font_weight, font_size=font_size)
+
+def stop_sound():
+    global timer_lock
+    timer_lock = True
+    risk_sound_wav.stop()
+
+def send_telegram_message(to, message):
+    for name in to:
+        try:
+            bot.send_message(chat_id=user_ids[name], text=message)
+        except Exception:
+            pass
+
+def alarm(message, to=["Hieu", "Evan"], alarm=False, risk_sound=True):
+    global timer_lock
+    if alarm and timer_lock:
+        timer_lock = False
+        my_timer = threading.Timer(10, stop_sound)
+        my_timer.start()
+        if risk_sound:
+            risk_sound_wav.play()
+        else:
+            position_sound.play()
+
+    message_thread = threading.Thread(target=send_telegram_message, args=(to, message))
+    message_thread.start()
 
 if computer_specific.COMPUTER == "Evan":
     while not resynch():
