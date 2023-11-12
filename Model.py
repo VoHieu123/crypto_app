@@ -134,11 +134,11 @@ class Model(object):
         self.account_history = pd.DataFrame()
         self.identity = identity
         if identity == "TA":
-            self.settings_path = cs.SETTINGS_PATH[:-4] + "_ta" + ".pkl"
-            self.data_path = cs.DATA_PATH[:-4] + "_ta" + ".pkl"
+            self.settings_path = cs.SETTINGS_PATH + "_ta" + ".pkl"
+            self.data_path = cs.DATA_PATH + "_ta" + ".pkl"
         elif identity == "ST":
-            self.settings_path = cs.SETTINGS_PATH[:-4] + "_st" + ".pkl"
-            self.data_path = cs.DATA_PATH[:-4] + "_st" + ".pkl"
+            self.settings_path = cs.SETTINGS_PATH + "_st" + ".pkl"
+            self.data_path = cs.DATA_PATH + "_st" + ".pkl"
 
         if os.path.exists(self.data_path):
             with open(self.data_path, "rb") as pkl_file:
@@ -160,8 +160,6 @@ class Model(object):
         self.universal_mark_prices[market] = usdm
 
     def get_universal_mark_price(self, coin):
-        self.universal_mark_prices["OKX"].to_csv("test1.csv")
-        self.universal_mark_prices["Binance"].to_csv("test2.csv")
         coin = "1000PEPEUSDT" if coin == "PEPEUSDT" else coin
         price = 0
         for df in self.universal_mark_prices.values():

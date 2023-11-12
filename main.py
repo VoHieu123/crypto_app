@@ -1,18 +1,16 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow
-import Ui_MainWindow
-import Controller
-import threading
-import Model
-import const
+import main_window
+import controller as ctrller
+import model as mdl
+import threading, alarm, const
 import binance_handler, bybit_handler, okx_handler
 from utils import Communication
-import alarm
 
 class MyWindow(QMainWindow):
     def __init__(self, communication: Communication):
         super().__init__()
-        self.ui = Ui_MainWindow.Ui_MainWindow()
+        self.ui = main_window.Ui_MainWindow()
         self.ui.setupUi(self)
         self.communication_ = communication
         self.communication_.ui_signal.connect(self.update_ui)
@@ -31,12 +29,11 @@ class MyWindow(QMainWindow):
 
 def data_task(controller, window: MyWindow):
     while not window.exit_flag:
-        controller.data_loop()
-        # try:
-        #     controller.data_loop()
-        # except Exception as e:
-        #     print(f"Error: {e}")
-        #     alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
+        try:
+            controller.data_loop()
+        except Exception as e:
+            print(f"Error: {e}")
+            alarm.activate(message=f"Program runs again because of error: {e}", to=["Hieu"])
 
 def main():
     choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
@@ -65,14 +62,14 @@ def main():
         else:
             choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
-    model = Model.Model(identity)
+    model = mdl.Model(identity)
     BybitHandler = bybit_handler.BybitHandler(model=model, apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
     BinanceHandler = binance_handler.BinanceHandler(model=model, apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
     OKXHandler = okx_handler.OKXHandler(model=model, apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
     app = QApplication(sys.argv)
     communication = Communication()
     MainWindow = MyWindow(communication)
-    controller = Controller.Controller(identity, MainWindow, model, communication, binanceHandler=BinanceHandler,
+    controller = ctrller.Controller(identity, MainWindow, model, communication, binanceHandler=BinanceHandler,
                                        okxHandler=OKXHandler, bybitHandler=BybitHandler)
     MainWindow.set_up(controller=controller)
     MainWindow.setWindowTitle("Steve" if choice == 2 else "Tuan Anh")
