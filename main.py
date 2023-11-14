@@ -42,36 +42,36 @@ def main():
     while True:
         if choice == 1:
             identity = "TA"
-            chosenBinAPIKey = const.TA_BIN_API_KEY
-            chosenBinSecretKey = const.TA_BIN_SECRET_KEY
-            chosenOKXAPIKey = const.TA_OKX_API_KEY
-            chosenOKXSecretKey = const.TA_OKX_SECRET_KEY
-            chosenPassword = const.TA_OKX_PASSPHRASE
-            chosenBybAPIKey = const.TA_BYB_API_KEY
-            chosenBybSecretKey = const.TA_BYB_SECRET_KEY
+            bin_api = const.TA_BIN_API_KEY
+            bin_secret = const.TA_BIN_SECRET_KEY
+            okx_api = const.TA_OKX_API_KEY
+            okx_secret = const.TA_OKX_SECRET_KEY
+            okx_password = const.TA_OKX_PASSPHRASE
+            bybit_api = const.TA_BYB_API_KEY
+            bybit_secret = const.TA_BYB_SECRET_KEY
             break
         elif choice == 2:
             identity = "ST"
-            chosenBinAPIKey = const.ST_BIN_API_KEY
-            chosenBinSecretKey = const.ST_BIN_SECRET_KEY
-            chosenOKXAPIKey = const.ST_OKX_API_KEY
-            chosenOKXSecretKey = const.ST_OKX_SECRET_KEY
-            chosenPassword = const.ST_OKX_PASSPHRASE
-            chosenBybAPIKey = const.ST_BYB_API_KEY
-            chosenBybSecretKey = const.ST_BYB_SECRET_KEY
+            bin_api = const.ST_BIN_API_KEY
+            bin_secret = const.ST_BIN_SECRET_KEY
+            okx_api = const.ST_OKX_API_KEY
+            okx_secret = const.ST_OKX_SECRET_KEY
+            okx_password = const.ST_OKX_PASSPHRASE
+            bybit_api = const.ST_BYB_API_KEY
+            bybit_secret = const.ST_BYB_SECRET_KEY
             break
         else:
             choice = int(input("Type: 1 - Tuan Anh, 2 - Steve: "))
 
     model = mdl.Model(identity)
-    BybitHandler = bybit_handler.BybitHandler(model=model, apiKey=chosenBybAPIKey, secretKey=chosenBybSecretKey)
-    BinanceHandler = binance_handler.BinanceHandler(model=model, apiKey=chosenBinAPIKey, secretKey=chosenBinSecretKey)
-    OKXHandler = okx_handler.OKXHandler(model=model, apiKey=chosenOKXAPIKey, secretKey=chosenOKXSecretKey, password=chosenPassword)
+    BybitHandler = bybit_handler.BybitHandler(model=model, apiKey=bybit_api, secretKey=bybit_secret)
+    BinanceHandler = binance_handler.BinanceHandler(model=model, apiKey=bin_api, secretKey=bin_secret)
+    OKXHandler = okx_handler.OKXHandler(model=model, apiKey=okx_api, secretKey=okx_secret, password=okx_password)
     app = QApplication(sys.argv)
     communication = Communication()
     MainWindow = MyWindow(communication)
-    controller = ctrller.Controller(identity, MainWindow, model, communication, binanceHandler=BinanceHandler,
-                                       okxHandler=OKXHandler, bybitHandler=BybitHandler)
+    controller = ctrller.Controller(identity, MainWindow, model, communication, binance_handler=BinanceHandler,
+                                       okx_handler=OKXHandler, bybit_handler=BybitHandler)
     MainWindow.set_up(controller=controller)
     MainWindow.setWindowTitle("Steve" if choice == 2 else "Tuan Anh")
 

@@ -1,14 +1,13 @@
 import uuid
 from PyQt6.QtCore import pyqtSignal, QObject
 import win32api, datetime
-from time import time, sleep
+from time import sleep
 from binance import Client
 from pybit.unified_trading import HTTP
 from okx import PublicData
 import computer_specific
 import pygame.mixer
 import threading
-import computer_specific
 from telegram import Bot
 
 pygame.mixer.init()
